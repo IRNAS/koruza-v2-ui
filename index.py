@@ -1,11 +1,14 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dash
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from app import server
 from app import app
 from layouts import layout_dashboard, no_page
+from callbacks import KoruzaGuiCallbacks
+
 #import callbacks
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
@@ -34,6 +37,8 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ])
 
+KoruzaGuiCallbacks().callbacks()
+
 # Update page
 # # # # # # # # #
 @app.callback(Output('page-content', 'children'),
@@ -52,7 +57,7 @@ if __name__ == '__main__':
 
     app.run_server(
         port=port,
-        debug=True,
+        debug=False,
         host=hostname,
         #dev_tools_ui=False,
         #dev_tools_props_check=False

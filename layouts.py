@@ -8,7 +8,9 @@ from dash.exceptions import PreventUpdate
 
 # import custom components
 from components.custom_toggle import custom_toggle
-from components.control_button import control_button
+#from components.control_button import control_button
+from components.signal_indicator import signal_indicator
+from components.unit_control import unit_control
 
 ###################### Dashboard Layout ######################
 """
@@ -20,93 +22,6 @@ ___________________
 |   |             |
 -------------------
 """
-
-def generate_data_display_layout():
-    """Section containing information about the Koruza unit"""
-    data_display_layout = html.Div(
-        id="data-display-div",
-        className="border-round d-flex flex-column",
-        #style={"display": "flex", "flex-direction": "column"},
-        children=[
-
-            # Unit Identity div
-            html.Div(
-                id="unit-identity-div",
-                className="d-flex flex-column",
-                #style={"flex-direction": "column"},
-                children=[
-                    html.P("Unity Identity", className="section-title-text"),
-                    html.P("Serial Number", className="property-title"),
-                    html.P("0046", id="unit-serial-number")
-                ]
-            ),
-
-            # Network status div
-            html.Div(
-                id="network-status-div",
-                className="d-flex flex-column",
-                #style={"flex-direction": "column"},
-                children=[
-                    html.P("Network", className="section-title-text"),
-                    html.P("IP Address", className="property-title"),
-                    html.P("192.168.13.148", id="unit-ip-address")
-                ]
-            ),
-
-            # MCU status div
-            html.Div(
-                id="mcu-status-div",
-                className="d-flex flex-column",
-                #style={"flex-direction": "column"},
-                children=[
-                    html.P("MCU Connected", id="mcu-status", className="section-title-text"),
-                    html.P("Motor X", className="property-title"),
-                    html.P("-1509", id="motor-coord-x"),
-                    html.P("Motor Y", className="property-title"),
-                    html.P("-2125", id="motor-coord-y")
-                ]
-            ),
-
-            # SFP status div
-            html.Div(
-                id="sfp-status-div",
-                className="d-flex flex-column",
-                #style={"flex-direction": "column"},
-                children=[
-                    html.P("SFP Connected", id="sfp-status", className="section-title-text"),
-                    html.P("Serial Number", className="property-title"),
-                    html.P("H800S003993", id="sfp-serial-number"),
-                    html.P("TX Wavelength", className="property-title"),
-                    html.P("1550nm", id="sfp-wavelength"),
-                    html.P("RX Power", className="property-title"),
-                    html.P("0.7415 (-0.89 dBm)", id="sfp-rx-power"),
-                    html.P("TX Power", className="property-title"),
-                    html.P("0.4313 (-3.63 dBm)", id="sfp-tx-power")
-                ]
-            ),
-
-            # Controls div
-            html.Div(
-                id="controls-div",
-                className="d-flex flex-column",
-                #style={"flex-direction": "column"},
-                children=[
-                    html.P("Controls", className="section-title-text"),
-                    dbc.Button("Homing", id="homing-btn", size="lg"),
-                    html.Div(
-                        className="d-flex flex-row",
-                        #style={"flex-direction": "row"},
-                        children=[
-                            custom_toggle(id="led-slider"),
-                            html.Span("LEDs")
-                        ]
-                    )
-                ]
-            )
-        ]
-    )
-
-    return data_display_layout
 
 def generate_control_layout():
     """Camera layout containing real time video, mode selection and granularity selection"""
@@ -120,20 +35,6 @@ def generate_control_layout():
                 align="center",
                 justify="space-between",
                 children=[
-                    dbc.Col(
-                        width=5,
-                        #style={"flex-direction": "row"},
-                        children=[
-                            html.Span("Mode: "),
-                            dbc.ButtonGroup(
-                                children=[
-                                    dbc.Button(html.Span("None", style={"font-size": "initial"}), id="none-btn", size="lg"),
-                                    dbc.Button(html.Span("Movement", style={"font-size": "initial"}), id="movement-btn", size="lg"),
-                                    dbc.Button(html.Span("Calibration", style={"font-size": "initial"}), id="calibration-btn", size="lg")
-                                ]
-                            )
-                        ]
-                    ),
                     dbc.Col(
                         width=4,
                         children=[
@@ -149,15 +50,32 @@ def generate_control_layout():
                         ]
                     ),
                     dbc.Col(
-                        width=3,
+                        width=8,
+                        className="d-flex flex-row align-items-top justify-content-between",
                         children=[
-                            dbc.DropdownMenu(
-                                bs_size="lg",
-                                label="Survey",
+                            html.Div(
                                 children=[
-                                    dbc.DropdownMenuItem("Toggle visibility", style={"font-size": "initial"}, id="toggle-overlay-btn"),
-                                    dbc.DropdownMenuItem("Reset", style={"font-size": "initial"}, id="reset-overlay-btn")
-                                ],
+                                    html.P("Unit Serial Number", className="property-title"),
+                                    html.P("0046", id="unit-serial-number")
+                                ]
+                            ),
+                            html.Div(
+                                children=[
+                                    html.P("IP Address", className="property-title"),
+                                    html.P("192.168.13.148", id="unit-ip-address")
+                                ]
+                            ),
+                            html.Div(
+                                children=[
+                                    html.P("SFP Serial Number", className="property-title"),
+                                    html.P("H800S003993", id="sfp-serial-number")
+                                ]
+                            ),
+                            html.Div(
+                                children=[
+                                    html.P("TX Wavelength", className="property-title"),
+                                    html.P("1550nm", id="sfp-wavelength")
+                                ]
                             )
                         ]
                     )
@@ -177,6 +95,92 @@ def generate_control_layout():
 
     return control_layout
 
+def generate_unit_control_layout(unit_id, title):
+    """Generate unit control layout with buttons, and power indicators"""
+    unit_control_div = html.Div(
+        id=f"unit-control-container-{unit_id}",
+        children=[
+            html.Div(
+                className="d-flex flex-column justify-content-between",
+                children=[
+                    html.Div(
+                        children=[
+                            html.H4(title),
+                        ]
+                    ),
+                    html.Div(
+                        className="d-flex flex-row justify-content-between",
+                        children=[
+                            html.Div(
+                                children=[
+                                    html.Div(  # rx strength div
+                                        #style={"flex-direction": "row"},
+                                        className="d-flex",
+                                        children=[
+                                            html.Div(
+                                                children=[
+                                                    html.P("RX Power", className="property-title"),
+                                                    html.P("0.7415 (-0.89 dBm)", id=f"sfp-rx-power-{unit_id}"),
+                                                ]
+                                            ),
+                                            signal_indicator(f"rx-signal-{unit_id}", "good", "four-bars")
+                                        ]
+                                    ),
+                                    html.Div(  # tx strength div
+                                        className="d-flex",
+                                        #style={"flex-direction": "d-inline-flex",
+                                        children=[
+                                            html.Div(
+                                                children=[
+                                                    html.P("TX Power", className="property-title"),
+                                                    html.P("0.4313 (-3.63 dBm)", id=f"sfp-tx-power-{unit_id}"),
+                                                ]
+                                            ),
+                                            signal_indicator(f"tx-signal-{unit_id}", "good", "four-bars")
+                                        ]
+                                    )
+
+                                ]
+                            ),
+                            html.Div(  # motor state
+                                children=[
+                                    html.P("Motor X", className="property-title"),
+                                    html.P("-1509", id=f"motor-coord-x-{unit_id}"),
+                                    html.P("Motor Y", className="property-title"),
+                                    html.P("-2125", id=f"motor-coord-y-{unit_id}")
+                                ]
+                            ),
+                            html.Div(  # LED control
+                                children=[
+                                    custom_toggle(id=f"led-slider-{unit_id}"),
+                                    html.Span("LEDs")
+                                ]
+                            )
+
+                        ]
+                    )
+                ]
+            ),
+            html.Div(
+                style={"position": "relative", "left": "36%"},
+                children=[
+                    unit_control(unit_id) 
+                ]
+            )
+            # html.Div(
+            #     id=f"unit-control-{unit_id}",
+            #     children=[
+            #         control_button(arrow_direction="up", id="motor-control-up-btn"),
+            #         control_button(arrow_direction="left", id="motor-control-left-btn"),
+            #         control_button(arrow_direction="right", id="motor-control-right-btn"),
+            #         control_button(arrow_direction="down", id="motor-control-down-btn")
+            #     ]
+            # )
+        ]
+    )
+
+    return unit_control_div
+
 def generate_camera_display_layout():
     """Generate camera display with control buttons"""
     camera_div = html.Div(
@@ -184,19 +188,16 @@ def generate_camera_display_layout():
         #style={"display": "flex", "flex-direction": "column"},
         className="d-flex flex-column align-items-center mt-5",
         children=[
-            control_button(arrow_direction="up", id="motor-control-up-btn"),
+            
             html.Div(
                 #style={"display": "flex", "flex-direction": "row"},
                 className="d-flex flex-row",
                 #justify="center",
                 #align="center",
                 children=[
-                    control_button(arrow_direction="left", id="motor-control-left-btn"),
                     html.Img(src="/assets/koruza-temp.png", id="video-stream-container", style={"width":"100%"}),
-                    control_button(arrow_direction="right", id="motor-control-right-btn"),
                 ]
             ),
-            control_button(arrow_direction="down", id="motor-control-down-btn"),
         ]
     )
     return camera_div
@@ -207,17 +208,35 @@ layout_dashboard = dbc.Container(
     children=[
         dbc.Row(  # single bootstrap row
             children=[
-                dbc.Col(  # koruza data display
-                    width=2,
-                    style={"min-width": "190px", "max-width": "190px"},
-                    children=[
-                        generate_data_display_layout()
-                    ]
-                ),
-                dbc.Col(  # camera section with motor controls
+                html.Div(id="hidden-div", style={"display": "none"}),
+                dcc.Interval(id="n-intervals-update-master-info", interval=500, n_intervals=0),
+                dcc.Interval(id="n-intervals-update-slave-info", interval=500, n_intervals=0),
+                dbc.Col(  # camera section with device information and control
                     width=10,
                     children=[
-                        generate_control_layout()
+                        dbc.Row(
+                            children=[
+                                dbc.Col(
+                                    children=[
+                                        generate_control_layout()
+                                    ]
+                                )
+                            ]
+                        ),
+                        dbc.Row(  # unit control section
+                            children=[
+                                dbc.Col(
+                                    children=[
+                                        generate_unit_control_layout("master", "Master")  # master unit controls and transmit power indicator
+                                    ]
+                                ),
+                                dbc.Col(
+                                    children=[
+                                        generate_unit_control_layout("slave", "Slave")  # slave unit controls and transmit power indicator
+                                    ]
+                                )
+                            ]
+                        )
                     ]
                 )
             ]

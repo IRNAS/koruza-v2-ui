@@ -35,50 +35,50 @@ def generate_control_layout():
                 align="center",
                 justify="space-between",
                 children=[
-                    dbc.Col(
-                        width=4,
-                        children=[
-                            html.Span("Steps: "),
-                            dbc.ButtonGroup(
-                                children=[
-                                    dbc.Button(html.Span("1", style={"font-size": "initial"}), id="steps-1-btn", size="lg"),
-                                    dbc.Button(html.Span("10", style={"font-size": "initial"}), id="steps-10-btn", size="lg"),
-                                    dbc.Button(html.Span("100", style={"font-size": "initial"}), id="steps-100-btn", size="lg"),
-                                    dbc.Button(html.Span("1000", style={"font-size": "initial"}), id="steps-1000-btn", size="lg")
-                                ]
-                            )
-                        ]
-                    ),
-                    dbc.Col(
-                        width=8,
-                        className="d-flex flex-row align-items-top justify-content-between",
-                        children=[
-                            html.Div(
-                                children=[
-                                    html.P("Unit Serial Number", className="property-title"),
-                                    html.P("0046", id="unit-serial-number")
-                                ]
-                            ),
-                            html.Div(
-                                children=[
-                                    html.P("IP Address", className="property-title"),
-                                    html.P("192.168.13.148", id="unit-ip-address")
-                                ]
-                            ),
-                            html.Div(
-                                children=[
-                                    html.P("SFP Serial Number", className="property-title"),
-                                    html.P("H800S003993", id="sfp-serial-number")
-                                ]
-                            ),
-                            html.Div(
-                                children=[
-                                    html.P("TX Wavelength", className="property-title"),
-                                    html.P("1550nm", id="sfp-wavelength")
-                                ]
-                            )
-                        ]
-                    )
+                    # dbc.Col(
+                    #     width=4,
+                    #     children=[
+                    #         html.Span("Steps: "),
+                    #         dbc.ButtonGroup(
+                    #             children=[
+                    #                 dbc.Button(html.Span("1", style={"font-size": "initial"}), id="steps-1-btn", size="lg"),
+                    #                 dbc.Button(html.Span("10", style={"font-size": "initial"}), id="steps-10-btn", size="lg"),
+                    #                 dbc.Button(html.Span("100", style={"font-size": "initial"}), id="steps-100-btn", size="lg"),
+                    #                 dbc.Button(html.Span("1000", style={"font-size": "initial"}), id="steps-1000-btn", size="lg")
+                    #             ]
+                    #         )
+                    #     ]
+                    # ),
+                    # dbc.Col(
+                    #     width=8,
+                    #     className="d-flex flex-row align-items-top justify-content-between",
+                    #     children=[
+                    #         html.Div(
+                    #             children=[
+                    #                 html.P("Unit Serial Number", className="property-title"),
+                    #                 html.P("0046", id="unit-serial-number")
+                    #             ]
+                    #         ),
+                    #         html.Div(
+                    #             children=[
+                    #                 html.P("IP Address", className="property-title"),
+                    #                 html.P("192.168.13.148", id="unit-ip-address")
+                    #             ]
+                    #         ),
+                    #         html.Div(
+                    #             children=[
+                    #                 html.P("SFP Serial Number", className="property-title"),
+                    #                 html.P("H800S003993", id="sfp-serial-number")
+                    #             ]
+                    #         ),
+                    #         html.Div(
+                    #             children=[
+                    #                 html.P("TX Wavelength", className="property-title"),
+                    #                 html.P("1550nm", id="sfp-wavelength")
+                    #             ]
+                    #         )
+                    #     ]
+                    # )
                 ]
             ),
             dbc.Row(
@@ -101,15 +101,59 @@ def generate_unit_control_layout(unit_id, title):
         id=f"unit-control-container-{unit_id}",
         children=[
             html.Div(
-                className="d-flex flex-column justify-content-between",
+                className="d-flex flex-column justify-content-center",
                 children=[
                     html.Div(
                         children=[
                             html.H4(title),
                         ]
                     ),
+                    # html.Div(
+                    #     children=[
+                    #         html.Div(
+                    #             className="d-flex flex-direction-row",
+                    #             children=[
+                    #                 html.Div(
+                    #                     style={"width": "150px"},
+                    #                     children=[
+                    #                         html.P("Unit Serial Number", className="property-title"),
+                    #                         html.P("0046", id="unit-serial-number")
+                    #                     ]
+                    #                 ),
+                    #                 html.Div(
+                    #                     style={"width": "150px"},
+                    #                     className="ml-4",
+                    #                     children=[
+                    #                         html.P("SFP Serial Number", className="property-title"),
+                    #                         html.P("H800S003993", id="sfp-serial-number")
+                    #                     ]
+                    #                 )
+                    #             ]
+                    #         ),
+                    #         html.Div(
+                    #             className="d-flex flex-direction-row",
+                    #             children=[
+                    #                 html.Div(
+                    #                     style={"width": "150px"},
+                    #                     children=[
+                    #                         html.P("IP Address", className="property-title"),
+                    #                         html.P("192.168.13.148", id="unit-ip-address")
+                    #                     ]
+                    #                 ),
+                    #                 html.Div(
+                    #                     style={"width": "150px"},
+                    #                     className="ml-4",
+                    #                     children=[
+                    #                         html.P("TX Wavelength", className="property-title"),
+                    #                         html.P("1550nm", id="sfp-wavelength")
+                    #                     ]
+                    #                 )
+                    #             ]
+                    #         )
+                    #     ]
+                    # ),
                     html.Div(
-                        className="d-flex flex-row justify-content-between",
+                        className="d-flex flex-row",
                         children=[
                             html.Div(
                                 children=[
@@ -118,51 +162,50 @@ def generate_unit_control_layout(unit_id, title):
                                         className="d-flex",
                                         children=[
                                             html.Div(
+                                                className="mr-5",
                                                 children=[
                                                     html.P("RX Power", className="property-title"),
                                                     html.P("0.7415 (-0.89 dBm)", id=f"sfp-rx-power-{unit_id}"),
                                                 ]
                                             ),
-                                            signal_indicator(f"rx-signal-{unit_id}", "good", "four-bars")
+                                            #signal_indicator(f"rx-signal-{unit_id}", "good", "four-bars")  # chane bar to linear bar
+                                            dbc.Progress(id=f"rx-power-bar-{unit_id}", value=25, className="mb-3", style={"height": "38px", "width": "100px"}) 
                                         ]
                                     ),
-                                    html.Div(  # tx strength div
-                                        className="d-flex",
-                                        #style={"flex-direction": "d-inline-flex",
-                                        children=[
-                                            html.Div(
-                                                children=[
-                                                    html.P("TX Power", className="property-title"),
-                                                    html.P("0.4313 (-3.63 dBm)", id=f"sfp-tx-power-{unit_id}"),
-                                                ]
-                                            ),
-                                            signal_indicator(f"tx-signal-{unit_id}", "good", "four-bars")
-                                        ]
-                                    )
+                                    # html.Div(  # tx strength div
+                                    #     className="d-flex",
+                                    #     #style={"flex-direction": "d-inline-flex",
+                                    #     children=[
+                                    #         html.Div(
+                                    #             className="mr-5",
+                                    #             children=[
+                                    #                 html.P("TX Power", className="property-title"),
+                                    #                 html.P("0.4313 (-3.63 dBm)", id=f"sfp-tx-power-{unit_id}"),
+                                    #             ]
+                                    #         ),
+                                    #         signal_indicator(f"tx-signal-{unit_id}", "good", "four-bars")
+                                    #     ]
+                                    # )
 
                                 ]
                             ),
                             html.Div(  # motor state
+                                style={"position": "relative", "left": "12%"},
                                 children=[
                                     html.P("Motor X", className="property-title"),
                                     html.P("-1509", id=f"motor-coord-x-{unit_id}"),
                                     html.P("Motor Y", className="property-title"),
                                     html.P("-2125", id=f"motor-coord-y-{unit_id}")
-                                ]
-                            ),
-                            html.Div(  # LED control
-                                children=[
-                                    custom_toggle(id=f"led-slider-{unit_id}"),
-                                    html.Span("LEDs")
+
+                                    # TODO add desired position after clicks on button
                                 ]
                             )
-
                         ]
                     )
                 ]
             ),
             html.Div(
-                style={"position": "relative", "left": "36%"},
+                style={"position": "relative", "left": "0%"},
                 children=[
                     unit_control(unit_id) 
                 ]
@@ -191,11 +234,11 @@ def generate_camera_display_layout():
             
             html.Div(
                 #style={"display": "flex", "flex-direction": "row"},
-                className="d-flex flex-row",
+                #className="d-flex flex-row",
                 #justify="center",
                 #align="center",
                 children=[
-                    html.Img(src="/assets/koruza-temp.png", id="video-stream-container", style={"width":"100%"}),
+                    html.Img(src="/assets/koruza-temp.png", id="video-stream-container", style={"height":"512px"}),
                 ]
             ),
         ]
@@ -204,13 +247,16 @@ def generate_camera_display_layout():
    
 layout_dashboard = dbc.Container(
     id="main-layout",
-    className="float-left",
+    #className="float-left",
+    style={"padding-right": "10px", "padding-left": "10px"},
     children=[
         dbc.Row(  # single bootstrap row
             children=[
                 html.Div(id="hidden-div", style={"display": "none"}),
                 dcc.Interval(id="n-intervals-update-master-info", interval=500, n_intervals=0),
                 dcc.Interval(id="n-intervals-update-slave-info", interval=500, n_intervals=0),
+                dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
+                dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
                 dbc.Col(  # camera section with device information and control
                     width=10,
                     children=[
@@ -224,6 +270,7 @@ layout_dashboard = dbc.Container(
                             ]
                         ),
                         dbc.Row(  # unit control section
+                            justify="between",
                             children=[
                                 dbc.Col(
                                     children=[

@@ -14,7 +14,7 @@ def control_button(arrow_direction, id, style={}):
         img_src = "../assets/icons/plus-circle.svg"
 
     return dbc.Button(
-        #html.Img(src=img_src, style={"vertical-align": "middle"}),
+        html.Img(src=img_src, style={"vertical-align": "middle"}),
         id=id, 
         className="align-self-center control-btn", 
         style=style, 

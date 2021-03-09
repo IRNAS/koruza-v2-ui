@@ -5,6 +5,8 @@ import logging
 from dash.dependencies import Input, Output, State
 from app import app
 
+from components.functions import generate_rx_power_bar
+
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -21,46 +23,55 @@ class KoruzaGuiCallbacks():
         """Defines all callbacks used in GUI"""
 
 
-        #  master unit info update
-        @app.callback(
-            [
-                Output("motor-coord-x-master", "children"),
-                Output("motor-coord-y-master", "children"),
-                Output("sfp-rx-power-master", "children"),
-                Output("sfp-tx-power-master", "children"),
-            ],
-            [
-                Input("n-intervals-update-master-info", "n_intervals")
-            ]
-        )
-        def update_master_info(n_intervals):
-            #print("hellp works")
-            self.num += 1
-            return str(self.num), "-600", "-700", "300"
+        # #  master unit info update
+        # @app.callback(
+        #     [
+        #         Output("motor-coord-x-master", "children"),
+        #         Output("motor-coord-y-master", "children"),
+        #         Output("sfp-rx-power-master", "children"),
+        #         #Output("sfp-tx-power-master", "children"),
+        #         Output("rx-power-bar-master", "value"),
+        #         Output("rx-power-bar-master", "color")
+        #     ],
+        #     [
+        #         Input("n-intervals-update-master-info", "n_intervals")
+        #     ]
+        # )
+        # def update_master_info(n_intervals):
+        #     #print("hellp works")
+        #     rx_power = -35
+        #     rx_value, rx_color = generate_rx_power_bar(rx_power)
+        #     return "500", "-600", str(rx_power) + "dB", rx_value, rx_color
 
 
-        #  slave unit info update
-        @app.callback(
-            [
-                #Output("motor-coord-x-slave", "children"),
-                Output("motor-coord-y-slave", "children"),
-                Output("sfp-rx-power-slave", "children"),
-                Output("sfp-tx-power-slave", "children")
-            ],
-            [
-                Input("n-intervals-update-slave-info", "n_intervals")
-            ]
-        )
-        def update_info(n_intervals):
-            #print("hellp works")
-            return "-600", "-700", "300"
+        # #  slave unit info update
+        # @app.callback(
+        #     [
+        #         Output("motor-coord-x-slave", "children"),
+        #         Output("motor-coord-y-slave", "children"),
+        #         Output("sfp-rx-power-slave", "children"),
+        #         #Output("sfp-tx-power-slave", "children"),
+        #         Output("rx-power-bar-slave", "value"),
+        #         Output("rx-power-bar-slave", "color")
+        #     ],
+        #     [
+        #         Input("n-intervals-update-slave-info", "n_intervals")
+        #     ]
+        # )
+        # def update_info(n_intervals):
+        #     #print("hellp works")
+        #     rx_power = -3
+        #     rx_value, rx_color = generate_rx_power_bar(rx_power)
+        #     return "500", "-600", str(rx_power) + "dB", rx_value, rx_color
 
 
         #  button callbacks
         @app.callback(
             [
                 #Output("motor-coord-x-slave", "children"),  # dummy div for outputs with no effect
-                Output("hidden-div", "children")
+                Output("hidden-div", "children"),
+                Output("confirm-homing-dialog-master", "displayed"),
+                Output("confirm-homing-dialog-slave", "displayed")
             ],
             [
                 # # test
@@ -69,25 +80,63 @@ class KoruzaGuiCallbacks():
                 Input("motor-control-btn-left-master", "n_clicks"),
                 Input("motor-control-btn-down-master", "n_clicks"),
                 Input("motor-control-btn-right-master", "n_clicks"),
+                Input("motor-control-btn-center-master", "n_clicks"),
+                Input("confirm-homing-dialog-master", "submit_n_clicks"),
 
                 #  slave unit values
                 Input("motor-control-btn-up-slave", "n_clicks"),
                 Input("motor-control-btn-left-slave", "n_clicks"),
                 Input("motor-control-btn-down-slave", "n_clicks"),
-                Input("motor-control-btn-right-slave", "n_clicks")
+                Input("motor-control-btn-right-slave", "n_clicks"),
+                Input("motor-control-btn-center-slave", "n_clicks"),
+                Input("confirm-homing-dialog-slave", "submit_n_clicks")
+            ],
+            [
+                State("steps-dropdown-master", "value"),
+                State("steps-dropdown-slave", "value")
             ]
         )
-        def update_button_action(motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s):
-            print("Motor up")
-            #if motor_up_m:
+        def update_button_action(motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, confirm_center_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, confirm_center_s, steps_m, steps_s):
+            display_master_homing_dialog = False
+            display_slave_homing_dialog = False
             
             ctx = dash.callback_context
-            print(ctx)
+
+            print(f"Steps master state: {steps_m}")
+            #print(ctx)
+
             if ctx.triggered and ctx.triggered[0]['value'] > 0:
 
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
-                print(split)
-                #logging.info(split)
+                #print(prop_id)
+                #  master unit callbacks
+                if prop_id == "motor-control-btn-up-master":
+                    print(f"move master up for {steps_m}")
+                if prop_id == "motor-control-btn-down-master":
+                    print(f"move master down for {steps_m}")
+                if prop_id == "motor-control-btn-left-master":
+                    print(f"move master left for {steps_m}")
+                if prop_id == "motor-control-btn-right-master":
+                    print(f"move master right for {steps_m}")
+                if prop_id == "confirm-homing-dialog-master":
+                    print(f"confirm home master for {steps_m}")
+                if prop_id == "motor-control-btn-center-master":
+                    display_master_homing_dialog = True
+                
 
-            return [""]
+                #  slave unit callbacks
+                if prop_id == "motor-control-btn-up-slave":
+                    print(f"move slave up {steps_s}")
+                if prop_id == "motor-control-btn-down-slave":
+                    print(f"move slave down {steps_s}")
+                if prop_id == "motor-control-btn-left-slave":
+                    print(f"move slave left {steps_s}")
+                if prop_id == "motor-control-btn-right-slave":
+                    print(f"move slave right {steps_s}")
+                if prop_id == "confirm-homing-dialog-slave":
+                    print(f"confirm home slave {steps_s}")
+                if prop_id == "motor-control-btn-center-slave":
+                    display_slave_homing_dialog = True
+
+            return None, display_master_homing_dialog, display_slave_homing_dialog

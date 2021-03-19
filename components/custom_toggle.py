@@ -11,7 +11,7 @@ def custom_toggle(id):
                     children=[
                         dbc.Checkbox(
                             id=id,
-                            checked=True
+                            checked=False
                         ),
                         html.Span(className="slider-toggle round")
                     ]

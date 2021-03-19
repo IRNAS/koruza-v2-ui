@@ -7,10 +7,10 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 # import custom components
-from components.custom_toggle import custom_toggle
+from .components.custom_toggle import custom_toggle
 #from components.control_button import control_button
-from components.signal_indicator import signal_indicator
-from components.unit_control import unit_control
+from .components.signal_indicator import signal_indicator
+from .components.unit_control import unit_control
 
 ###################### Dashboard Layout ######################
 """

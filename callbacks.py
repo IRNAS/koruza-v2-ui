@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output, State
 
 from .app import app
 from .components.functions import generate_rx_power_bar
-
 from ..koruza_v2_driver.src.constants import SFP_TRANSMIT, SFP_RECEIVE  # TODO move
 
 log = logging.getLogger('werkzeug')
@@ -87,6 +86,7 @@ class KoruzaGuiCallbacks():
                 Output("confirm-homing-dialog-slave", "displayed")
             ],
             [
+                Input("keyboard", "n_keydowns"),  # listen for keyboard input
                 # # test
                 #  master unit values
                 Input("motor-control-btn-up-master", "n_clicks"),
@@ -108,22 +108,47 @@ class KoruzaGuiCallbacks():
             ],
             [
                 State("steps-dropdown-master", "value"),
-                State("steps-dropdown-slave", "value")
+                State("steps-dropdown-slave", "value"),
+                State("keyboard", "keydown")
             ]
         )
-        def update_button_action(motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, led_toggle_m, confirm_center_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, led_toggle_s, confirm_center_s, steps_m, steps_s):
+        def update_button_action(n_keydowns, motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, led_toggle_m, confirm_center_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, led_toggle_s, confirm_center_s, steps_m, steps_s, event):
             display_master_homing_dialog = False
             display_slave_homing_dialog = False
             
             ctx = dash.callback_context
-
+            
             if steps_m is None:
-                steps_m = 0  # TODO handle elsewhere
+                steps_m = 0  # TODO handle elsewhere?
 
             if ctx.triggered:
 
                 split = ctx.triggered[0]["prop_id"].split(".")
+                #print(split)
                 prop_id = split[0]
+
+                if prop_id == "keyboard":
+                    #print(event)  # triggered event
+
+                    # master unit movement
+                    if event["key"] == "w":
+                        self.motor_wrapper.move_motor(0, -steps_m, 0)
+                    if event["key"] == "s":
+                        self.motor_wrapper.move_motor(0, steps_m, 0)
+                    if event["key"] == "d":
+                        self.motor_wrapper.move_motor(steps_m, 0, 0)
+                    if event["key"] == "a":
+                        self.motor_wrapper.move_motor(-steps_m, 0, 0)
+
+                    # slave unit movement
+                    if event["key"] == "ArrowUp":
+                        print(f"move master up for {steps_m}")
+                    if event["key"] == "ArrowDown":
+                        print(f"move master down for {steps_m}")
+                    if event["key"] == "ArrowRight":
+                        print(f"move master left for {steps_m}")
+                    if event["key"] == "ArrowLeft":
+                        print(f"move master right for {steps_m}")
                 #print(prop_id)
                 #  master unit callbacks
                 if prop_id == "motor-control-btn-up-master":

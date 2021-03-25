@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from dash_extensions import Keyboard
 
 # import custom components
 from .components.custom_toggle import custom_toggle
@@ -104,7 +105,7 @@ def generate_control_layout():
 
     return control_layout
 
-def generate_unit_control_layout(unit_id, title):
+def generate_unit_control_layout(unit_id, title, is_master=False):
     """Generate unit control layout with buttons, and power indicators"""
     unit_control_div = html.Div(
         id=f"unit-control-container-{unit_id}",
@@ -216,7 +217,7 @@ def generate_unit_control_layout(unit_id, title):
             html.Div(
                 style={"position": "relative", "left": "0%"},
                 children=[
-                    unit_control(unit_id) 
+                    unit_control(unit_id, is_master) 
                 ]
             )
             # html.Div(
@@ -262,6 +263,7 @@ layout_dashboard = dbc.Container(
         dbc.Row(  # single bootstrap row
             children=[
                 html.Div(id="hidden-div", style={"display": "none"}),
+                Keyboard(id="keyboard"),
                 dcc.Interval(id="n-intervals-update-master-info", interval=500, n_intervals=0),
                 dcc.Interval(id="n-intervals-update-slave-info", interval=500, n_intervals=0),
                 dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
@@ -283,7 +285,7 @@ layout_dashboard = dbc.Container(
                             children=[
                                 dbc.Col(
                                     children=[
-                                        generate_unit_control_layout("master", "Master")  # master unit controls and transmit power indicator
+                                        generate_unit_control_layout("master", "Master", is_master=True)  # master unit controls and transmit power indicator
                                     ]
                                 ),
                                 dbc.Col(

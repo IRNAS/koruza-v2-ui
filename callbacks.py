@@ -7,11 +7,13 @@ from dash.dependencies import Input, Output, State
 from .app import app
 from .components.functions import generate_rx_power_bar
 
+from ..koruza_v2_driver.src.constants import SFP_TRANSMIT, SFP_RECEIVE  # TODO move
+
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 class KoruzaGuiCallbacks():
-    def __init__(self, motor_wrapper, led_driver):
+    def __init__(self, motor_wrapper, led_driver, sfp_wrapper):
         """
         Initialize KoruzaGuiCallbacks class. Initializes tcp client used to send requests and listen for responses
         """
@@ -20,6 +22,7 @@ class KoruzaGuiCallbacks():
 
         self.motor_wrapper = motor_wrapper
         self.led_driver = led_driver
+        self.sfp_wrapper = sfp_wrapper
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -41,11 +44,17 @@ class KoruzaGuiCallbacks():
         )
         def update_master_info(n_intervals):
             #print("hellp works")
-            rx_power = -3
-            rx_value, rx_color = generate_rx_power_bar(rx_power)
+            # update sfp diagnostics
+            self.sfp_wrapper.update_sfp_diagnostics()
+
+            # rx_power = -3
+            rx_power = self.sfp_wrapper.get_module_diagnostics(SFP_RECEIVE)["rx_power"]
+            rx_power = self.sfp_wrapper.get_module_diagnostics(SFP_TRANSMIT)["tx_power"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
+            rx_power_dBm = self.sfp_wrapper.get_module_diagnostics(SFP_TRANSMIT)["tx_power_dBm"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
+            rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
             motor_x = self.motor_wrapper.position_x
             motor_y = self.motor_wrapper.position_y
-            return motor_x, motor_y, str(rx_power) + "dB", rx_value, rx_color
+            return motor_x, motor_y, str(rx_power) + " (" + str(rx_power_dBm) + " dBm)", rx_value, rx_color
 
 
         # #  slave unit info update
@@ -108,9 +117,6 @@ class KoruzaGuiCallbacks():
             
             ctx = dash.callback_context
 
-            print(f"Steps master state: {steps_m}")
-            #print(ctx)
-
             if steps_m is None:
                 steps_m = 0  # TODO handle elsewhere
 
@@ -133,7 +139,8 @@ class KoruzaGuiCallbacks():
                     print(f"move master right for {steps_m}")
                     self.motor_wrapper.move_motor(steps_m, 0, 0)
                 if prop_id == "confirm-homing-dialog-master":
-                    print(f"confirm home master for {steps_m}")
+                    print(f"confirm home master")
+                    self.motor_wrapper.home()
                 if prop_id == "motor-control-btn-center-master":
                     display_master_homing_dialog = True
                 if prop_id == "led-slider-master":

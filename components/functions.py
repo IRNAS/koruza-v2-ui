@@ -32,7 +32,7 @@ def generate_rx_power_bar(signal_str):
     elif signal_str <= -4:
         color = "#34eb34"
         value = 90
-    elif signal_str <= -1:
+    else:
         color = "#34eb4c"
         value = 100
 

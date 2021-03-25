@@ -1,3 +1,5 @@
+import socket
+
 import dash
 import dash_daq as daq
 import dash_html_components as html
@@ -12,6 +14,13 @@ from .components.custom_toggle import custom_toggle
 from .components.signal_indicator import signal_indicator
 from .components.unit_control import unit_control
 
+#### TODO MOVE TO CONSTANTS ####
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+LOCALHOST = s.getsockname()[0]
+s.close()
+PORT = 8080
+VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 ###################### Dashboard Layout ######################
 """
 ___________________
@@ -238,7 +247,7 @@ def generate_camera_display_layout():
                 #justify="center",
                 #align="center",
                 children=[
-                    html.Img(src="/assets/koruza-temp.png", id="video-stream-container", style={"height":"512px"}),
+                    html.Img(src=VIDEO_STREAM_SRC, id="video-stream-container", style={"height":"512px"}),
                 ]
             ),
         ]

@@ -13,6 +13,7 @@ from .callbacks import KoruzaGuiCallbacks
 
 from ..koruza_v2_driver.src.motor_driver_wrapper import MotorWrapper
 from ..koruza_v2_driver.src.led_driver import LedDriver
+from ..koruza_v2_driver.src.sfp_wrapper import SfpWrapper
 #import callbacks
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
@@ -47,7 +48,7 @@ motor_driver = None
 try:
     motor_driver = MotorWrapper("/dev/ttyAMA0", baudrate=115200, timeout=2)
 except Exception as e:
-    print("Failed to init motor_driver")
+    print("Failed to init Motor Driver")
 
 led_driver = None
 try:
@@ -55,7 +56,13 @@ try:
 except Exception as e:
     print("Failed to init LED Driver")
 
-KoruzaGuiCallbacks(motor_driver, led_driver).callbacks()
+sfp_wrapper = None
+try:
+    sfp_wrapper = SfpWrapper()
+except Exception as e:
+    print("Failed to init SFP Wrapper")
+
+KoruzaGuiCallbacks(motor_driver, led_driver, sfp_wrapper).callbacks()
 
 # Update page
 # # # # # # # # #

@@ -22,6 +22,9 @@ class KoruzaGuiCallbacks():
         self.motor_wrapper = motor_wrapper
         self.led_driver = led_driver
         self.sfp_wrapper = sfp_wrapper
+
+        self.rx_color_master = None
+        self.master_led_on = False
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -53,6 +56,8 @@ class KoruzaGuiCallbacks():
             rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
             motor_x = self.motor_wrapper.position_x
             motor_y = self.motor_wrapper.position_y
+            if self.master_led_on:
+                self.led_driver.set_color(rx_color, 0)
             return motor_x, motor_y, str(rx_power) + " (" + str(rx_power_dBm) + " dBm)", rx_value, rx_color
 
 
@@ -132,9 +137,9 @@ class KoruzaGuiCallbacks():
 
                     # master unit movement
                     if event["key"] == "w":
-                        self.motor_wrapper.move_motor(0, -steps_m, 0)
-                    if event["key"] == "s":
                         self.motor_wrapper.move_motor(0, steps_m, 0)
+                    if event["key"] == "s":
+                        self.motor_wrapper.move_motor(0, -steps_m, 0)
                     if event["key"] == "d":
                         self.motor_wrapper.move_motor(steps_m, 0, 0)
                     if event["key"] == "a":
@@ -153,10 +158,10 @@ class KoruzaGuiCallbacks():
                 #  master unit callbacks
                 if prop_id == "motor-control-btn-up-master":
                     print(f"move master up for {steps_m}")
-                    self.motor_wrapper.move_motor(0, -steps_m, 0)
+                    self.motor_wrapper.move_motor(0, steps_m, 0)
                 if prop_id == "motor-control-btn-down-master":
                     print(f"move master down for {steps_m}")
-                    self.motor_wrapper.move_motor(0, steps_m, 0)
+                    self.motor_wrapper.move_motor(0, -steps_m, 0)
                 if prop_id == "motor-control-btn-left-master":
                     print(f"move master left for {steps_m}")
                     self.motor_wrapper.move_motor(-steps_m, 0, 0)
@@ -170,9 +175,11 @@ class KoruzaGuiCallbacks():
                     display_master_homing_dialog = True
                 if prop_id == "led-slider-master":
                     if led_toggle_m:
-                        self.led_driver.set_color("blue", 105)
+                        self.master_led_on = True
+                        # self.led_driver.set_color("blue", 105)
                     else:
                         self.led_driver.turn_off()
+                        self.master_led_on = False
                 
 
                 #  slave unit callbacks

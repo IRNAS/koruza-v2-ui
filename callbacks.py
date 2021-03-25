@@ -12,16 +12,13 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 class KoruzaGuiCallbacks():
-    def __init__(self, motor_wrapper, led_driver, sfp_wrapper):
+    def __init__(self, koruza):
         """
         Initialize KoruzaGuiCallbacks class. Initializes tcp client used to send requests and listen for responses
         """
-
-        self.tcp_client = None
-
-        self.motor_wrapper = motor_wrapper
-        self.led_driver = led_driver
-        self.sfp_wrapper = sfp_wrapper
+        self.motor_wrapper = koruza.motor_wrapper
+        self.led_driver = koruza.led_driver
+        self.sfp_wrapper = koruza.sfp_wrapper
 
         self.rx_color_master = None
         self.master_led_on = False
@@ -51,11 +48,16 @@ class KoruzaGuiCallbacks():
 
             # rx_power = -3
             rx_power = self.sfp_wrapper.get_module_diagnostics(SFP_RECEIVE)["rx_power"]
-            rx_power = self.sfp_wrapper.get_module_diagnostics(SFP_TRANSMIT)["tx_power"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
-            rx_power_dBm = self.sfp_wrapper.get_module_diagnostics(SFP_TRANSMIT)["tx_power_dBm"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
+            # rx_power = self.sfp_wrapper.get_module_diagnostics(SFP_TRANSMIT)["tx_power"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
+            rx_power_dBm = self.sfp_wrapper.get_module_diagnostics(SFP_RECEIVE)["rx_power_dBm"]  # NOTE switched for visualization  - should be tx_power, but we're not displaying it
+            # rx_power_dBm = -30
             rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
-            motor_x = self.motor_wrapper.position_x
-            motor_y = self.motor_wrapper.position_y
+            try:
+                motor_x = self.motor_wrapper.position_x
+                motor_y = self.motor_wrapper.position_y
+            except Exception as e:
+                motor_x = 0
+                motor_y = 0
             if self.master_led_on:
                 self.led_driver.set_color(rx_color, 0)
             return motor_x, motor_y, str(rx_power) + " (" + str(rx_power_dBm) + " dBm)", rx_value, rx_color

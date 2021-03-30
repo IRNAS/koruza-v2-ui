@@ -14,7 +14,8 @@ from .callbacks import KoruzaGuiCallbacks
 # from ..koruza_v2_driver.src.motor_driver_wrapper import MotorWrapper
 # from ..koruza_v2_driver.src.led_driver import LedDriver
 # from ..koruza_v2_driver.src.sfp_wrapper import SfpWrapper
-from ..koruza_v2_driver.koruza import Koruza
+# from ..koruza_v2_driver.koruza import Koruza
+import xmlrpc.client
 #import callbacks
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
@@ -43,28 +44,10 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ])
 
-""" INITS - NOTE THIS IS TEMPORARY - connect all with koruza.py and initi only koruza.py"""
-# Init motor driver
-# motor_driver = None
-# try:
-#     motor_driver = MotorWrapper("/dev/ttyAMA0", baudrate=115200, timeout=2)
-# except Exception as e:
-#     print("Failed to init Motor Driver")
-
-# led_driver = None
-# try:
-#     led_driver = LedDriver()
-# except Exception as e:
-#     print("Failed to init LED Driver")
-
-# sfp_wrapper = None
-# try:
-#     sfp_wrapper = SfpWrapper()
-# except Exception as e:
-#     print("Failed to init SFP Wrapper")
-koruza = Koruza()
-
-KoruzaGuiCallbacks(koruza).callbacks()
+# koruza = Koruza()
+# init client and pass it to callbacks
+client = xmlrpc.client.ServerProxy('http://localhost:8000', allow_none=True)
+KoruzaGuiCallbacks(client).callbacks()
 
 # Update page
 # # # # # # # # #

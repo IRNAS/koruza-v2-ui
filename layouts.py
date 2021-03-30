@@ -290,7 +290,7 @@ layout_dashboard = dbc.Container(
                                 ),
                                 dbc.Col(
                                     children=[
-                                        generate_unit_control_layout("slave", "Slave")  # slave unit controls and transmit power indicator
+                                        generate_unit_control_layout("slave", "Slave - not functional - WIP")  # slave unit controls and transmit power indicator
                                     ]
                                 )
                             ]

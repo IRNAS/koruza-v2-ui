@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import xmlrpc.client
 from dash.dependencies import Input, Output
 
 # run with sudo python3 -m koruza_v2.koruza_v2_ui.index
@@ -11,12 +12,11 @@ from .app import app
 from .layouts import layout_dashboard, no_page
 from .callbacks import KoruzaGuiCallbacks
 
+from ..src.constants import KORUZA_MAIN_PORT
 # from ..koruza_v2_driver.src.motor_driver_wrapper import MotorWrapper
 # from ..koruza_v2_driver.src.led_driver import LedDriver
 # from ..koruza_v2_driver.src.sfp_wrapper import SfpWrapper
 # from ..koruza_v2_driver.koruza import Koruza
-import xmlrpc.client
-#import callbacks
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
 app.index_string = ''' 
@@ -46,7 +46,7 @@ app.layout = html.Div([
 
 # koruza = Koruza()
 # init client and pass it to callbacks
-client = xmlrpc.client.ServerProxy('http://localhost:8000', allow_none=True)
+client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
 KoruzaGuiCallbacks(client).callbacks()
 
 # Update page
@@ -59,7 +59,7 @@ def display_page(pathname):
     if pathname == "/dashboard":
         return layout_dashboard
     else:
-        return no_page
+        return layout_dashboard
 
 if __name__ == '__main__':
     hostname = "0.0.0.0"

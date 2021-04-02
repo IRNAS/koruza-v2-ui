@@ -9,4 +9,4 @@ netifaces==0.10.9
 requests==2.23.0
 jsonschema
 dash-bootstrap-components==0.10.5
-dash-extensions-0.0.47
+dash-extensions==0.0.47

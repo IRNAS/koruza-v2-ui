@@ -236,21 +236,86 @@ def generate_unit_control_layout(unit_id, title, is_master=False):
 
 def generate_camera_display_layout():
     """Generate camera display with control buttons"""
+
+    x_pts = []
+    y_pts = []
+    for x in range(0, 320):
+        for y in range(0, 240):
+            x_pts.append(x * 2)
+            y_pts.append(y * 2)
+
     camera_div = html.Div(
         id="camera-container",
         #style={"display": "flex", "flex-direction": "column"},
         className="d-flex flex-column align-items-center mt-5",
         children=[
-            
             html.Div(
-                #style={"display": "flex", "flex-direction": "row"},
-                #className="d-flex flex-row",
-                #justify="center",
-                #align="center",
+                style={"height":"480px", "width": "640px"},
                 children=[
-                    html.Img(src=VIDEO_STREAM_SRC, id="video-stream-container", style={"height":"512px"}),
+                    html.Img(src=VIDEO_STREAM_SRC, id="video-stream-container", style={"height":"480px", "width": "640px", "absolute": "relative", "top": "0px", "left": "0px"}),
+                    dcc.Graph(
+                        id="camera-overlay",
+                        style={"height":"534px", "width": "640px", "position": "relative", "top": "-508px", "left": "0px"},  # TODO make cleaner
+                        config={
+                            # "modeBarButtonsToAdd": [ "drawrect" ],
+                            "displayModeBar": False,
+                            # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
+                            # "showAxisDragHandles": False,
+                            "displaylogo": False,
+                            "editable": False
+                        },
+
+                        # NOTE TODO this is still kinda slow, figure out a better way to do this
+                        figure={
+                            "data": [
+                                {
+                                    # "type": "scatter",
+                                    # "mode": "markers",
+                                    # "marker_color": "rgba(255, 0, 0, 0.05)",
+                                    "x": x_pts,
+                                    "y": y_pts,
+                                    "marker": {
+                                        "color": "rgba(255, 0, 0, 0.00)"
+                                    }
+                                }
+                            ],
+                            "layout": {
+                                "xaxis": {
+                                    "showticklabels": False,
+                                    "ticks": "",
+                                    "showgrid": False,
+                                    "zeroline": False,
+                                    "fixedrange": True,
+                                },
+                                "yaxis": {
+                                    "showticklabels": False,
+                                    "ticks": "",
+                                    "showgrid": False,
+                                    "zeroline": False,
+                                    "fixedrange": True,
+                                },
+                                "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
+                                "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
+                                "margin": {
+                                    "t": 0,
+                                    "b": 0,
+                                    "l": 0,
+                                    "r": 0
+                                },
+                                "clickmode": "event",
+                                "hovermode": "closest",
+                                "newshape": {
+                                    "line": {
+                                        "color": "#ff0000",
+                                        "opacity": "1.0"
+                                    }
+                                },
+                                "shapes": []
+                            },
+                        }
+                    )
                 ]
-            ),
+            )
         ]
     )
     return camera_div

@@ -1,6 +1,7 @@
 import random
 import dash
 import logging
+import json
 from threading import Lock
 
 from dash.dependencies import Input, Output, State
@@ -10,6 +11,8 @@ from .components.functions import generate_rx_power_bar
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+SETTINGS_FILE = "./koruza_v2/config.json"  # load settings file on init and write current motor pos and calibration
 
 class KoruzaGuiCallbacks():
     def __init__(self, client):
@@ -24,6 +27,15 @@ class KoruzaGuiCallbacks():
 
         self.master_led_on = False
         self.slave_led_on = False
+
+        self.settings = None
+
+        # load settings from json
+        try:
+            with open(SETTINGS_FILE) as config_file:
+                self.settings = json.load(config_file)
+        except Exception as e:
+            log.error(f"Can not open settings.json. Error: {e}")
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -69,12 +81,25 @@ class KoruzaGuiCallbacks():
                         "opacity": "1.0"
                     }
                 }
+
+                # TODO convert camera coordinates to motor coordinates
                 fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                 # print(fig["layout"]["shapes"])
                 # fig["shapes"] = []
+                # TODO implement some sort of lock - look at filelock as in drainbot
+                try:
+                    with open(SETTINGS_FILE, "w") as config_file:
+                        self.settings["calibration"]["offset_x"] = click_data["points"][0]["x"]
+                        self.settings["calibration"]["offset_y"] = click_data["points"][0]["y"]
+                        json.dump(self.settings, config_file, indent=4)
+                except Exception as e:
+                    print(e)
+
             except Exception as e:
                 print(e)
 
+            # write last calibration location to file
+            
             return fig
 
         #  master unit info update

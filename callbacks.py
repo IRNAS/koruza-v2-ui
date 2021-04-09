@@ -7,7 +7,9 @@ from threading import Lock
 from dash.dependencies import Input, Output, State
 
 from .app import app
-from .components.functions import generate_rx_power_bar
+from .components.functions import generate_rx_power_bar, generate_marker
+
+from ..src.config_manager import config_manager
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -28,14 +30,8 @@ class KoruzaGuiCallbacks():
         self.master_led_on = False
         self.slave_led_on = False
 
-        self.settings = None
-
         # load settings from json
-        try:
-            with open(SETTINGS_FILE) as config_file:
-                self.settings = json.load(config_file)
-        except Exception as e:
-            log.error(f"Can not open settings.json. Error: {e}")
+        self.config_manager = config_manager
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -56,44 +52,49 @@ class KoruzaGuiCallbacks():
             # https://dash.plotly.com/annotations
             # https://plotly.com/python/creating-and-updating-figures/
             # print(click_data)
-            # TODO: find a way to detect click position: https://plotly.com/python/reference/layout/ 
-            square_size = 18
+            SQUARE_SIZE = 18  # TODO move to constants
             try:
-                line_lb_rt = {
-                    "type": "line",
-                    "x0": click_data["points"][0]["x"] - (square_size / 2),
-                    "y0": click_data["points"][0]["y"] - (square_size / 2),
-                    "x1": click_data["points"][0]["x"] + (square_size / 2),
-                    "y1": click_data["points"][0]["y"] + (square_size / 2),
-                    "line": {
-                        "color": "#ff0000",
-                        "opacity": "1.0"
-                    }
-                }
-                line_lt_rb = {
-                    "type": "line",
-                    "x0": click_data["points"][0]["x"] - (square_size / 2),
-                    "y0": click_data["points"][0]["y"] + (square_size / 2),
-                    "x1": click_data["points"][0]["x"] + (square_size / 2),
-                    "y1": click_data["points"][0]["y"] - (square_size / 2),
-                    "line": {
-                        "color": "#ff0000",
-                        "opacity": "1.0"
-                    }
-                }
+                line_lb_rt, line_lt_rb = generate_marker(click_data["points"][0]["x"], click_data["points"][0]["y"], SQUARE_SIZE)
+                # line_lb_rt = {
+                #     "type": "line",
+                #     "x0": click_data["points"][0]["x"] - (SQUARE_SIZE / 2),
+                #     "y0": click_data["points"][0]["y"] - (SQUARE_SIZE / 2),
+                #     "x1": click_data["points"][0]["x"] + (SQUARE_SIZE / 2),
+                #     "y1": click_data["points"][0]["y"] + (SQUARE_SIZE / 2),
+                #     "line": {
+                #         "color": "#ff0000",
+                #         "opacity": "1.0"
+                #     }
+                # }
+                # line_lt_rb = {
+                #     "type": "line",
+                #     "x0": click_data["points"][0]["x"] - (SQUARE_SIZE / 2),
+                #     "y0": click_data["points"][0]["y"] + (SQUARE_SIZE / 2),
+                #     "x1": click_data["points"][0]["x"] + (SQUARE_SIZE / 2),
+                #     "y1": click_data["points"][0]["y"] - (SQUARE_SIZE / 2),
+                #     "line": {
+                #         "color": "#ff0000",
+                #         "opacity": "1.0"
+                #     }
+                # }
 
                 # TODO convert camera coordinates to motor coordinates
                 fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                 # print(fig["layout"]["shapes"])
                 # fig["shapes"] = []
                 # TODO implement some sort of lock - look at filelock as in drainbot
-                try:
-                    with open(SETTINGS_FILE, "w") as config_file:
-                        self.settings["calibration"]["offset_x"] = click_data["points"][0]["x"]
-                        self.settings["calibration"]["offset_y"] = click_data["points"][0]["y"]
-                        json.dump(self.settings, config_file, indent=4)
-                except Exception as e:
-                    print(e)
+                key_data_pairs = []
+                key_data_pairs.append(("offset_x", click_data["points"][0]["x"]))
+                key_data_pairs.append(("offset_y", click_data["points"][0]["y"]))
+                self.config_manager.update_calibration_config(key_data_pairs)
+                # write_json_file(SETTINGS_FILE, self.settings, "calibration", key_data_pairs)
+                # try:
+                #     with open(SETTINGS_FILE, "w") as config_file:
+                #         self.settings["calibration"]["offset_x"] = click_data["points"][0]["x"]
+                #         self.settings["calibration"]["offset_y"] = click_data["points"][0]["y"]
+                #         json.dump(self.settings, config_file, indent=4)
+                # except Exception as e:
+                #     print(e)
 
             except Exception as e:
                 print(e)

@@ -29,3 +29,29 @@ def generate_rx_power_bar(signal_str):
   
 
     return value, color
+
+def generate_marker(pos_x, pos_y, SQUARE_SIZE):
+    marker_lb_rt = {
+        "type": "line",
+        "x0": pos_x - (SQUARE_SIZE / 2),
+        "y0": pos_y - (SQUARE_SIZE / 2),
+        "x1": pos_x + (SQUARE_SIZE / 2),
+        "y1": pos_y + (SQUARE_SIZE / 2),
+        "line": {
+            "color": "#ff0000",
+            "opacity": "1.0"
+        }
+    }
+    marker_lt_rb = {
+        "type": "line",
+        "x0": pos_x - (SQUARE_SIZE / 2),
+        "y0": pos_y + (SQUARE_SIZE / 2),
+        "x1": pos_x + (SQUARE_SIZE / 2),
+        "y1": pos_y - (SQUARE_SIZE / 2),
+        "line": {
+            "color": "#ff0000",
+            "opacity": "1.0"
+        }
+    }
+
+    return marker_lb_rt, marker_lt_rb

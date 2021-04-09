@@ -1,5 +1,5 @@
 import socket
-
+import json
 import dash
 import dash_daq as daq
 import dash_html_components as html
@@ -14,6 +14,9 @@ from .components.custom_toggle import custom_toggle
 #from components.control_button import control_button
 from .components.signal_indicator import signal_indicator
 from .components.unit_control import unit_control
+from .components.functions import generate_marker
+
+from ..src.config_manager import config_manager
 
 #### TODO MOVE TO CONSTANTS ####
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -22,6 +25,14 @@ LOCALHOST = s.getsockname()[0]
 s.close()
 PORT = 8080
 VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
+
+SQUARE_SIZE = 18
+
+# LOAD PREVIOUS LOCATION OF CALIB VALUE
+SETTINGS_FILE = "./koruza_v2/config.json"  # load settings file on init and write current motor pos and calibration
+# settings = load_json_file(SETTINGS_FILE)
+settings = config_manager.calibration
+
 ###################### Dashboard Layout ######################
 """
 ___________________
@@ -244,6 +255,31 @@ def generate_camera_display_layout():
             x_pts.append(x * 2)
             y_pts.append(y * 2)
 
+    # marker_lb_rt = {
+    #     "type": "line",
+    #     "x0": settings["offset_x"] - (SQUARE_SIZE / 2),
+    #     "y0": settings["offset_y"] - (SQUARE_SIZE / 2),
+    #     "x1": settings["offset_x"] + (SQUARE_SIZE / 2),
+    #     "y1": settings["offset_y"] + (SQUARE_SIZE / 2),
+    #     "line": {
+    #         "color": "#ff0000",
+    #         "opacity": "1.0"
+    #     }
+    # }
+    # marker_lt_rb = {
+    #     "type": "line",
+    #     "x0": settings["offset_x"] - (SQUARE_SIZE / 2),
+    #     "y0": settings["offset_y"] + (SQUARE_SIZE / 2),
+    #     "x1": settings["offset_x"] + (SQUARE_SIZE / 2),
+    #     "y1": settings["offset_y"] - (SQUARE_SIZE / 2),
+    #     "line": {
+    #         "color": "#ff0000",
+    #         "opacity": "1.0"
+    #     }
+    # }
+
+    marker_lb_rt, marker_lt_rb = generate_marker(settings["offset_x"], settings["offset_y"], SQUARE_SIZE)
+
     camera_div = html.Div(
         id="camera-container",
         #style={"display": "flex", "flex-direction": "column"},
@@ -310,7 +346,7 @@ def generate_camera_display_layout():
                                         "opacity": "1.0"
                                     }
                                 },
-                                "shapes": []
+                                "shapes": [marker_lb_rt, marker_lt_rb]
                             },
                         }
                     )

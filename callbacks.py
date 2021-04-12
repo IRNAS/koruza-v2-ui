@@ -129,13 +129,16 @@ class KoruzaGuiCallbacks():
             # print(sfp_data["sfp_1"]["diagnostics"])
 
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]  # TODO figure out correct sfp for rx
+                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
                 rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
                 rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
             else:
                 rx_power = 0
                 rx_power_dBm = -40.0
                 rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
+
+            rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            # print(rx_power_label)
 
             self.lock.acquire()
             try:
@@ -153,7 +156,7 @@ class KoruzaGuiCallbacks():
                     log.error(e)
                 self.lock.release()
 
-            return motor_x, motor_y, str(rx_power) + " (" + str(rx_power_dBm) + " dBm)", rx_value, rx_color
+            return motor_x, motor_y, rx_power_label, rx_value, rx_color
 
         #  slave unit info update
         @app.callback(

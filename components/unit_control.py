@@ -38,7 +38,7 @@ def unit_control(unit_id, is_master=False):
                             {"label": "100", "value": 100},
                             {"label": "1000", "value": 1000}
                         ],
-                        #value=1,
+                        value=1000,
                         clearable=False
                     )
                 ]

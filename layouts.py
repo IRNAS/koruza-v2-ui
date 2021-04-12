@@ -51,58 +51,6 @@ def generate_control_layout():
         className="border-round",
         children=[
             dbc.Row(
-                #id="camera-control-row",
-                no_gutters=True,
-                align="center",
-                justify="space-between",
-                children=[
-                    # dbc.Col(
-                    #     width=4,
-                    #     children=[
-                    #         html.Span("Steps: "),
-                    #         dbc.ButtonGroup(
-                    #             children=[
-                    #                 dbc.Button(html.Span("1", style={"font-size": "initial"}), id="steps-1-btn", size="lg"),
-                    #                 dbc.Button(html.Span("10", style={"font-size": "initial"}), id="steps-10-btn", size="lg"),
-                    #                 dbc.Button(html.Span("100", style={"font-size": "initial"}), id="steps-100-btn", size="lg"),
-                    #                 dbc.Button(html.Span("1000", style={"font-size": "initial"}), id="steps-1000-btn", size="lg")
-                    #             ]
-                    #         )
-                    #     ]
-                    # ),
-                    # dbc.Col(
-                    #     width=8,
-                    #     className="d-flex flex-row align-items-top justify-content-between",
-                    #     children=[
-                    #         html.Div(
-                    #             children=[
-                    #                 html.P("Unit Serial Number", className="property-title"),
-                    #                 html.P("0046", id="unit-serial-number")
-                    #             ]
-                    #         ),
-                    #         html.Div(
-                    #             children=[
-                    #                 html.P("IP Address", className="property-title"),
-                    #                 html.P("192.168.13.148", id="unit-ip-address")
-                    #             ]
-                    #         ),
-                    #         html.Div(
-                    #             children=[
-                    #                 html.P("SFP Serial Number", className="property-title"),
-                    #                 html.P("H800S003993", id="sfp-serial-number")
-                    #             ]
-                    #         ),
-                    #         html.Div(
-                    #             children=[
-                    #                 html.P("TX Wavelength", className="property-title"),
-                    #                 html.P("1550nm", id="sfp-wavelength")
-                    #             ]
-                    #         )
-                    #     ]
-                    # )
-                ]
-            ),
-            dbc.Row(
                 children=[
                     dbc.Col(
                         children=[
@@ -251,32 +199,9 @@ def generate_camera_display_layout():
     x_pts = []
     y_pts = []
     for x in range(0, 320):
-        for y in range(0, 240):
+        for y in range(0, 320):
             x_pts.append(x * 2)
             y_pts.append(y * 2)
-
-    # marker_lb_rt = {
-    #     "type": "line",
-    #     "x0": settings["offset_x"] - (SQUARE_SIZE / 2),
-    #     "y0": settings["offset_y"] - (SQUARE_SIZE / 2),
-    #     "x1": settings["offset_x"] + (SQUARE_SIZE / 2),
-    #     "y1": settings["offset_y"] + (SQUARE_SIZE / 2),
-    #     "line": {
-    #         "color": "#ff0000",
-    #         "opacity": "1.0"
-    #     }
-    # }
-    # marker_lt_rb = {
-    #     "type": "line",
-    #     "x0": settings["offset_x"] - (SQUARE_SIZE / 2),
-    #     "y0": settings["offset_y"] + (SQUARE_SIZE / 2),
-    #     "x1": settings["offset_x"] + (SQUARE_SIZE / 2),
-    #     "y1": settings["offset_y"] - (SQUARE_SIZE / 2),
-    #     "line": {
-    #         "color": "#ff0000",
-    #         "opacity": "1.0"
-    #     }
-    # }
 
     marker_lb_rt, marker_lt_rb = generate_marker(settings["offset_x"], settings["offset_y"], SQUARE_SIZE)
 
@@ -286,12 +211,12 @@ def generate_camera_display_layout():
         className="d-flex flex-column align-items-center mt-5",
         children=[
             html.Div(
-                style={"height":"480px", "width": "640px"},
+                style={"height":"640px", "width": "640px"},
                 children=[
-                    html.Img(src=VIDEO_STREAM_SRC, id="video-stream-container", style={"height":"480px", "width": "640px", "absolute": "relative", "top": "0px", "left": "0px"}),
+                    html.Img(src=VIDEO_STREAM_SRC, id="video-stream-container", style={"height":"640px", "width": "640px", "absolute": "relative", "top": "0px", "left": "0px"}),
                     dcc.Graph(
                         id="camera-overlay",
-                        style={"height":"534px", "width": "640px", "position": "relative", "top": "-508px", "left": "0px"},  # TODO make cleaner
+                        style={"height":"712px", "width": "640px", "position": "relative", "top": "-676px", "left": "0px"},  # TODO make cleaner
                         config={
                             # "modeBarButtonsToAdd": [ "drawrect" ],
                             "displayModeBar": False,

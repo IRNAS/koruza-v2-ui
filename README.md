@@ -4,6 +4,11 @@ Introduction...
 
 ## Repository Structure
 
+| Branch | Description |
+| ------ | ----------- |
+| master | ... |
+| dev | ... |
+
 ## Setup and Installation
 
 ## License

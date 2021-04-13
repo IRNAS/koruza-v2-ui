@@ -49,52 +49,22 @@ class KoruzaGuiCallbacks():
         )
         def update_calibration_position(click_data, fig):
             """Update calibration position and save somewhere globally. TODO: a file with global config"""
+            # HELP:
             # https://dash.plotly.com/annotations
             # https://plotly.com/python/creating-and-updating-figures/
-            # print(click_data)
+            
             SQUARE_SIZE = 18  # TODO move to constants
             try:
                 line_lb_rt, line_lt_rb = generate_marker(click_data["points"][0]["x"], click_data["points"][0]["y"], SQUARE_SIZE)
-                # line_lb_rt = {
-                #     "type": "line",
-                #     "x0": click_data["points"][0]["x"] - (SQUARE_SIZE / 2),
-                #     "y0": click_data["points"][0]["y"] - (SQUARE_SIZE / 2),
-                #     "x1": click_data["points"][0]["x"] + (SQUARE_SIZE / 2),
-                #     "y1": click_data["points"][0]["y"] + (SQUARE_SIZE / 2),
-                #     "line": {
-                #         "color": "#ff0000",
-                #         "opacity": "1.0"
-                #     }
-                # }
-                # line_lt_rb = {
-                #     "type": "line",
-                #     "x0": click_data["points"][0]["x"] - (SQUARE_SIZE / 2),
-                #     "y0": click_data["points"][0]["y"] + (SQUARE_SIZE / 2),
-                #     "x1": click_data["points"][0]["x"] + (SQUARE_SIZE / 2),
-                #     "y1": click_data["points"][0]["y"] - (SQUARE_SIZE / 2),
-                #     "line": {
-                #         "color": "#ff0000",
-                #         "opacity": "1.0"
-                #     }
-                # }
 
                 # TODO convert camera coordinates to motor coordinates
                 fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
-                # print(fig["layout"]["shapes"])
-                # fig["shapes"] = []
-                # TODO implement some sort of lock - look at filelock as in drainbot
+
                 key_data_pairs = []
                 key_data_pairs.append(("offset_x", click_data["points"][0]["x"]))
                 key_data_pairs.append(("offset_y", click_data["points"][0]["y"]))
                 self.config_manager.update_calibration_config(key_data_pairs)
-                # write_json_file(SETTINGS_FILE, self.settings, "calibration", key_data_pairs)
-                # try:
-                #     with open(SETTINGS_FILE, "w") as config_file:
-                #         self.settings["calibration"]["offset_x"] = click_data["points"][0]["x"]
-                #         self.settings["calibration"]["offset_y"] = click_data["points"][0]["y"]
-                #         json.dump(self.settings, config_file, indent=4)
-                # except Exception as e:
-                #     print(e)
+            
 
             except Exception as e:
                 print(e)
@@ -117,6 +87,18 @@ class KoruzaGuiCallbacks():
             ]
         )
         def update_master_info(n_intervals):
+            """
+            Updates master unit info:
+                - RX
+                - TX
+                - LEDs
+                
+            Input: 
+                n_intervals increment triggers this callback.
+            """
+            
+            # TODO move LED set_color to main
+            
             # update sfp diagnostics
             self.lock.acquire()  # will block until completed
             try:
@@ -172,6 +154,18 @@ class KoruzaGuiCallbacks():
             ]
         )
         def update_slave_info(n_intervals):
+            """
+            PLACEHOLDER, WAITING FOR IMPLEMENTATION OF D2D MGMT.
+            TODO: MOVE TO MAIN!!
+           
+             Updates slave unit info:
+                - RX
+                - TX
+                - LEDs
+                
+            Input: 
+                n_intervals increment triggers this callback.
+            """
             # update sfp diagnostics
             self.lock.acquire()  # will block until completed
             try:
@@ -245,6 +239,9 @@ class KoruzaGuiCallbacks():
             ]
         )
         def update_button_action(n_keydowns, motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, led_toggle_m, confirm_center_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, led_toggle_s, confirm_center_s, steps_m, steps_s, event):
+            """
+            Trigger button callbacks. On every click one of these callbacks is triggered.
+            """
             display_master_homing_dialog = False
             display_slave_homing_dialog = False
             

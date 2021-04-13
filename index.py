@@ -3,8 +3,8 @@
 # =================
 # GRAPHICAL USER INTERFACE
 # =================
-#
-#
+# 
+# 
 # run with sudo python3 -m koruza_v2.koruza_v2_ui.index
 
 import dash
@@ -13,7 +13,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 import xmlrpc.client
-# run with sudo python3 -m koruza_v2.koruza_v2_ui.index
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from .app import server
@@ -51,7 +50,6 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ])
 
-# koruza = Koruza()
 # init client and pass it to callbacks
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
 KoruzaGuiCallbacks(client).callbacks()

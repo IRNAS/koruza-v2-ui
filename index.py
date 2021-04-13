@@ -1,3 +1,12 @@
+# KORUZA-V2-PRO
+# 
+# =================
+# GRAPHICAL USER INTERFACE
+# =================
+#
+#
+# run with sudo python3 -m koruza_v2.koruza_v2_ui.index
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html

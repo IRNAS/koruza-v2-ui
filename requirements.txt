@@ -3,3 +3,4 @@ dash==1.19.0
 dash-daq==0.5.0
 dash-extensions==0.0.47
 filelock==3.0.12
+dash-auth==1.4.1

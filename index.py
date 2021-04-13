@@ -1,9 +1,9 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import xmlrpc.client
 from dash.dependencies import Input, Output
 
+import xmlrpc.client
 # run with sudo python3 -m koruza_v2.koruza_v2_ui.index
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
@@ -11,12 +11,9 @@ from .app import server
 from .app import app
 from .layouts import layout_dashboard, no_page
 from .callbacks import KoruzaGuiCallbacks
+from .components.header import Header
 
 from ..src.constants import KORUZA_MAIN_PORT
-# from ..koruza_v2_driver.src.motor_driver_wrapper import MotorWrapper
-# from ..koruza_v2_driver.src.led_driver import LedDriver
-# from ..koruza_v2_driver.src.sfp_wrapper import SfpWrapper
-# from ..koruza_v2_driver.koruza import Koruza
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
 app.index_string = ''' 
@@ -41,6 +38,7 @@ app.index_string = '''
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    Header(),
     html.Div(id='page-content')
 ])
 
@@ -56,6 +54,8 @@ KoruzaGuiCallbacks(client).callbacks()
 def display_page(pathname):
     # if pathname == "/setup":
     #     return layout_setup_wizard
+    if pathname == "/info":
+        return layout_info
     if pathname == "/dashboard":
         return layout_dashboard
     else:

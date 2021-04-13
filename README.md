@@ -21,12 +21,14 @@ Introduction...
     |---custom-styles.css
     |---favicon.ico
     |---koruza-temp.png
+    
 |--- components/
     |---control_button.py
     |---custom_toggle.py
     |---functions.py
     |---signal_indicator.py
     |---unit_control.py
+    
 |---.gitignore
 |---LICENSE
 |---README.md

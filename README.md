@@ -7,7 +7,6 @@ Introduction...
 | Branch | Description |
 | ------ | ----------- |
 | master | ... |
-| dev | ... |
 
 ## Setup and Installation
 

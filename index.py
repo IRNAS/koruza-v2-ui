@@ -17,7 +17,7 @@ import xmlrpc.client
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from .app import server
 from .app import app
-from .layouts import layout_dashboard, no_page
+from .layouts import layout_info, layout_dashboard, no_page
 from .callbacks import KoruzaGuiCallbacks
 from .components.header import Header
 
@@ -66,7 +66,7 @@ def display_page(pathname):
     if pathname == "/dashboard":
         return layout_dashboard
     else:
-        return layout_dashboard
+        return no_page
 
 if __name__ == '__main__':
     hostname = "0.0.0.0"

@@ -1,6 +1,8 @@
 import socket
 import json
 import dash
+import math
+import numpy as np
 import dash_daq as daq
 import dash_html_components as html
 import dash_core_components as dcc
@@ -44,6 +46,99 @@ ___________________
 -------------------
 """
 
+def generate_unit_info_panel(unit_id):
+    """Info panel containing info on both units"""
+    return html.Div(
+        className="flex-direction-column",
+        children=[
+            html.Div("Unit Serial Number", className="property-title"),
+            html.Div("0046", id="unit-serial-number"),
+            html.Div("SFP Serial Number", className="property-title"),
+            html.Div("H800S003993", id="sfp-serial-number"),
+            html.Div("IP Address", className="property-title"),
+            html.Div("192.168.13.148", id="unit-ip-address"),
+            html.Div("TX Wavelength", className="property-title"),
+            html.Div("1550nm", id="sfp-wavelength"),
+            html.Div("TX Power", className="property-title"),
+            html.Div("0.5928 (-2.27 dBm)", id="tx-power"),
+            html.Div("Rx Power", className="property-title"),
+            html.Div("0.0002 (-36.99 dBm)", id="rx-power"),
+            generate_rx_power_graph(unit_id),
+        ]
+    )
+
+def generate_rx_power_graph(unit_id):
+    """
+    Generate rx power graph
+
+    TODO: Enable zoom on x axis, when zoomed in display more data points
+    TODO: Figure out how much data to display. last 10 mins? 1 datapoint every 30 seconds?
+
+    """
+
+    # TODO remove and replace with actual callbacks
+    x = list(range(0, 60))  # 1 datapoint every 10 seconds, for 10 minutes
+    y = np.sin(x)
+
+    return html.Div(
+        dcc.Graph(
+            id=f"rx-power-graph-{unit_id}",
+            #style={"height":"712px", "width": "640px", "position": "relative", "top": "-676px", "left": "0px"},  # TODO make cleaner
+            config={
+                # "modeBarButtonsToAdd": [ "drawrect" ],
+                "displayModeBar": False,
+                # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
+                # "showAxisDragHandles": False,
+                "displaylogo": False,
+                "editable": False
+            },
+            figure={
+                "data": [
+                    {
+                        "type": "line",
+                        "x": x,  # TODO parse timestamps for x axis
+                        "y": y.tolist(),  # TODO gather data from unit and display on Y
+                        # "marker": {
+                        #     "color": "rgba(255, 0, 0, 0.00)"
+                        # }
+                    }
+                ],
+                "layout": {
+                    "xaxis": {
+                        "showticklabels": True,
+                        "ticks": "",
+                        "showgrid": False,
+                        "zeroline": False,
+                        "fixedrange": True,
+                    },
+                    "yaxis": {
+                        "showticklabels": True,
+                        "ticks": "outside",
+                        "showgrid": True,
+                        "zeroline": False,
+                        "fixedrange": False,
+                    },
+                    "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
+                    "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
+                    "margin": {
+                        "t": 0,
+                        # "b": 0,
+                        "l": 30,
+                        "r": 10
+                    },
+                    "clickmode": "event",
+                    "hovermode": "closest",
+                    "newshape": {
+                        "line": {
+                            "color": "#ff0000",
+                            "opacity": "1.0"
+                        }
+                    }
+                }
+            }
+        )
+    )
+
 def generate_control_layout():
     """Camera layout containing real time video, mode selection and granularity selection"""
     control_layout = html.Div(
@@ -77,50 +172,6 @@ def generate_unit_control_layout(unit_id, title, is_master=False):
                             html.H4(title),
                         ]
                     ),
-                    # html.Div(
-                    #     children=[
-                    #         html.Div(
-                    #             className="d-flex flex-direction-row",
-                    #             children=[
-                    #                 html.Div(
-                    #                     style={"width": "150px"},
-                    #                     children=[
-                    #                         html.P("Unit Serial Number", className="property-title"),
-                    #                         html.P("0046", id="unit-serial-number")
-                    #                     ]
-                    #                 ),
-                    #                 html.Div(
-                    #                     style={"width": "150px"},
-                    #                     className="ml-4",
-                    #                     children=[
-                    #                         html.P("SFP Serial Number", className="property-title"),
-                    #                         html.P("H800S003993", id="sfp-serial-number")
-                    #                     ]
-                    #                 )
-                    #             ]
-                    #         ),
-                    #         html.Div(
-                    #             className="d-flex flex-direction-row",
-                    #             children=[
-                    #                 html.Div(
-                    #                     style={"width": "150px"},
-                    #                     children=[
-                    #                         html.P("IP Address", className="property-title"),
-                    #                         html.P("192.168.13.148", id="unit-ip-address")
-                    #                     ]
-                    #                 ),
-                    #                 html.Div(
-                    #                     style={"width": "150px"},
-                    #                     className="ml-4",
-                    #                     children=[
-                    #                         html.P("TX Wavelength", className="property-title"),
-                    #                         html.P("1550nm", id="sfp-wavelength")
-                    #                     ]
-                    #                 )
-                    #             ]
-                    #         )
-                    #     ]
-                    # ),
                     html.Div(
                         className="d-flex flex-row",
                         children=[
@@ -281,6 +332,27 @@ def generate_camera_display_layout():
     )
     return camera_div
    
+layout_info = dbc.Container(
+    id="info-layout",
+    style={"padding-right": "10px", "padding-left": "10px"},
+    children=[
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    children=[
+                        generate_unit_info_panel("master"),
+                    ]
+                ),
+                dbc.Col(
+                    children=[
+                        generate_unit_info_panel("slave")
+                    ]
+                )
+            ]
+        )
+    ]
+)
+
 layout_dashboard = dbc.Container(
     id="main-layout",
     #className="float-left",

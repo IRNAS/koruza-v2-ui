@@ -14,8 +14,6 @@ from ..src.config_manager import config_manager
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-SETTINGS_FILE = "./koruza_v2/config.json"  # load settings file on init and write current motor pos and calibration
-
 class KoruzaGuiCallbacks():
     def __init__(self, client):
         """
@@ -27,7 +25,6 @@ class KoruzaGuiCallbacks():
 
         self.rx_color_master = None
 
-        self.master_led_on = False
         self.slave_led_on = False
 
         # load settings from json
@@ -97,18 +94,15 @@ class KoruzaGuiCallbacks():
                 n_intervals increment triggers this callback.
             """
             
-            # TODO move LED set_color to main
-            
             # update sfp diagnostics
-            self.lock.acquire()  # will block until completed
+            sfp_data = None
+            self.lock.acquire()  # TODO maybe move locks to koruza.py?
             try:
-                sfp_data = self.koruza_client.get_sfp_data()
+                sfp_data = self.koruza_client.get_sfp_diagnostics()
+                # print(sfp_data)
             except Exception as e:
                 log.error(e)
-                sfp_data = None
-
             self.lock.release()
-            # print(sfp_data["sfp_1"]["diagnostics"])
 
             if sfp_data:
                 rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
@@ -130,14 +124,6 @@ class KoruzaGuiCallbacks():
                 motor_y = 0
             self.lock.release()
                 
-            if self.master_led_on:
-                self.lock.acquire()
-                try:
-                    self.koruza_client.set_led_color(rx_color, 0)
-                except Exception as e:
-                    log.error(e)
-                self.lock.release()
-
             return motor_x, motor_y, rx_power_label, rx_value, rx_color
 
         #  slave unit info update
@@ -382,18 +368,17 @@ class KoruzaGuiCallbacks():
                     display_master_homing_dialog = True
 
                 if prop_id == "led-slider-master":
+                    self.lock.acquire()
                     if led_toggle_m:
-                        self.master_led_on = True
+                        self.koruza_client.toggle_led()
                         # self.led_driver.set_color("blue", 105)
                     else:
                         # self.led_driver.turn_off()
-                        self.lock.acquire()
                         try:
-                            self.koruza_client.disable_led()
+                            self.koruza_client.toggle_led()
                         except Exception as e:
                             log.warning(e)
-                        self.lock.release()
-                        self.master_led_on = False
+                    self.lock.release()
                 
 
                 #  slave unit callbacks

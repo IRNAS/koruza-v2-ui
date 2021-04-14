@@ -5,7 +5,7 @@ import dash_core_components as dcc
 from .control_button import control_button
 from .custom_toggle import custom_toggle
 
-def unit_control(unit_id, is_master=False):
+def unit_control(unit_id, is_master=False, checked=False):
     """Returns unit control div"""
     arrows = [
         control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "2%", "left": "35%"}),
@@ -67,7 +67,7 @@ def unit_control(unit_id, is_master=False):
                     html.Div(
                         style={"position": "absolute", "top": "40px"},
                         children=[
-                            custom_toggle(id=f"led-slider-{unit_id}"),
+                            custom_toggle(id=f"led-slider-{unit_id}", checked=checked),
                             html.P("LEDs", style={"position": "absolute", "left": "16px"})
                         ]
                     )

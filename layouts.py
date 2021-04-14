@@ -33,7 +33,8 @@ SQUARE_SIZE = 18
 # LOAD PREVIOUS LOCATION OF CALIB VALUE
 SETTINGS_FILE = "./koruza_v2/config.json"  # load settings file on init and write current motor pos and calibration
 # settings = load_json_file(SETTINGS_FILE)
-settings = config_manager.calibration
+calibration_config = config_manager.calibration
+camera_config = config_manager.camera
 
 ###################### Dashboard Layout ######################
 """
@@ -159,7 +160,7 @@ def generate_control_layout():
 
     return control_layout
 
-def generate_unit_control_layout(unit_id, title, is_master=False):
+def generate_unit_control_layout(unit_id, title, is_master=False, checked=False):
     """Generate unit control layout with buttons, and power indicators"""
     unit_control_div = html.Div(
         id=f"unit-control-container-{unit_id}",
@@ -227,7 +228,7 @@ def generate_unit_control_layout(unit_id, title, is_master=False):
             html.Div(
                 style={"position": "relative", "left": "0%"},
                 children=[
-                    unit_control(unit_id, is_master) 
+                    unit_control(unit_id, is_master, checked) 
                 ]
             )
             # html.Div(
@@ -254,7 +255,7 @@ def generate_camera_display_layout():
             x_pts.append(x * 2)
             y_pts.append(y * 2)
 
-    marker_lb_rt, marker_lt_rb = generate_marker(settings["offset_x"], settings["offset_y"], SQUARE_SIZE)
+    marker_lb_rt, marker_lt_rb = generate_marker(calibration_config["offset_x"], calibration_config["offset_y"], SQUARE_SIZE)
 
     camera_div = html.Div(
         id="camera-container",
@@ -383,12 +384,12 @@ layout_dashboard = dbc.Container(
                             children=[
                                 dbc.Col(
                                     children=[
-                                        generate_unit_control_layout("master", "Master", is_master=True)  # master unit controls and transmit power indicator
+                                        generate_unit_control_layout("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
                                     ]
                                 ),
                                 dbc.Col(
                                     children=[
-                                        generate_unit_control_layout("slave", "Slave - not functional - WIP")  # slave unit controls and transmit power indicator
+                                        generate_unit_control_layout("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
                                     ]
                                 )
                             ]

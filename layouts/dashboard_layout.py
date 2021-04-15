@@ -44,47 +44,53 @@ ___________________
 def dashboard_layout(camera_config, calibration_config):
     return dbc.Container(
         id="main-layout",
-        #className="float-left",
+        className="float-left",
         style={"padding-right": "10px", "padding-left": "10px"},
         children=[
+            html.Div(id="hidden-div", style={"display": "none"}),
+            Keyboard(id="keyboard"),
+            dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
+            dcc.Interval(id="n-intervals-update-slave-info", interval=1000, n_intervals=0),
+            dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
             dbc.Row(  # single bootstrap row
                 children=[
-                    html.Div(id="hidden-div", style={"display": "none"}),
-                    Keyboard(id="keyboard"),
-                    dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
-                    dcc.Interval(id="n-intervals-update-slave-info", interval=1000, n_intervals=0),
-                    dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
-                    dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
-                    dbc.Col(  # camera section with device information and control
-                        width=10,
+                    dbc.Col(
+                        width=6,
                         children=[
-                            dbc.Row(
+                            camera_display(calibration_config, src=VIDEO_STREAM_SRC)
+                        ]
+                    ),
+                    dbc.Col(
+                        width=4,
+                        children=[
+                            html.Div(
                                 children=[
-                                    dbc.Col(
-                                        children=[
-                                            camera_display(calibration_config, src=VIDEO_STREAM_SRC)
-                                        ]
-                                    )
+                                    control_panel("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
                                 ]
                             ),
-                            dbc.Row(  # unit control section
-                                justify="between",
+                            html.Div(
                                 children=[
-                                    dbc.Col(
-                                        children=[
-                                            control_panel("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
-                                        ]
-                                    ),
-                                    dbc.Col(
-                                        children=[
-                                            control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
-                                        ]
-                                    )
+                                    control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
                                 ]
                             )
+                            # dbc.Row(  # unit control section
+                            #     justify="between",
+                            #     children=[
+                            #         dbc.Col(
+                            #         )
+                            #     ]
+                            # ),
+                            # dbc.Row(  # unit control section
+                            #     justify="between",
+                            #     children=[
+                            #         dbc.Col(
+                            #         )
+                            #     ]
+                            # )
                         ]
                     )
                 ]
-            )
+            ),
         ]
     )

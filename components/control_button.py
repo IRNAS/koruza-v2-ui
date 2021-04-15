@@ -11,8 +11,8 @@ def control_button(arrow_direction, id, style={}):
         img_src = "../assets/icons/arrow_right_big.png"
     elif arrow_direction == "left":
         img_src = "../assets/icons/arrow_left_big.png"
-    elif arrow_direction == "center":
-        img_src = "../assets/icons/plus-circle.svg"
+    # elif arrow_direction == "center":
+    #     img_src = "../assets/icons/plus-circle.svg"
 
     icon = None
     if img_src is not None:

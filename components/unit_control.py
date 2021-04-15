@@ -23,11 +23,13 @@ def unit_control(unit_id, is_master=False, checked=False):
     ]
 
     return html.Div(
-        className="d-flex flex-direction-row mt-2",
+        className="d-flex flex-direction-row mt-2 no-pad-l-10",
+        # style={"box-shadow": "0 0 3px 0px black"},
         children=[
             html.Div(
                 style={"position": "relative", "width": "110px"},
                 children=[
+                    html.P("STEPS", style={"position": "absolute", "top": "20px"}, className="property-title"),
                     dcc.Dropdown(
                         id=f"steps-dropdown-{unit_id}",
                         placeholder="Steps",
@@ -51,19 +53,8 @@ def unit_control(unit_id, is_master=False, checked=False):
             html.Div(
                 style={"position": "relative", "left": "10%", "width": "40px"}, 
                 children=[
-                    control_button(arrow_direction="center", id=f"motor-control-btn-center-{unit_id}", style={"position": "absolute", "top": "37%"}),
-                ]
-            ),
-            html.Div(  # LED control
-                style={"position": "relative", "left": "10%", "width": "40px"},
-                children=[
-                    html.Div(
-                        style={"position": "absolute", "top": "40px"},
-                        children=[
-                            custom_toggle(id=f"led-slider-{unit_id}", checked=checked),
-                            html.P("LEDs", style={"position": "absolute", "left": "16px"})
-                        ]
-                    )
+                    dbc.Button("Homing", id=f"motor-control-btn-center-{unit_id}", style={"font-size": "16px", "font-weight": "bold", "position": "absolute", "top": "37%", "height": "36px"}, className="align-self-center", size="lg", n_clicks=0)
+                    # control_button(arrow_direction="Homing", id=f"motor-control-btn-center-{unit_id}", style={"position": "absolute", "top": "37%"}),
                 ]
             )
         ]

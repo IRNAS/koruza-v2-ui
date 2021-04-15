@@ -224,3 +224,11 @@ input:checked+.slider-toggle:before {
         min-width: 1600px
     }
 }
+
+
+
+/* DIV PADDINGS */
+
+.no-pad-l-10 {
+    padding: 10px 0px 10px 10px
+}

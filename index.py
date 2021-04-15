@@ -17,9 +17,17 @@ import xmlrpc.client
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from .app import server
 from .app import app
-from .layouts import layout_info, layout_dashboard, no_page
+
+# Import callbacks
 from .callbacks import KoruzaGuiCallbacks
+
+# Import custom components
 from .components.header import Header
+
+# Import custom layouts
+from .layouts.info_layout import info_layout
+from .layouts.dashboard_layout import dashboard_layout
+from .layouts.no_page_layout import no_page_layout
 
 from ..src.constants import KORUZA_MAIN_PORT
 
@@ -67,9 +75,9 @@ def display_page(pathname):
     # if pathname == "/setup":
     #     return layout_setup_wizard
     if pathname == "/info":
-        return layout_info
+        return info_layout
     if pathname == "/dashboard":
-        return layout_dashboard(camera_config, calibration_config)  # pass configs to layout
+        return dashboard_layout(camera_config, calibration_config)  # pass configs to layout
     else:
         return no_page
 

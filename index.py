@@ -59,12 +59,17 @@ KoruzaGuiCallbacks(client).callbacks()
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
+    # update calibs on refresh
+
+    calibration_config = client.get_calibration_config()
+    camera_config = client.get_camera_config()
+
     # if pathname == "/setup":
     #     return layout_setup_wizard
     if pathname == "/info":
         return layout_info
     if pathname == "/dashboard":
-        return layout_dashboard
+        return layout_dashboard(camera_config, calibration_config)  # pass configs to layout
     else:
         return no_page
 

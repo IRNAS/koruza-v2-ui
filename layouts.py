@@ -18,8 +18,6 @@ from .components.signal_indicator import signal_indicator
 from .components.unit_control import unit_control
 from .components.functions import generate_marker
 
-from ..src.config_manager import config_manager
-
 #### TODO MOVE TO CONSTANTS ####
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
@@ -29,12 +27,6 @@ PORT = 8080
 VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 SQUARE_SIZE = 18
-
-# LOAD PREVIOUS LOCATION OF CALIB VALUE
-SETTINGS_FILE = "./koruza_v2/config.json"  # load settings file on init and write current motor pos and calibration
-# settings = load_json_file(SETTINGS_FILE)
-calibration_config = config_manager.calibration
-camera_config = config_manager.camera
 
 ###################### Dashboard Layout ######################
 """
@@ -140,7 +132,7 @@ def generate_rx_power_graph(unit_id):
         )
     )
 
-def generate_control_layout():
+def generate_control_layout(calibration_config):
     """Camera layout containing real time video, mode selection and granularity selection"""
     control_layout = html.Div(
         id="control-display-div",
@@ -150,7 +142,7 @@ def generate_control_layout():
                 children=[
                     dbc.Col(
                         children=[
-                            generate_camera_display_layout()
+                            generate_camera_display_layout(calibration_config)
                         ]
                     )
                 ]
@@ -245,7 +237,7 @@ def generate_unit_control_layout(unit_id, title, is_master=False, checked=False)
 
     return unit_control_div
 
-def generate_camera_display_layout():
+def generate_camera_display_layout(calibration_config):
     """Generate camera display with control buttons"""
 
     x_pts = []
@@ -354,52 +346,59 @@ layout_info = dbc.Container(
     ]
 )
 
-layout_dashboard = dbc.Container(
-    id="main-layout",
-    #className="float-left",
-    style={"padding-right": "10px", "padding-left": "10px"},
-    children=[
-        dbc.Row(  # single bootstrap row
-            children=[
-                html.Div(id="hidden-div", style={"display": "none"}),
-                Keyboard(id="keyboard"),
-                dcc.Interval(id="n-intervals-update-master-info", interval=500, n_intervals=0),
-                dcc.Interval(id="n-intervals-update-slave-info", interval=500, n_intervals=0),
-                dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
-                dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
-                dbc.Col(  # camera section with device information and control
-                    width=10,
-                    children=[
-                        dbc.Row(
-                            children=[
-                                dbc.Col(
-                                    children=[
-                                        generate_control_layout()
-                                    ]
-                                )
-                            ]
-                        ),
-                        dbc.Row(  # unit control section
-                            justify="between",
-                            children=[
-                                dbc.Col(
-                                    children=[
-                                        generate_unit_control_layout("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
-                                    ]
-                                ),
-                                dbc.Col(
-                                    children=[
-                                        generate_unit_control_layout("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
-                                    ]
-                                )
-                            ]
-                        )
-                    ]
-                )
-            ]
-        )
-    ]
-)
+def layout_dashboard(camera_config, calibration_config):
+
+    print("RETURNING LAYOUT DASHBOARD")
+
+    print(f"camera config: {camera_config}")
+    print(f"calibration config: {calibration_config}")
+
+    return dbc.Container(
+        id="main-layout",
+        #className="float-left",
+        style={"padding-right": "10px", "padding-left": "10px"},
+        children=[
+            dbc.Row(  # single bootstrap row
+                children=[
+                    html.Div(id="hidden-div", style={"display": "none"}),
+                    Keyboard(id="keyboard"),
+                    dcc.Interval(id="n-intervals-update-master-info", interval=500, n_intervals=0),
+                    dcc.Interval(id="n-intervals-update-slave-info", interval=500, n_intervals=0),
+                    dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
+                    dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
+                    dbc.Col(  # camera section with device information and control
+                        width=10,
+                        children=[
+                            dbc.Row(
+                                children=[
+                                    dbc.Col(
+                                        children=[
+                                            generate_control_layout(calibration_config=calibration_config)
+                                        ]
+                                    )
+                                ]
+                            ),
+                            dbc.Row(  # unit control section
+                                justify="between",
+                                children=[
+                                    dbc.Col(
+                                        children=[
+                                            generate_unit_control_layout("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
+                                        ]
+                                    ),
+                                    dbc.Col(
+                                        children=[
+                                            generate_unit_control_layout("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
 
 ###################### END Dashboard Layout ######################
 

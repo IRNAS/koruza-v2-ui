@@ -9,8 +9,6 @@ from dash.dependencies import Input, Output, State
 from .app import app
 from .components.functions import generate_rx_power_bar, generate_marker
 
-from ..src.config_manager import config_manager
-
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -26,9 +24,6 @@ class KoruzaGuiCallbacks():
         self.rx_color_master = None
 
         self.slave_led_on = False
-
-        # load settings from json
-        self.config_manager = config_manager
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -60,7 +55,7 @@ class KoruzaGuiCallbacks():
                 key_data_pairs = []
                 key_data_pairs.append(("offset_x", click_data["points"][0]["x"]))
                 key_data_pairs.append(("offset_y", click_data["points"][0]["y"]))
-                self.config_manager.update_calibration_config(key_data_pairs)
+                self.koruza_client.update_calibration_config(key_data_pairs)  # TODO change to koruza rpc
             
 
             except Exception as e:
@@ -370,7 +365,10 @@ class KoruzaGuiCallbacks():
                 if prop_id == "led-slider-master":
                     self.lock.acquire()
                     if led_toggle_m:
-                        self.koruza_client.toggle_led()
+                        try:
+                            self.koruza_client.toggle_led()
+                        except Exception as e:
+                            log.warning(e)
                         # self.led_driver.set_color("blue", 105)
                     else:
                         # self.led_driver.turn_off()

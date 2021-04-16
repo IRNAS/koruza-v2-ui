@@ -67,11 +67,13 @@ def dashboard_layout(camera_config, calibration_config):
                         # md=6,
                         children=[
                             html.Div(
+                                style={"margin-top": "28px"},
                                 children=[
                                     control_panel("master", "Main Unit", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
                                 ]
                             ),
                             html.Div(
+                                style={"margin-top": "30px"},
                                 children=[
                                     control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
                                 ]

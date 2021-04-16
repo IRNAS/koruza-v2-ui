@@ -4,13 +4,13 @@ import dash_html_components as html
 def control_button(arrow_direction, id, style={}):
     img_src = None
     if arrow_direction == "up":
-        img_src = "../assets/icons/arrow_up_big.png"
+        img_src = "../assets/icons/arrow-up.png"
     elif arrow_direction == "down":
-        img_src = "../assets/icons/arrow_down_big.png"
+        img_src = "../assets/icons/arrow-down.png"
     elif arrow_direction == "right":
-        img_src = "../assets/icons/arrow_right_big.png"
+        img_src = "../assets/icons/arrow-right.png"
     elif arrow_direction == "left":
-        img_src = "../assets/icons/arrow_left_big.png"
+        img_src = "../assets/icons/arrow-left.png"
     # elif arrow_direction == "center":
     #     img_src = "../assets/icons/plus-circle.svg"
 
@@ -18,7 +18,7 @@ def control_button(arrow_direction, id, style={}):
     if img_src is not None:
         icon = html.Img(src=img_src, style={"vertical-align": "middle"}),
     else:
-        icon = html.Span(arrow_direction, style={"font-size": "28px", "font-weight": "bold", "color": "#00aacf"})
+        icon = html.Span(arrow_direction, style={"font-size": "28px", "font-weight": "500", "color": "#00aacf"})
     return dbc.Button(
         icon,
         id=id, 

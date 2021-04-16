@@ -16,11 +16,13 @@ def Header():
                         className="navbar-nav mr-auto",
                         children=[
                             html.Li(
+                                style={"height": "30px"},
                                 children=[
                                     dbc.NavItem(dbc.NavLink(id="info-navlink", children="KORUZA Link Information", href="/info", active="exact"))
                                 ]
                             ),
                             html.Li(
+                                style={"height": "30px"},
                                 children=[
                                     dbc.NavItem(dbc.NavLink(id="dashboard-navlink", children="Unit Dashboard", href="/dashboard", active="exact"))
                                 ]

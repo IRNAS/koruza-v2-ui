@@ -10,16 +10,14 @@ def control_panel(unit_id, title, is_master=False, checked=False):
     control_panel_div = html.Div(
         id=f"control-panel-{unit_id}",
         style={"width": "80%", "height": "350px"},
-        className="div-shadow",
         children=[
             html.Div(
-                # style={"box-shadow": "1px 2px 3px 0px #00000040"},
                 className="d-flex flex-column justify-content-center",
                 children=[
                     html.Div(
                         style={"margin-top": "6px", "margin-left": "16px"},
                         children=[
-                            html.H4(title),
+                            html.H5(title, style={"font-weight": "500", "font-size": "30px"}),
                         ]
                     ),
                     html.Div(

@@ -9,8 +9,8 @@ def camera_display(calibration_config, src):
 
     x_pts = []
     y_pts = []
-    for x in range(0, 320):
-        for y in range(0, 320):
+    for x in range(0, 360):
+        for y in range(0, 360):
             x_pts.append(x * 2)
             y_pts.append(y * 2)
 
@@ -22,12 +22,12 @@ def camera_display(calibration_config, src):
         className="d-flex flex-column align-items-center mt-5",
         children=[
             html.Div(
-                style={"height":"640px", "width": "640px"},
+                style={"height":"720px", "width": "720px"},
                 children=[
-                    html.Img(src=src, id="video-stream-container", style={"height":"640px", "width": "640px", "absolute": "relative", "top": "0px", "left": "0px"}),
+                    html.Img(src=src, id="video-stream-container", style={"height":"720px", "width": "720px", "absolute": "relative", "top": "0px", "left": "0px"}),
                     dcc.Graph(
                         id="camera-overlay",
-                        style={"height":"712px", "width": "640px", "position": "relative", "top": "-676px", "left": "0px"},  # TODO make cleaner
+                        style={"height":"800px", "width": "720px", "position": "relative", "top": "-760px", "left": "0px"},  # TODO make cleaner
                         config={
                             # "modeBarButtonsToAdd": [ "drawrect" ],
                             "displayModeBar": False,
@@ -44,7 +44,7 @@ def camera_display(calibration_config, src):
                                     "x": x_pts,
                                     "y": y_pts,
                                     "marker": {
-                                        "color": "rgba(255, 0, 0, 0.00)"
+                                        "color": "rgba(255, 0, 0, 0.0)"
                                     }
                                 }
                             ],

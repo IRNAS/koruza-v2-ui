@@ -8,28 +8,28 @@ from .custom_toggle import custom_toggle
 def unit_control(unit_id, is_master=False, checked=False):
     """Returns unit control div"""
     arrows = [
-        control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "2%", "left": "35%"}),
-        control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit_id}", style={"position": "absolute", "left": "0%", "top": "37%"}),
-        control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit_id}", style={"position": "absolute", "right": "0%", "top": "37%"}),
-        control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit_id}", style={"position": "absolute", "bottom": "33%", "left": "35%"})
+        control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "6%", "left": "35%"}),
+        control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit_id}", style={"position": "absolute", "left": "0%", "top": "48%"}),
+        control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit_id}", style={"position": "absolute", "right": "0%", "top": "48%"}),
+        control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit_id}", style={"position": "absolute", "top": "48%", "left": "35%"})
     ]
 
     if is_master:
         arrows = [
-        control_button(arrow_direction="W", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "2%", "left": "35%"}),
-        control_button(arrow_direction="A", id=f"motor-control-btn-left-{unit_id}", style={"position": "absolute", "left": "0%", "top": "37%"}),
-        control_button(arrow_direction="D", id=f"motor-control-btn-right-{unit_id}", style={"position": "absolute", "right": "0%", "top": "37%"}),
-        control_button(arrow_direction="S", id=f"motor-control-btn-down-{unit_id}", style={"position": "absolute", "bottom": "33%", "left": "35%"})
+        control_button(arrow_direction="W", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "6%", "left": "35%"}),
+        control_button(arrow_direction="A", id=f"motor-control-btn-left-{unit_id}", style={"position": "absolute", "left": "0%", "top": "48%"}),
+        control_button(arrow_direction="D", id=f"motor-control-btn-right-{unit_id}", style={"position": "absolute", "right": "0%", "top": "48%"}),
+        control_button(arrow_direction="S", id=f"motor-control-btn-down-{unit_id}", style={"position": "absolute", "top": "48%", "left": "35%"})
     ]
 
     return html.Div(
-        className="d-flex flex-direction-row mt-2 no-pad-l-10",
+        className="d-flex flex-direction-row",
         # style={"box-shadow": "0 0 3px 0px black"},
         children=[
             html.Div(
-                style={"position": "relative", "width": "110px"},
+                style={"position": "relative", "width": "110px", "font-size": "22px", "text-align": "vertical"},
                 children=[
-                    html.P("STEPS", style={"position": "absolute", "top": "20px"}, className="property-title"),
+                    html.P("STEPS", className="property-title"),
                     dcc.Dropdown(
                         id=f"steps-dropdown-{unit_id}",
                         placeholder="Steps",
@@ -47,13 +47,13 @@ def unit_control(unit_id, is_master=False, checked=False):
             ),
             html.Div(
                 id=f"unit-control-{unit_id}",
-                style={"position": "relative", "height": "118px", "width": "118px", "left": "5%"},
+                style={"position": "relative", "height": "118px", "width": "140px", "left": "5%"},
                 children=arrows,
             ),
             html.Div(
-                style={"position": "relative", "left": "10%", "width": "40px"}, 
+                style={"position": "relative", "left": "10%"}, 
                 children=[
-                    dbc.Button("Homing", id=f"motor-control-btn-center-{unit_id}", style={"font-size": "16px", "font-weight": "bold", "position": "absolute", "top": "37%", "height": "36px"}, className="align-self-center", size="lg", n_clicks=0)
+                    dbc.Button("Homing", id=f"motor-control-btn-center-{unit_id}", style={"font-size": "28px", "font-weight": "bold", "color": "#00aacf", "position": "absolute", "top": "48%", "left": "100%", "height": "42px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
                     # control_button(arrow_direction="Homing", id=f"motor-control-btn-center-{unit_id}", style={"position": "absolute", "top": "37%"}),
                 ]
             )

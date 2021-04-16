@@ -2,6 +2,7 @@ import random
 import dash
 import logging
 import json
+import time
 from threading import Lock
 
 from dash.dependencies import Input, Output, State

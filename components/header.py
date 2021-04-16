@@ -9,8 +9,7 @@ def Header():
         className="pt-0 pb-0 pr-0 pl-0 mb-1",
         children=[
             html.Div(
-                className="navbar-collapse collapse",
-                style={"background": "rgb(210, 220, 220)"},
+                className="navbar-collapse header-koruza",
                 children=[
                     html.Ul(
                         id="nav",

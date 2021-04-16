@@ -18,12 +18,13 @@ def control_button(arrow_direction, id, style={}):
     if img_src is not None:
         icon = html.Img(src=img_src, style={"vertical-align": "middle"}),
     else:
-        icon = html.Span(arrow_direction, style={"font-weight": "bold", "font-size": "16px"})
+        icon = html.Span(arrow_direction, style={"font-size": "28px", "font-weight": "bold", "color": "#00aacf"})
     return dbc.Button(
         icon,
         id=id, 
         className="align-self-center control-btn", 
         style=style, 
         size="lg",
-        n_clicks=0
+        n_clicks=0,
+        color="#00aacf"
     )

@@ -58,6 +58,8 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ])
 
+
+# TODO can't work without main code running - should we fix?
 # init client and pass it to callbacks
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
 KoruzaGuiCallbacks(client).callbacks()
@@ -79,7 +81,7 @@ def display_page(pathname):
     if pathname == "/dashboard":
         return dashboard_layout(camera_config, calibration_config)  # pass configs to layout
     else:
-        return no_page
+        return no_page_layout
 
 if __name__ == '__main__':
     hostname = "0.0.0.0"

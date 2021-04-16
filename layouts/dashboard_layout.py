@@ -45,6 +45,7 @@ def dashboard_layout(camera_config, calibration_config):
     return dbc.Container(
         id="main-layout",
         className="float-left",
+        # fluid=True,
         style={"padding-right": "10px", "padding-left": "10px"},
         children=[
             html.Div(id="hidden-div", style={"display": "none"}),
@@ -63,10 +64,11 @@ def dashboard_layout(camera_config, calibration_config):
                     ),
                     dbc.Col(
                         width=4,
+                        # md=6,
                         children=[
                             html.Div(
                                 children=[
-                                    control_panel("master", "Master", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
+                                    control_panel("master", "Main Unit", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
                                 ]
                             ),
                             html.Div(

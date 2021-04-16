@@ -1,9 +1,10 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
-def custom_toggle(id, checked, label):
+def custom_toggle(id, checked, label, style):
     """Returns custom toggle switch"""
     return html.Div(
+        style=style,
         children=[
             dbc.FormGroup(
                 children=[
@@ -20,6 +21,6 @@ def custom_toggle(id, checked, label):
                 ],
                 check=True
             ),
-            html.P(children=label, style={"position": "relative", "left": "16px"})
+            html.P(children=label, style={"position": "relative", "left": "16px"}, className="property-value")
         ]
     )

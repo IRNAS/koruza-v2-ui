@@ -1,43 +1,30 @@
 
-from ...src.colors import Color
+from .rx_indicator import rx_indicator
 
-def generate_rx_power_bar(signal_str):
-    color = ""
-    value = 2
-    if signal_str >= -40:
-        # color = "#ff0000"
-        color = Color.NO_SIGNAL
-        value = 2
+def update_rx_power_bar(id, signal_str):
+    class_name = ""
+    if signal_str == -40:
+        class_name = ""
+    if signal_str > -40:
+        class_name = "signal-strength-1"
     if signal_str >= -38:
-        # color = "#ff4500"
-        color = Color.BAD_SIGNAL
-        value = 14
+        class_name = "signal-strength-2"
+    if signal_str >= -34:
+        class_name = "signal-strength-3"
     if signal_str >= -30:
-        # color = "#ff7f50"
-        color = Color.VERY_WEAK_SIGNAL
-        value = 28
+        class_name = "signal-strength-4"
     if signal_str >= -25:
-        # color = "#ff00ff"
-        color = Color.WEAK_SIGNAL
-        value = 42
+        class_name = "signal-strength-5"
     if signal_str >= -20:
-        # color = "#0000ff"
-        color = Color.MEDIUM_SIGNAL
-        value = 56
+        class_name = "signal-strength-6"
     if signal_str >= -15:
-        # color = "#0045ff"
-        color = Color.GOOD_SIGNAL
-        value = 70
+        class_name = "signal-strength-7"
     if signal_str >= -10:
-        # color = "#00ffff"
-        color = Color.VERY_GOOD_SIGNAL
-        value = 85
+        class_name = "signal-strength-8"
     if signal_str >= -5:
-        # color = "#00ff00"
-        color = Color.EXCELLENT_SIGNAL
-        value = 100
+        class_name = "signal-strength-9"
 
-    return value, color
+    return rx_indicator(id=f"rx-power-bar-{id}", class_name=class_name)
 
 def generate_marker(pos_x, pos_y, SQUARE_SIZE):
     marker_lb_rt = {

@@ -4,12 +4,13 @@ import dash_core_components as dcc
 
 from .unit_control import unit_control
 from .custom_toggle import custom_toggle
+from .rx_indicator import rx_indicator
 
 def control_panel(unit_id, title, is_master=False, checked=False):
     """Generate unit control layout with buttons, and power indicators"""
     control_panel_div = html.Div(
         id=f"control-panel-{unit_id}",
-        style={"width": "80%", "height": "350px"},
+        style={"width": "450px", "height": "350px"},
         children=[
             html.Div(
                 className="d-flex flex-column justify-content-center",
@@ -51,12 +52,13 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                                     )
                                                 ]
                                             ),
-                                            dbc.Progress(id=f"rx-power-bar-{unit_id}", value=25, className="mb-3", style={"height": "38px", "width": "100px"}),
-                                            # html.Div(
-                                            #     children=[
-                                                    
-                                            #     ]
-                                            # )
+                                            html.Div(
+                                                id=f"rx-bar-container-{unit_id}",
+                                                children=[
+                                                    rx_indicator(id=unit_id, class_name="")
+                                                ]
+                                            )
+                                            # dbc.Progress(id=f"rx-power-bar-{unit_id}", value=25, className="mb-3", style={"height": "38px", "width": "100px"}),
                                         ]
                                     )
                                 ]

@@ -22,7 +22,8 @@ from .app import app
 from .callbacks import KoruzaGuiCallbacks
 
 # Import custom components
-from .components.header import Header
+from .components.header import header
+from .components.footer import footer
 
 # Import custom layouts
 from .layouts.info_layout import info_layout
@@ -54,14 +55,16 @@ app.index_string = '''
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    Header(),
-    html.Div(id='page-content')
+    header(),
+    html.Div(id='page-content'),
+    footer()
 ])
 
 
 # TODO can't work without main code running - should we fix?
 # init client and pass it to callbacks
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
+# client = None
 KoruzaGuiCallbacks(client).callbacks()
 
 # Update page
@@ -71,8 +74,12 @@ KoruzaGuiCallbacks(client).callbacks()
 def display_page(pathname):
     # update calibs on refresh
 
-    calibration_config = client.get_calibration_config()
-    camera_config = client.get_camera_config()
+    try:
+        calibration_config = client.get_calibration_config()
+        camera_config = client.get_camera_config()
+    except Exception as e:
+        calibration_config = {}
+        camera_config = {}
 
     # if pathname == "/setup":
     #     return layout_setup_wizard

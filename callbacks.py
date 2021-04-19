@@ -8,7 +8,7 @@ from threading import Lock
 from dash.dependencies import Input, Output, State
 
 from .app import app
-from .components.functions import generate_rx_power_bar, generate_marker
+from .components.functions import generate_marker, update_rx_power_bar
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -72,8 +72,7 @@ class KoruzaGuiCallbacks():
                 Output("motor-coord-x-master", "children"),
                 Output("motor-coord-y-master", "children"),
                 Output("sfp-rx-power-master", "children"),
-                Output("rx-power-bar-master", "value"),
-                Output("rx-power-bar-master", "color")
+                Output("rx-bar-container-master", "children")
             ],
             [
                 Input("n-intervals-update-master-info", "n_intervals")
@@ -100,15 +99,13 @@ class KoruzaGuiCallbacks():
                 log.error(e)
             self.lock.release()
 
+            rx_power = 0
+            rx_power_dBm = -40
             if sfp_data:
                 rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
                 rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
-                rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
-            else:
-                rx_power = 0
-                rx_power_dBm = -40.0
-                rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
-
+            
+            rx_bar = update_rx_power_bar(id="master", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
             # print(rx_power_label)
 
@@ -120,7 +117,7 @@ class KoruzaGuiCallbacks():
                 motor_y = 0
             self.lock.release()
                 
-            return motor_x, motor_y, rx_power_label, rx_value, rx_color
+            return motor_x, motor_y, rx_power_label, rx_bar
 
         #  slave unit info update
         @app.callback(
@@ -128,8 +125,7 @@ class KoruzaGuiCallbacks():
                 Output("motor-coord-x-slave", "children"),
                 Output("motor-coord-y-slave", "children"),
                 Output("sfp-rx-power-slave", "children"),
-                Output("rx-power-bar-slave", "value"),
-                Output("rx-power-bar-slave", "color")
+                Output("rx-bar-container-slave", "children")
             ],
             [
                 Input("n-intervals-update-slave-info", "n_intervals")
@@ -157,33 +153,25 @@ class KoruzaGuiCallbacks():
                 log.warning(f"Error getting slave sfp data: {e}")
             self.lock.release()
 
+            rx_power = 0
+            rx_power_dBm = -40
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]  # TODO figure out correct sfp for rx
+                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
                 rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
-                rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
-            else:
-                rx_power = 0
-                rx_power_dBm = -40.0
-                rx_value, rx_color = generate_rx_power_bar(rx_power_dBm)
+            
+            rx_bar = update_rx_power_bar(id="slave", signal_str=rx_power_dBm)
+            rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            # print(rx_power_label)
 
             self.lock.acquire()
             try:
-                motor_x, motor_y = self.koruza_client.issue_ble_command("get_motors_position", ())
+                motor_x, motor_y = self.koruza_client.get_motors_position()
             except Exception as e:
                 motor_x = 0
                 motor_y = 0
-                log.warning(f"Error getting slave motor data: {e}")
             self.lock.release()
                 
-            if self.slave_led_on:
-                self.lock.acquire()
-                try:
-                    self.koruza_client.issue_ble_command("set_led_color", (rx_color, 0))
-                except Exception as e:
-                    print(f"Error setting slave led color: {e}")
-                self.lock.release()
-
-            return motor_x, motor_y, str(rx_power) + " (" + str(rx_power_dBm) + " dBm)", rx_value, rx_color
+            return motor_x, motor_y, rx_power_label, rx_bar
 
         #  button callbacks
         @app.callback(

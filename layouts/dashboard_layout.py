@@ -13,8 +13,6 @@ from dash_extensions import Keyboard
 
 # import custom components
 from ..components.custom_toggle import custom_toggle
-#from components.control_button import control_button
-from ..components.signal_indicator import signal_indicator
 from ..components.control_panel import control_panel
 from ..components.functions import generate_marker
 from ..components.camera_display import camera_display
@@ -45,7 +43,6 @@ def dashboard_layout(camera_config, calibration_config):
     return dbc.Container(
         id="main-layout",
         className="float-left",
-        # fluid=True,
         style={"padding-right": "10px", "padding-left": "10px"},
         children=[
             html.Div(id="hidden-div", style={"display": "none"}),
@@ -57,44 +54,43 @@ def dashboard_layout(camera_config, calibration_config):
             dbc.Row(  # single bootstrap row
                 children=[
                     dbc.Col(
-                        width=6,
+                        xs=12,  # put content in columns when viewing on small devices
+                        sm=12,
+                        md=6,
+                        lg=6,
                         children=[
                             camera_display(calibration_config, src=VIDEO_STREAM_SRC)
                         ]
                     ),
                     dbc.Col(
-                        width=4,
+                        xs=12,
+                        sm=12,
+                        md=4,
+                        lg=4,
                         # md=6,
                         children=[
                             html.Div(
                                 style={"margin-top": "28px"},
                                 children=[
-                                    control_panel("master", "Main Unit", is_master=True, checked=camera_config["led"])  # master unit controls and transmit power indicator
+                                    control_panel("master", "Main Unit", is_master=True, checked=camera_config.get("led"))  # master unit controls and transmit power indicator
                                 ]
                             ),
                             html.Div(
                                 style={"margin-top": "30px"},
                                 children=[
-                                    control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config["led"])  # slave unit controls and transmit power indicator
+                                    control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=camera_config.get("led"))  # slave unit controls and transmit power indicator
                                 ]
                             )
-                            # dbc.Row(  # unit control section
-                            #     justify="between",
-                            #     children=[
-                            #         dbc.Col(
-                            #         )
-                            #     ]
-                            # ),
-                            # dbc.Row(  # unit control section
-                            #     justify="between",
-                            #     children=[
-                            #         dbc.Col(
-                            #         )
-                            #     ]
-                            # )
                         ]
                     )
                 ]
             ),
+            dbc.Row(
+                children=[
+                    dbc.Col(
+                        html.Div("", style={"height": "70px"})  # hack to enable scrolling past footer - TODO find a cleaner solution
+                    )
+                ]
+            )
         ]
     )

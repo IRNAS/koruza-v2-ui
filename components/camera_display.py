@@ -14,7 +14,12 @@ def camera_display(calibration_config, src):
             x_pts.append(x * 2)
             y_pts.append(y * 2)
 
-    marker_lb_rt, marker_lt_rb = generate_marker(calibration_config["offset_x"], calibration_config["offset_y"], SQUARE_SIZE)
+    marker_lb_rt = None,
+    marker_lt_rb = None
+    try:
+        marker_lb_rt, marker_lt_rb = generate_marker(calibration_config["offset_x"], calibration_config["offset_y"], SQUARE_SIZE)
+    except Exception as e:
+        print(e)
 
     camera_div = html.Div(
         id="camera-container",
@@ -22,12 +27,14 @@ def camera_display(calibration_config, src):
         className="d-flex flex-column align-items-center mt-5",
         children=[
             html.Div(
-                style={"height":"720px", "width": "720px"},
+                # style={"height":"720px", "width": "720px"},
+                className="video-container",
                 children=[
-                    html.Img(src=src, id="video-stream-container", style={"height":"720px", "width": "720px", "absolute": "relative", "top": "0px", "left": "0px"}),
+                    html.Img(src=src, id="video-stream-container", className="video-container", style={"absolute": "relative", "top": "0px", "left": "0px"}),
                     dcc.Graph(
                         id="camera-overlay",
-                        style={"height":"800px", "width": "720px", "position": "relative", "top": "-760px", "left": "0px"},  # TODO make cleaner
+                        className="graph-container",
+                        # style={"height":"800px", "width": "720px", "position": "relative", "top": "-760px", "left": "0px"},  # TODO make cleaner
                         config={
                             # "modeBarButtonsToAdd": [ "drawrect" ],
                             "displayModeBar": False,

@@ -178,24 +178,66 @@ input:checked+.slider-toggle:before {
 
 /* BODY */
 
+/* https://css-tricks.com/snippets/css/media-queries-for-standard-devices/ */
+
+/* Phone layout */
 @media (min-width: 0px) {
     .container, .container-sm {
-        max-width: 1240px;
-        min-width: 1240px
+        max-width: 540px;
+        min-width: 540px
+    }
+
+    .video-container {
+        height: 540px;
+        width: 540px;
+    }
+
+    .graph-container {
+        height: 600px;
+        width: 540px;
+        position: relative;
+        top: -570px;
+        left: 0px;
     }
 }
 
-@media (min-width: 576px) {
+/* @media (min-width: 576px) {
     .container, .container-sm {
         max-width: 1240px;
         min-width: 1240px
     }
-}
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
+} */
 
 @media (min-width: 768px) {
-    .container, .container-sm, .container-md {
+    .container, .container-sm, .container-md .video-container-md {
         max-width: 1240px;
         min-width: 1240px
+    }
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
     }
 }
 
@@ -204,12 +246,37 @@ input:checked+.slider-toggle:before {
         max-width: 1240px;
         min-width: 1240px
     }
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
 }
 
 @media (min-width: 1200px) {
     .container, .container-sm, .container-md, .container-lg, .container-xl {
         max-width: 1240px;
         min-width: 1240px
+    }
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
     }
 }
 
@@ -218,12 +285,36 @@ input:checked+.slider-toggle:before {
         max-width: 1440px;
         min-width: 1440px
     }
+    .video-container {
+        height: 720px;
+        width: 720px;
+    }
+
+    .graph-container {
+        height: 800px;
+        width: 720px;
+        position: relative;
+        top: -760px;
+        left: 0px;
+    }
 }
 
 @media (min-width: 1780px) {
     .container, .container-sm, .container-md, .container-lg, .container-xl {
         max-width: 1780px;
         min-width: 1780px
+    }
+    .video-container {
+        height: 720px;
+        width: 720px;
+    }
+
+    .graph-container {
+        height: 800px;
+        width: 720px;
+        position: relative;
+        top: -760px;
+        left: 0px;
     }
 }
 
@@ -401,5 +492,88 @@ input:checked+.slider-toggle:before {
 }
 
 .header-koruza {
-    background-color: #00aacf
+    background-color: #00aacf;
+    width: 540px;
+}
+
+/* .video-container {
+    height: 640px;
+    width: 640px;
+} */
+
+/* Custom nav link */
+.custom-nav-link {
+    font-size: 19px;
+    font-weight: 500;
+    color: #ffffff;
+}
+.custom-nav-link:hover, .custom-nav-link:active {
+    background-color: #0099c5;
+}
+
+/* Rx Power Indicator */
+.signal-strength {
+    width: 100%;
+    height: 32px;
+    display: inline-block;
+    padding-right: 5px;
+    margin-top: 5%;
+}
+
+.bar{
+    display: inline-block;
+    height: 100%;
+    /*padding-left: 1px;*/
+    width: 10%;
+    border: 1px solid #898989;
+    margin-left: 1px;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.signal-strength-1 .bar-1, .signal-strength-2 .bar-1, .signal-strength-3 .bar-1,
+.signal-strength-4 .bar-1, .signal-strength-5 .bar-1, .signal-strength-6 .bar-1,
+.signal-strength-7 .bar-7, .signal-strength-8 .bar-1, .signal-strength-9 .bar-1 {
+    background-color: #ff0000;
+}
+  
+.signal-strength-2 .bar-2, .signal-strength-3 .bar-2, .signal-strength-4 .bar-2, 
+.signal-strength-5 .bar-2, .signal-strength-6 .bar-2, .signal-strength-7 .bar-2, 
+.signal-strength-8 .bar-2, .signal-strength-9 .bar-2 {
+    background-color: #f67b29;
+}
+
+.signal-strength-3 .bar-3 .signal-strength-4 .bar-3, .signal-strength-5 .bar-3, 
+.signal-strength-6 .bar-3, .signal-strength-7 .bar-3, .signal-strength-8 .bar-3,
+.signal-strength-9 .bar-3
+{
+    background-color: #f3c83b;
+}
+
+.signal-strength-4 .bar-4, .signal-strength-5 .bar-4, 
+.signal-strength-6 .bar-4, .signal-strength-7 .bar-4, .signal-strength-8 .bar-4,
+.signal-strength-9 .bar-4 {
+    background-color: #faf62b;
+}
+ 
+.signal-strength-5 .bar-5, .signal-strength-6 .bar-5, .signal-strength-7 .bar-5, 
+.signal-strength-8 .bar-5, .signal-strength-9 .bar-5 {
+    background-color: #beeb42;
+}
+
+.signal-strength-6 .bar-6, .signal-strength-7 .bar-6, 
+.signal-strength-8 .bar-6, .signal-strength-9 .bar-6 {
+    background-color: #89e235;
+}
+
+.signal-strength-7 .bar-7, .signal-strength-8 .bar-7, .signal-strength-9 .bar-7 {
+    background-color: rgb(75, 195, 125);
+}
+
+.signal-strength-8 .bar-8, .signal-strength-9 .bar-8 {
+    background-color: #38b8d2;
+}
+
+.signal-strength-9 .bar-9 {
+    background-color: #1cafe9;
 }

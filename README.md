@@ -11,6 +11,10 @@ Introduction...
 | master | ... |
 
 ### File Structure
+Included code is structured following the guidelines provided by [dash](https://dash.plotly.com/urls).
+* assets - icons, css styles and favicon
+* components - custom components used in defined layouts
+* layouts - layouts defining each page structure
 
 ```
 .
@@ -20,27 +24,35 @@ Introduction...
     |---base-styles.css
     |---custom-styles.css
     |---favicon.ico
-    |---koruza-temp.png
     
 |--- components/
+    |---camera_display.py
     |---control_button.py
+    |---control_panel.py
     |---custom_toggle.py
+    |---footer.py
     |---functions.py
-    |---signal_indicator.py
+    |---header.py
+    |---rx_indicator.py
+    |---rx_power_graph.py
     |---unit_control.py
+    |---unit_info_panel.py
+
+|--- layouts/
+    |---dashboard_layout.py
+    |---info_layout.py
+    |---no_page_layout.py
     
 |---.gitignore
-|---LICENSE
-|---README.md
 |---app.py
 |---callbacks.py
 |---index.py
-|---layouts.py
+|---LICENSE
+|---README.md
 |---requirements.txt
 
 ```
 
-## Setup and Installation
 
 ## License
 

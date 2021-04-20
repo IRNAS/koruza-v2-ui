@@ -146,7 +146,7 @@ class KoruzaGuiCallbacks():
             # update sfp diagnostics
             self.lock.acquire()  # will block until completed
             try:
-                sfp_data = self.koruza_client.issue_ble_command("get_sfp_data", ())
+                sfp_data = self.koruza_client.issue_remote_command("get_sfp_data", ())
             except Exception as e:
                 sfp_data = None
                 log.warning(f"Error getting slave sfp data: {e}")
@@ -163,7 +163,7 @@ class KoruzaGuiCallbacks():
 
             self.lock.acquire()
             try:
-                motor_x, motor_y = self.koruza_client.get_motors_position()
+                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())
             except Exception as e:
                 motor_x = 0
                 motor_y = 0
@@ -260,7 +260,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave up for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_ble_command("move_motors", (0, -steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -268,7 +268,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave down for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_ble_command("move_motors", (0, steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -276,7 +276,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave left for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_ble_command("move_motors", (steps_s, 0, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (steps_s, 0, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -284,7 +284,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave right for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_ble_command("move_motors", (-steps_s, 0, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (-steps_s, 0, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -360,7 +360,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave up {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_ble_command("move_motors", (0, -steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -369,7 +369,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave down {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_ble_command("move_motors", (0, steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -378,7 +378,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave left {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_ble_command("move_motors", (-steps_s, 0, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (-steps_s, 0, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -387,7 +387,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave right {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_ble_command("move_motors", (steps_s, 0, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (steps_s, 0, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -396,7 +396,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"confirm home slave")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_ble_command("home", ())
+                        self.koruza_client.issue_remote_command("home", ())
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -405,15 +405,17 @@ class KoruzaGuiCallbacks():
                     display_slave_homing_dialog = True
 
                 if prop_id == "led-slider-slave":
+                    self.lock.acquire()
                     if led_toggle_m:
-                        self.slave_led_on = True
-                    else:
-                        self.lock.acquire()
                         try:
-                            self.koruza_client.issue_ble_command("disable_led", ())
+                            self.koruza_client.issue_command("toggle_led", ())
                         except Exception as e:
                             log.warning(e)
-                        self.lock.release()
-                        self.slave_led_on = False
+                    else:
+                        try:
+                            self.koruza_client.issue_command("toggle_led", ())
+                        except Exception as e:
+                            log.warning(e)
+                    self.lock.release()
 
             return display_master_homing_dialog, display_slave_homing_dialog

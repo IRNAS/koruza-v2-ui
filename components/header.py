@@ -5,6 +5,8 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 def header():
+    """Generate header with navlinks"""
+    
     navbar = dbc.Navbar(
         className="pt-0 pb-0 pr-0 pl-0 mb-1",
         children=[

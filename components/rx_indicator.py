@@ -3,6 +3,8 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 def rx_indicator(id, class_name):
+    """Generate rx power indicator"""
+    
     indicator = html.Div(
         id=f"rx-power-bar-{id}",
         className=f"signal-strength {class_name}",

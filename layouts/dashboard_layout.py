@@ -1,3 +1,9 @@
+"""
+Dashboard layout contents:
+* camera stream from device the code is running on
+* "master" and "slave" unit control blocks and rx power indicators
+"""
+
 import socket
 import json
 import dash
@@ -25,19 +31,7 @@ s.close()
 PORT = 8080
 VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
-SQUARE_SIZE = 18
-
 ###################### Dashboard Layout ######################
-"""
-___________________
--------------------
-|   |             |
-|   |             |
-|   |             |
-|   |             |
--------------------
-"""
-
 
 def dashboard_layout(camera_config, calibration_config):
     return dbc.Container(
@@ -67,7 +61,6 @@ def dashboard_layout(camera_config, calibration_config):
                         sm=12,
                         md=4,
                         lg=4,
-                        # md=6,
                         children=[
                             html.Div(
                                 style={"margin-top": "28px"},

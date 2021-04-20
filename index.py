@@ -12,6 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+import logging
 import xmlrpc.client
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
@@ -31,6 +32,8 @@ from .layouts.dashboard_layout import dashboard_layout
 from .layouts.no_page_layout import no_page_layout
 
 from ..src.constants import KORUZA_MAIN_PORT
+
+log = logging.getLogger()
 
 # see https://dash.plot.ly/external-resources to alter header, footer and favicon
 app.index_string = ''' 
@@ -61,7 +64,7 @@ app.layout = html.Div([
 ])
 
 
-# TODO can't work without main code running - should we fix?
+# TODO can't work without main code running - should we change?
 # init client and pass it to callbacks
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
 # client = None
@@ -78,6 +81,7 @@ def display_page(pathname):
         calibration_config = client.get_calibration_config()
         camera_config = client.get_camera_config()
     except Exception as e:
+        log.error(f"An error occured during get config: {e}")
         calibration_config = {}
         camera_config = {}
 

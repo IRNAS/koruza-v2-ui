@@ -5,6 +5,8 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 def footer():
+    """Creates footer"""
+    
     navbar = dbc.Navbar(
         fixed="bottom",
         style={"height": "43px"},

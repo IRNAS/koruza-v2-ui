@@ -2,7 +2,8 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 
 def custom_toggle(id, checked, label, style):
-    """Returns custom toggle switch"""
+    """Creates custom toggle switch"""
+
     return html.Div(
         style=style,
         children=[

@@ -6,7 +6,7 @@ from .control_button import control_button
 from .custom_toggle import custom_toggle
 
 def unit_control(unit_id, is_master=False, checked=False):
-    """Returns unit control div"""
+    """Generate unit control div with control buttons, homing button and step selection"""
     arrows = [
         control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit_id}", style={"position": "absolute", "top": "6%", "left": "35%"}),
         control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit_id}", style={"position": "absolute", "left": "0%", "top": "48%"}),
@@ -24,7 +24,6 @@ def unit_control(unit_id, is_master=False, checked=False):
 
     return html.Div(
         className="d-flex flex-direction-row",
-        # style={"box-shadow": "0 0 3px 0px black"},
         children=[
             html.Div(
                 style={"position": "relative", "width": "110px", "font-size": "22px", "text-align": "vertical"},
@@ -54,7 +53,6 @@ def unit_control(unit_id, is_master=False, checked=False):
                 style={"position": "relative", "left": "10%"}, 
                 children=[
                     dbc.Button("Homing", id=f"motor-control-btn-center-{unit_id}", style={"font-size": "28px", "font-weight": "500", "color": "#00aacf", "position": "absolute", "top": "48%", "left": "100%", "height": "42px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
-                    # control_button(arrow_direction="Homing", id=f"motor-control-btn-center-{unit_id}", style={"position": "absolute", "top": "37%"}),
                 ]
             )
         ]

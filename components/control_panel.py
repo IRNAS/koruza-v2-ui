@@ -7,7 +7,8 @@ from .custom_toggle import custom_toggle
 from .rx_indicator import rx_indicator
 
 def control_panel(unit_id, title, is_master=False, checked=False):
-    """Generate unit control layout with buttons, and power indicators"""
+    """Generate unit control layout with buttons, power indicator and motor positions"""
+    
     control_panel_div = html.Div(
         id=f"control-panel-{unit_id}",
         style={"width": "450px", "height": "350px"},
@@ -36,7 +37,6 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                                 className="d-flex flex-row",
                                                 children=[
                                                     html.Div(
-                                                        # className="mr-5",
                                                         style={"width": "75%"},
                                                         children=[
                                                             html.P("RX Power", className="property-title"),
@@ -44,7 +44,6 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                                         ]
                                                     ),
                                                     html.Div(
-                                                        # style={"position": "absolute", "top": "40px"},
                                                         style={"width": "25%"},
                                                         children=[
                                                             custom_toggle(id=f"led-slider-{unit_id}", checked=checked, label="LED", style={"margin-top": "4px"}),
@@ -58,7 +57,6 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                                     rx_indicator(id=unit_id, class_name="")
                                                 ]
                                             )
-                                            # dbc.Progress(id=f"rx-power-bar-{unit_id}", value=25, className="mb-3", style={"height": "38px", "width": "100px"}),
                                         ]
                                     )
                                 ]
@@ -76,7 +74,6 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                             html.P("-2125", id=f"motor-coord-y-{unit_id}", className="property-value")
                                         ]
                                     )
-                                    # TODO add desired position after clicks on button
                                 ]
                             )
                         ]

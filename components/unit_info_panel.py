@@ -4,7 +4,8 @@ import dash_bootstrap_components as dbc
 from ..components.rx_power_graph import rx_power_graph
 
 def unit_info_panel(unit_id):
-    """Info panel containing info on both units"""
+    """Info panel containing info on unit"""
+
     return html.Div(
         className="flex-direction-column",
         children=[

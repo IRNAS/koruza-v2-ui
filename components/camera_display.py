@@ -1,11 +1,14 @@
+import logging
 import dash_core_components as dcc
 import dash_html_components as html
 
 from .functions import generate_marker
-SQUARE_SIZE = 18
+from ...src.constants import SQUARE_SIZE
+
+log = logging.getLogger()
 
 def camera_display(calibration_config, src):
-    """Generate camera display with control buttons"""
+    """Generate video stream div with overlay"""
 
     x_pts = []
     y_pts = []
@@ -14,32 +17,27 @@ def camera_display(calibration_config, src):
             x_pts.append(x * 2)
             y_pts.append(y * 2)
 
-    marker_lb_rt = None,
+    marker_lb_rt = None
     marker_lt_rb = None
+
     try:
         marker_lb_rt, marker_lt_rb = generate_marker(calibration_config["offset_x"], calibration_config["offset_y"], SQUARE_SIZE)
     except Exception as e:
-        print(e)
+        log.warning(e)
 
     camera_div = html.Div(
         id="camera-container",
-        #style={"display": "flex", "flex-direction": "column"},
         className="d-flex flex-column align-items-center mt-5",
         children=[
             html.Div(
-                # style={"height":"720px", "width": "720px"},
                 className="video-container",
                 children=[
                     html.Img(src=src, id="video-stream-container", className="video-container", style={"absolute": "relative", "top": "0px", "left": "0px"}),
                     dcc.Graph(
                         id="camera-overlay",
                         className="graph-container",
-                        # style={"height":"800px", "width": "720px", "position": "relative", "top": "-760px", "left": "0px"},  # TODO make cleaner
                         config={
-                            # "modeBarButtonsToAdd": [ "drawrect" ],
                             "displayModeBar": False,
-                            # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
-                            # "showAxisDragHandles": False,
                             "displaylogo": False,
                             "editable": False
                         },

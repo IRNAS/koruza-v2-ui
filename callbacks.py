@@ -10,6 +10,8 @@ from dash.dependencies import Input, Output, State
 from .app import app
 from .components.functions import generate_marker, update_rx_power_bar
 
+from ..src.constants import SQUARE_SIZE
+
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -45,8 +47,7 @@ class KoruzaGuiCallbacks():
             # HELP:
             # https://dash.plotly.com/annotations
             # https://plotly.com/python/creating-and-updating-figures/
-            
-            SQUARE_SIZE = 18  # TODO move to constants
+  
             try:
                 line_lb_rt, line_lt_rb = generate_marker(click_data["points"][0]["x"], click_data["points"][0]["y"], SQUARE_SIZE)
 
@@ -60,9 +61,7 @@ class KoruzaGuiCallbacks():
             
 
             except Exception as e:
-                print(e)
-
-            # write last calibration location to file
+                log.warning(e)
             
             return fig
 
@@ -161,7 +160,6 @@ class KoruzaGuiCallbacks():
             
             rx_bar = update_rx_power_bar(id="slave", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
-            # print(rx_power_label)
 
             self.lock.acquire()
             try:
@@ -176,14 +174,12 @@ class KoruzaGuiCallbacks():
         #  button callbacks
         @app.callback(
             [
-                #Output("motor-coord-x-slave", "children"),  # dummy div for outputs with no effect
-                # Output("hidden-div", "children"),
                 Output("confirm-homing-dialog-master", "displayed"),
                 Output("confirm-homing-dialog-slave", "displayed")
             ],
             [
                 Input("keyboard", "n_keydowns"),  # listen for keyboard input
-                # # test
+
                 #  master unit values
                 Input("motor-control-btn-up-master", "n_clicks"),
                 Input("motor-control-btn-left-master", "n_clicks"),
@@ -223,45 +219,41 @@ class KoruzaGuiCallbacks():
             if ctx.triggered:
 
                 split = ctx.triggered[0]["prop_id"].split(".")
-                #print(split)
                 prop_id = split[0]
 
                 if prop_id == "keyboard":
-                    #print(event)  # triggered event
+
 
                     # master unit movement
                     if event["key"] == "w":
-                        # self.motor_wrapper.move_motor(0, steps_m, 0)
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(0, steps_m, 0)
                         except Exception as e:
-                            log.warrning(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "s":
-                        # self.motor_wrapper.move_motor(0, -steps_m, 0)
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(0, -steps_m, 0)
                         except Exception as e:
-                            log.warrning(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "d":
-                        # self.motor_wrapper.move_motor(steps_m, 0, 0)
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(steps_m, 0, 0)
                         except Exception as e:
-                            log.warrning(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "a":
-                        # self.motor_wrapper.move_motor(-steps_m, 0, 0)
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(-steps_m, 0, 0)
                         except Exception as e:
-                            log.warrning(e)
+                            log.warning(e)
                         self.lock.release()
+
 
                     # slave unit movement
                     if event["key"] == "ArrowUp":
@@ -270,7 +262,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_ble_command("move_motors", (0, -steps_s, 0))
                         except Exception as e:
-                            print(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowDown":
                         log.info(f"move slave down for {steps_s}")
@@ -278,7 +270,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_ble_command("move_motors", (0, steps_s, 0))
                         except Exception as e:
-                            print(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowRight":
                         log.info(f"move slave left for {steps_s}")
@@ -286,7 +278,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_ble_command("move_motors", (steps_s, 0, 0))
                         except Exception as e:
-                            print(e)
+                            log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowLeft":
                         log.info(f"move slave right for {steps_s}")
@@ -294,13 +286,13 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_ble_command("move_motors", (-steps_s, 0, 0))
                         except Exception as e:
-                            print(e)
+                            log.warning(e)
                         self.lock.release()
-                #print(prop_id)
+
+
                 #  master unit callbacks
                 if prop_id == "motor-control-btn-up-master":
                     log.info(f"move master up for {steps_m}")
-                    # self.motor_wrapper.move_motor(0, steps_m, 0)
                     self.lock.acquire()
                     try:
                         self.koruza_client.move_motors(0, steps_m, 0)
@@ -310,7 +302,6 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "motor-control-btn-down-master":
                     log.info(f"move master down for {steps_m}")
-                    # self.motor_wrapper.move_motor(0, -steps_m, 0)
                     self.lock.acquire()
                     try:
                         self.koruza_client.move_motors(0, -steps_m, 0)
@@ -320,7 +311,6 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "motor-control-btn-left-master":
                     log.info(f"move master left for {steps_m}")
-                    # self.motor_wrapper.move_motor(steps_m, 0, 0)
                     self.lock.acquire()
                     try:
                         self.koruza_client.move_motors(-steps_m, 0, 0)
@@ -330,7 +320,6 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "motor-control-btn-right-master":
                     log.info(f"move master right for {steps_m}")
-                    # self.motor_wrapper.move_motor(-steps_m, 0, 0)
                     self.lock.acquire()
                     try:
                         self.koruza_client.move_motors(steps_m, 0, 0)
@@ -340,12 +329,12 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "confirm-homing-dialog-master":
                     log.info(f"confirm home master")
-                    # self.motor_wrapper.home()
+
                     self.lock.acquire()
                     try:
                         self.koruza_client.home()
                     except Exception as e:
-                        print(e)
+                        log.warning(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-center-master":
@@ -358,9 +347,7 @@ class KoruzaGuiCallbacks():
                             self.koruza_client.toggle_led()
                         except Exception as e:
                             log.warning(e)
-                        # self.led_driver.set_color("blue", 105)
                     else:
-                        # self.led_driver.turn_off()
                         try:
                             self.koruza_client.toggle_led()
                         except Exception as e:
@@ -407,7 +394,6 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "confirm-homing-dialog-slave":
                     log.info(f"confirm home slave")
-                    # self.motor_wrapper.home()
                     self.lock.acquire()
                     try:
                         self.koruza_client.issue_ble_command("home", ())
@@ -421,9 +407,7 @@ class KoruzaGuiCallbacks():
                 if prop_id == "led-slider-slave":
                     if led_toggle_m:
                         self.slave_led_on = True
-                        # self.led_driver.set_color("blue", 105)
                     else:
-                        # self.led_driver.turn_off()
                         self.lock.acquire()
                         try:
                             self.koruza_client.issue_ble_command("disable_led", ())

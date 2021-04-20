@@ -1,3 +1,9 @@
+"""
+Info layout contents:
+* two info panels - "master" and "slave" information
+TODO: add features
+"""
+
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 

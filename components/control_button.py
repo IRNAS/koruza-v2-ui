@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 def control_button(arrow_direction, id, style={}):
+    """Custom control button with pre-defined assets or custom text"""
     img_src = None
     if arrow_direction == "up":
         img_src = "../assets/icons/arrow-up.png"
@@ -11,8 +12,6 @@ def control_button(arrow_direction, id, style={}):
         img_src = "../assets/icons/arrow-right.png"
     elif arrow_direction == "left":
         img_src = "../assets/icons/arrow-left.png"
-    # elif arrow_direction == "center":
-    #     img_src = "../assets/icons/plus-circle.svg"
 
     icon = None
     if img_src is not None:

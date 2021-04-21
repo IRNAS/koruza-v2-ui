@@ -411,14 +411,14 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "led-slider-slave":
                     self.lock.acquire()
-                    if led_toggle_m:
+                    if led_toggle_s:
                         try:
-                            self.koruza_client.issue_command("toggle_led", ())
+                            self.koruza_client.issue_remote_command("toggle_led", ())
                         except Exception as e:
                             log.warning(e)
                     else:
                         try:
-                            self.koruza_client.issue_command("toggle_led", ())
+                            self.koruza_client.issue_remote_command("toggle_led", ())
                         except Exception as e:
                             log.warning(e)
                     self.lock.release()

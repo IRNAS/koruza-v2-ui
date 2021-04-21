@@ -42,7 +42,7 @@ def dashboard_layout(camera_config, calibration_config):
             html.Div(id="hidden-div", style={"display": "none"}),
             Keyboard(id="keyboard"),
             dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
-            dcc.Interval(id="n-intervals-update-slave-info", interval=1000, n_intervals=0),
+            dcc.Interval(id="n-intervals-update-slave-info", interval=30000, n_intervals=0),
             dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
             dbc.Row(  # single bootstrap row

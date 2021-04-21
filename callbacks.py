@@ -21,12 +21,7 @@ class KoruzaGuiCallbacks():
         Initialize koruzaGuiCallbacks class. Initializes tcp client used to send requests and listen for responses
         """
         self.koruza_client = client
-
         self.lock = Lock()
-
-        self.rx_color_master = None
-
-        self.slave_led_on = False
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -346,6 +341,7 @@ class KoruzaGuiCallbacks():
                     display_master_homing_dialog = True
 
                 if prop_id == "led-slider-master":
+                    # print("TOGGLING LED")
                     self.lock.acquire()
                     if led_toggle_m:
                         try:
@@ -411,6 +407,7 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "led-slider-slave":
                     self.lock.acquire()
+                    # TODO implement synchronization of remote and local state of toggle
                     if led_toggle_s:
                         try:
                             self.koruza_client.issue_remote_command("toggle_led", ())

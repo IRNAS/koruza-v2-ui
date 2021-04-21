@@ -33,7 +33,15 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, calibration_data):
+def dashboard_layout(led_data, calibration_data, mode):
+
+    if mode == "master":
+        self_interval = dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0)
+        slave_interval = dcc.Interval(id="n-intervals-update-slave-info", interval=3000, n_intervals=0)
+    if mode == "slave":
+        self_interval = dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0)
+        slave_interval = None
+
     return dbc.Container(
         id="main-layout",
         className="float-left",
@@ -41,8 +49,10 @@ def dashboard_layout(led_data, calibration_data):
         children=[
             html.Div(id="hidden-div", style={"display": "none"}),
             Keyboard(id="keyboard"),
-            dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
-            dcc.Interval(id="n-intervals-update-slave-info", interval=30000, n_intervals=0),
+            # dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
+            # dcc.Interval(id="n-intervals-update-slave-info", interval=30000, n_intervals=0),
+            self_interval,
+            slave_interval,
             dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
             dbc.Row(  # single bootstrap row

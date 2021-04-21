@@ -32,6 +32,7 @@ from .layouts.dashboard_layout import dashboard_layout
 from .layouts.no_page_layout import no_page_layout
 
 from ..src.constants import KORUZA_MAIN_PORT
+from ..src.config_manager import get_config
 
 log = logging.getLogger()
 
@@ -77,20 +78,25 @@ KoruzaGuiCallbacks(client).callbacks()
 def display_page(pathname):
     # update calibs on refresh
 
-    try:
-        calibration_data = client.get_calibration_data()
-        led_data = client.get_led_data()
-    except Exception as e:
-        log.error(f"An error occured during get config: {e}")
-        calibration_data = {}
-        led_data = {}
+    # try:
+    calibration_data = client.get_calibration_data()
+    led_data = client.get_led_data()
+
+    config = get_config()["device_mgmt"]
+    print(config)
+    ch = config["channel"]
+    mode = config[ch]["mode"]
+    # except Exception as e:
+    #     log.error(f"An error occured during get config: {e}")
+    #     calibration_data = {}
+    #     led_data = {}
 
     # if pathname == "/setup":
     #     return layout_setup_wizard
     if pathname == "/info":
         return info_layout
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, calibration_data)  # pass configs to layout
+        return dashboard_layout(led_data, calibration_data, mode)  # pass configs to layout
     else:
         return no_page_layout
 

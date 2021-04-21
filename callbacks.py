@@ -103,13 +103,14 @@ class KoruzaGuiCallbacks():
             if sfp_data:
                 rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
                 rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
-            
+
             rx_bar = update_rx_power_bar(id="master", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
             # print(rx_power_label)
 
             self.lock.acquire()
             try:
+                # print("Getting local motors position")
                 motor_x, motor_y = self.koruza_client.get_motors_position()
             except Exception as e:
                 motor_x = 0
@@ -146,7 +147,9 @@ class KoruzaGuiCallbacks():
             # update sfp diagnostics
             self.lock.acquire()  # will block until completed
             try:
-                sfp_data = self.koruza_client.issue_remote_command("get_sfp_data", ())
+                # print("Getting remote sfp diagnostics")
+                sfp_data = self.koruza_client.issue_remote_command("get_sfp_diagnostics", ())
+                # print(f"Gotten remote sfp diagnostics: {sfp_data}")
             except Exception as e:
                 sfp_data = None
                 log.warning(f"Error getting slave sfp data: {e}")
@@ -163,7 +166,9 @@ class KoruzaGuiCallbacks():
 
             self.lock.acquire()
             try:
-                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())
+                # print("Getting remote motors position")
+                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())  # NOTE: works confirmed
+                # print(f"Remote motor x: {motor_x}, remote motor y: {motor_y}")
             except Exception as e:
                 motor_x = 0
                 motor_y = 0

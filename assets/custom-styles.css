@@ -533,7 +533,7 @@ input:checked+.slider-toggle:before {
 
 .signal-strength-1 .bar-1, .signal-strength-2 .bar-1, .signal-strength-3 .bar-1,
 .signal-strength-4 .bar-1, .signal-strength-5 .bar-1, .signal-strength-6 .bar-1,
-.signal-strength-7 .bar-7, .signal-strength-8 .bar-1, .signal-strength-9 .bar-1 {
+.signal-strength-7 .bar-1, .signal-strength-8 .bar-1, .signal-strength-9 .bar-1 {
     background-color: #ff0000;
 }
   
@@ -543,10 +543,9 @@ input:checked+.slider-toggle:before {
     background-color: #f67b29;
 }
 
-.signal-strength-3 .bar-3 .signal-strength-4 .bar-3, .signal-strength-5 .bar-3, 
+.signal-strength-3 .bar-3, .signal-strength-4 .bar-3, .signal-strength-5 .bar-3, 
 .signal-strength-6 .bar-3, .signal-strength-7 .bar-3, .signal-strength-8 .bar-3,
-.signal-strength-9 .bar-3
-{
+.signal-strength-9 .bar-3 {
     background-color: #f3c83b;
 }
 

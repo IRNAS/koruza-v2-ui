@@ -6,8 +6,6 @@ from .rx_indicator import rx_indicator
 
 def update_rx_power_bar(id, signal_str):
     class_name = ""
-    if signal_str == -40:
-        class_name = ""
     if signal_str > -40:
         class_name = "signal-strength-1"
     if signal_str >= -38:

@@ -7,8 +7,10 @@ from ...src.constants import SQUARE_SIZE
 
 log = logging.getLogger()
 
-def camera_display(calibration_config, src):
+def camera_display(calibration_data, src):
     """Generate video stream div with overlay"""
+
+    print(f"calib data: {calibration_data}")
 
     x_pts = []
     y_pts = []
@@ -21,9 +23,9 @@ def camera_display(calibration_config, src):
     marker_lt_rb = None
 
     try:
-        marker_lb_rt, marker_lt_rb = generate_marker(calibration_config["offset_x"], calibration_config["offset_y"], SQUARE_SIZE)
+        marker_lb_rt, marker_lt_rb = generate_marker(calibration_data["offset_x"], calibration_data["offset_y"], SQUARE_SIZE)
     except Exception as e:
-        log.warning(e)
+        log.warning(f"An exception occured when trying to create camera overlay marker: {e}")
 
     camera_div = html.Div(
         id="camera-container",

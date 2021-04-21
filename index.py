@@ -78,19 +78,19 @@ def display_page(pathname):
     # update calibs on refresh
 
     try:
-        calibration_config = client.get_calibration_config()
-        camera_config = client.get_camera_config()
+        calibration_data = client.get_calibration_data()
+        led_data = client.get_led_data()
     except Exception as e:
         log.error(f"An error occured during get config: {e}")
-        calibration_config = {}
-        camera_config = {}
+        calibration_data = {}
+        led_data = {}
 
     # if pathname == "/setup":
     #     return layout_setup_wizard
     if pathname == "/info":
         return info_layout
     if pathname == "/dashboard":
-        return dashboard_layout(camera_config, calibration_config)  # pass configs to layout
+        return dashboard_layout(led_data, calibration_data)  # pass configs to layout
     else:
         return no_page_layout
 

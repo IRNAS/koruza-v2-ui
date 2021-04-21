@@ -40,7 +40,9 @@ def unit_control(unit_id, is_master=False, checked=False):
                             {"label": "1000", "value": 1000}
                         ],
                         value=1000,
-                        clearable=False
+                        clearable=False,
+                        persistence=True,
+                        searchable=False
                     )
                 ]
             ),

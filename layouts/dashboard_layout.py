@@ -52,7 +52,7 @@ def dashboard_layout(led_data, calibration_data, mode):
             # dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
             # dcc.Interval(id="n-intervals-update-slave-info", interval=30000, n_intervals=0),
             self_interval,
-            slave_interval,
+            # slave_interval,
             dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
             dbc.Row(  # single bootstrap row
@@ -75,13 +75,13 @@ def dashboard_layout(led_data, calibration_data, mode):
                             html.Div(
                                 style={"margin-top": "28px"},
                                 children=[
-                                    control_panel("master", "Main Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
+                                    control_panel("master", "Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
                                 ]
                             ),
                             html.Div(
                                 style={"margin-top": "30px"},
                                 children=[
-                                    control_panel("slave", "Slave - not functional - WIP", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
+                                    control_panel("slave", "Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
                                 ]
                             )
                         ]

@@ -52,7 +52,7 @@ class KoruzaGuiCallbacks():
                 key_data_pairs = []
                 key_data_pairs.append(("offset_x", click_data["points"][0]["x"]))
                 key_data_pairs.append(("offset_y", click_data["points"][0]["y"]))
-                self.koruza_client.update_calibration_config(key_data_pairs)  # TODO change to koruza rpc
+                self.koruza_client.update_calibration_data(key_data_pairs)
             
 
             except Exception as e:

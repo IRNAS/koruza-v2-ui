@@ -566,7 +566,7 @@ input:checked+.slider-toggle:before {
 }
 
 .signal-strength-7 .bar-7, .signal-strength-8 .bar-7, .signal-strength-9 .bar-7 {
-    background-color: rgb(75, 195, 125);
+    background-color: #4bc37d;
 }
 
 .signal-strength-8 .bar-8, .signal-strength-9 .bar-8 {

@@ -61,7 +61,7 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     header(),
     html.Div(id='page-content'),
-    footer()
+    # footer()
 ])
 
 

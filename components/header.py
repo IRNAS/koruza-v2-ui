@@ -17,12 +17,12 @@ def header():
                         id="nav",
                         className="navbar-nav mr-auto",
                         children=[
-                            html.Li(
-                                style={"height": "33px"},
-                                children=[
-                                    dbc.NavItem(dbc.NavLink(id="info-navlink", className="custom-nav-link", children="KORUZA Link Information", href="/info", active="exact"))
-                                ]
-                            ),
+                            # html.Li(
+                            #     style={"height": "33px"},
+                            #     children=[
+                            #         dbc.NavItem(dbc.NavLink(id="info-navlink", className="custom-nav-link", children="KORUZA Link Information", href="/info", active="exact"))
+                            #     ]
+                            # ),
                             html.Li(
                                 style={"height": "33px"},
                                 children=[

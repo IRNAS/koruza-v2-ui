@@ -260,7 +260,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave up for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -268,7 +268,7 @@ class KoruzaGuiCallbacks():
                         log.info(f"move slave down for {steps_s}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
@@ -361,7 +361,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave up {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -370,7 +370,7 @@ class KoruzaGuiCallbacks():
                     log.info(f"move slave down {steps_s}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()

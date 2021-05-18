@@ -1,0 +1,578 @@
+/* Font styles */
+
+.section-title-text {
+    /*font-weight: bold;*/
+    color: darkgreen;
+    margin-bottom: 2px;
+}
+
+.big-text {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.large-text {
+    font-size: 8rem;
+    font-weight: bold;
+    line-height: 60px;
+}
+
+.btn-group-lg>.btn {
+    padding: 0.5rem 1rem;
+    font-size: inherit;
+    line-height: 1.5;
+    border-radius: 0.3rem
+}
+
+/* END OF FONT STYLE */
+
+/* Borders */
+
+.border-round {
+    border: 1px solid #ccc !important;
+    border-radius: 2px;
+}
+
+/* END OF BORDERS */
+
+/* TOGGLE SWITCH */
+
+/* The switch - the box around the slider */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+/* Hide default HTML checkbox */
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+
+.slider-toggle {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+.slider-toggle:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+input:checked+.slider-toggle {
+    background-color: #00aacf;
+}
+
+input:focus+.slider-toggle {
+    box-shadow: 0 0 1px #00aacf;
+}
+
+input:checked+.slider-toggle:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+
+.slider-toggle.round {
+    border-radius: 20px;
+}
+
+.slider-toggle.round:before {
+    border-radius: 50%;
+}
+
+/* END OF TOGGLE SWITCH */
+
+/* START OF SIGNAL STRENGTH INDICATOR */
+
+.sizing-box {
+    height: 50px;
+    width: 80px;
+}
+
+.signal-bars {
+    display: inline-block;
+}
+
+.signal-bars .bar {
+    width: 14%;
+    margin-left: 1%;
+    min-height: 20%;
+    display: inline-block;
+}
+
+.signal-bars .bar.first-bar {
+    height: 20%;
+}
+
+.signal-bars .bar.second-bar {
+    height: 40%;
+}
+
+.signal-bars .bar.third-bar {
+    height: 60%;
+}
+
+.signal-bars .bar.fourth-bar {
+    height: 80%;
+}
+
+.signal-bars .bar.fifth-bar {
+    height: 99%;
+}
+
+.good .bar {
+    background-color: #16a085;
+    border: thin solid darken(#16a085, 7%);
+}
+
+.bad .bar {
+    background-color: #e74c3c;
+    border: thin solid darken(#e74c3c, 20%);
+}
+
+.ok .bar {
+    background-color: #f1c40f;
+    border: thin solid darken(#f1c40f, 7%);
+}
+
+.four-bars .bar.fifth-bar, .three-bars .bar.fifth-bar, .three-bars .bar.fourth-bar, .one-bar .bar:not(.first-bar), .two-bars .bar:not(.first-bar):not(.second-bar) {
+    background-color: #fafafa;
+    border: thin solid #f3f3f3;
+}
+
+/* END OF SIGNAL STRENGTH INDICATOR */
+
+/* START OF CONTROL BUTTON */
+
+.control-btn {
+    height: 42px;
+    width: 42px;
+    padding: 0px;
+}
+
+/* END OF CONTROL BUTTON */
+
+/* BODY */
+
+/* https://css-tricks.com/snippets/css/media-queries-for-standard-devices/ */
+
+/* Phone layout */
+@media (min-width: 0px) {
+    .container, .container-sm {
+        max-width: 540px;
+        min-width: 540px
+    }
+
+    .video-container {
+        height: 540px;
+        width: 540px;
+    }
+
+    .graph-container {
+        height: 600px;
+        width: 540px;
+        position: relative;
+        top: -570px;
+        left: 0px;
+    }
+}
+
+/* @media (min-width: 576px) {
+    .container, .container-sm {
+        max-width: 1240px;
+        min-width: 1240px
+    }
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
+} */
+
+@media (min-width: 768px) {
+    .container, .container-sm, .container-md .video-container-md {
+        max-width: 1240px;
+        min-width: 1240px
+    }
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container, .container-sm, .container-md, .container-lg {
+        max-width: 1240px;
+        min-width: 1240px
+    }
+
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container, .container-sm, .container-md, .container-lg, .container-xl {
+        max-width: 1240px;
+        min-width: 1240px
+    }
+    .video-container {
+        height: 640px;
+        width: 640px;
+    }
+
+    .graph-container {
+        height: 712px;
+        width: 640px;
+        position: relative;
+        top: -676px;
+        left: 0px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .container, .container-sm, .container-md, .container-lg, .container-xl {
+        max-width: 1440px;
+        min-width: 1440px
+    }
+    .video-container {
+        height: 720px;
+        width: 720px;
+    }
+
+    .graph-container {
+        height: 800px;
+        width: 720px;
+        position: relative;
+        top: -760px;
+        left: 0px;
+    }
+}
+
+@media (min-width: 1780px) {
+    .container, .container-sm, .container-md, .container-lg, .container-xl {
+        max-width: 1780px;
+        min-width: 1780px
+    }
+    .video-container {
+        height: 720px;
+        width: 720px;
+    }
+
+    .graph-container {
+        height: 800px;
+        width: 720px;
+        position: relative;
+        top: -760px;
+        left: 0px;
+    }
+}
+
+
+
+/* DIV PADDINGS */
+
+.no-pad-l-10 {
+    padding: 10px 0px 10px 10px
+}
+
+.background-gradient {
+    background-image: linear-gradient(rgb(90, 171, 255), rgb(23 104 152));
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+}
+
+
+/* FONT */
+/* devanagari */
+@font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 300;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pasEfOqeef2kg.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 300;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pasEfOleef2kg.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 300;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pasEfOreec.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  /* devanagari */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDIxapCSOBg7S-QT7p4GM-aUWA.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDIxapCSOBg7S-QT7p4JM-aUWA.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDIxapCSOBg7S-QT7p4HM-Y.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  /* devanagari */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 500;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pb0EPOqeef2kg.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 500;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pb0EPOleef2kg.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 500;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pb0EPOreec.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  /* devanagari */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 600;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pbYF_Oqeef2kg.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 600;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pbYF_Oleef2kg.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 600;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pbYF_Oreec.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  /* devanagari */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 700;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pa8FvOqeef2kg.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 700;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pa8FvOleef2kg.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Rajdhani';
+    font-style: normal;
+    font-weight: 700;
+    src: url(https://fonts.gstatic.com/s/rajdhani/v10/LDI2apCSOBg7S-QT7pa8FvOreec.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+*, html, body {
+    font-family: "Rajdhani", sans-serif;
+}
+
+.property-title {
+    /* font-weight: bold; */
+    font-size: 26px;
+    color: #898989;
+    text-transform: uppercase;
+    margin-bottom: 0rem;
+}
+
+.property-value {
+    /* font-weight: bold; */
+    font-size: 20px;
+}
+
+.background-koruza {
+    background-color: #ffffff;
+}
+
+.div-shadow {
+    box-shadow: 0px 0px 16px 0px #00000040;
+    border-radius: 6px;
+}
+
+.div-control-group {
+    box-shadow: 0px 0px 3px 0px #00000070;
+    border-radius: 6px;
+}
+
+.header-koruza {
+    background-color: #00aacf;
+    width: 540px;
+}
+
+/* .video-container {
+    height: 640px;
+    width: 640px;
+} */
+
+/* Custom nav link */
+.custom-nav-link {
+    font-size: 19px;
+    font-weight: 500;
+    color: #ffffff;
+}
+.custom-nav-link:hover, .custom-nav-link:active {
+    background-color: #0099c5;
+}
+
+/* Rx Power Indicator */
+.signal-strength {
+    width: 100%;
+    height: 32px;
+    display: inline-block;
+    padding-right: 5px;
+    margin-top: 5%;
+}
+
+.bar{
+    display: inline-block;
+    height: 100%;
+    /*padding-left: 1px;*/
+    width: 10%;
+    border: 1px solid #898989;
+    margin-left: 1px;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.signal-strength-1 .bar-1, .signal-strength-2 .bar-1, .signal-strength-3 .bar-1,
+.signal-strength-4 .bar-1, .signal-strength-5 .bar-1, .signal-strength-6 .bar-1,
+.signal-strength-7 .bar-1, .signal-strength-8 .bar-1, .signal-strength-9 .bar-1 {
+    background-color: #ff0000;
+}
+  
+.signal-strength-2 .bar-2, .signal-strength-3 .bar-2, .signal-strength-4 .bar-2, 
+.signal-strength-5 .bar-2, .signal-strength-6 .bar-2, .signal-strength-7 .bar-2, 
+.signal-strength-8 .bar-2, .signal-strength-9 .bar-2 {
+    background-color: #f67b29;
+}
+
+.signal-strength-3 .bar-3, .signal-strength-4 .bar-3, .signal-strength-5 .bar-3, 
+.signal-strength-6 .bar-3, .signal-strength-7 .bar-3, .signal-strength-8 .bar-3,
+.signal-strength-9 .bar-3 {
+    background-color: #f3c83b;
+}
+
+.signal-strength-4 .bar-4, .signal-strength-5 .bar-4, 
+.signal-strength-6 .bar-4, .signal-strength-7 .bar-4, .signal-strength-8 .bar-4,
+.signal-strength-9 .bar-4 {
+    background-color: #faf62b;
+}
+ 
+.signal-strength-5 .bar-5, .signal-strength-6 .bar-5, .signal-strength-7 .bar-5, 
+.signal-strength-8 .bar-5, .signal-strength-9 .bar-5 {
+    background-color: #beeb42;
+}
+
+.signal-strength-6 .bar-6, .signal-strength-7 .bar-6, 
+.signal-strength-8 .bar-6, .signal-strength-9 .bar-6 {
+    background-color: #89e235;
+}
+
+.signal-strength-7 .bar-7, .signal-strength-8 .bar-7, .signal-strength-9 .bar-7 {
+    background-color: #4bc37d;
+}
+
+.signal-strength-8 .bar-8, .signal-strength-9 .bar-8 {
+    background-color: #38b8d2;
+}
+
+.signal-strength-9 .bar-9 {
+    background-color: #1cafe9;
+}

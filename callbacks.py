@@ -18,15 +18,15 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 class KoruzaGuiCallbacks():
-    def __init__(self, client):
+    def __init__(self, client, mode):
         """
         Initialize koruzaGuiCallbacks class. Initializes tcp client used to send requests and listen for responses
         """
         self.koruza_client = client
         self.lock = Lock()
 
-        self.spiral_align = SpiralAlign()
-
+        if mode == "primary":
+            self.spiral_align = SpiralAlign()
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -350,7 +350,8 @@ class KoruzaGuiCallbacks():
                 if prop_id == "confirm-align-dialog-primary":
                     log.info(f"confirm align master")
 
-                    self.spiral_align.align_alternatingly()  # start spiral align
+                    if mode == "primary":
+                        self.spiral_align.align_alternatingly()  # start spiral align
 
                 if prop_id == "motor-control-btn-center-primary":
                     display_master_homing_dialog = True

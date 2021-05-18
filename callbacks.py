@@ -11,6 +11,8 @@ from .app import app
 from .components.functions import generate_marker, update_rx_power_bar
 
 from ..src.constants import SQUARE_SIZE
+from ..koruza_v2_tracking.algorithms.spiral_align import SpiralAlign
+from ..koruza_v2_tracking.src.heatmap import Heatmap
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -22,6 +24,9 @@ class KoruzaGuiCallbacks():
         """
         self.koruza_client = client
         self.lock = Lock()
+
+        self.spiral_align = SpiralAlign()
+
     
     def callbacks(self):
         """Defines all callbacks used in GUI"""
@@ -63,13 +68,13 @@ class KoruzaGuiCallbacks():
         #  master unit info update
         @app.callback(
             [
-                Output("motor-coord-x-master", "children"),
-                Output("motor-coord-y-master", "children"),
-                Output("sfp-rx-power-master", "children"),
-                Output("rx-bar-container-master", "children")
+                Output("motor-coord-x-primary", "children"),
+                Output("motor-coord-y-primary", "children"),
+                Output("sfp-rx-power-primary", "children"),
+                Output("rx-bar-container-primary", "children")
             ],
             [
-                Input("n-intervals-update-master-info", "n_intervals")
+                Input("n-intervals-update-primary-info", "n_intervals")
             ]
         )
         def update_master_info(n_intervals):
@@ -117,13 +122,13 @@ class KoruzaGuiCallbacks():
         #  slave unit info update
         @app.callback(
             [
-                Output("motor-coord-x-slave", "children"),
-                Output("motor-coord-y-slave", "children"),
-                Output("sfp-rx-power-slave", "children"),
-                Output("rx-bar-container-slave", "children")
+                Output("motor-coord-x-secondary", "children"),
+                Output("motor-coord-y-secondary", "children"),
+                Output("sfp-rx-power-secondary", "children"),
+                Output("rx-bar-container-secondary", "children")
             ],
             [
-                Input("n-intervals-update-slave-info", "n_intervals")
+                Input("n-intervals-update-secondary-info", "n_intervals")
             ]
         )
         def update_slave_info(n_intervals):
@@ -174,42 +179,47 @@ class KoruzaGuiCallbacks():
         #  button callbacks
         @app.callback(
             [
-                Output("confirm-homing-dialog-master", "displayed"),
-                Output("confirm-homing-dialog-slave", "displayed")
+                Output("confirm-homing-dialog-primary", "displayed"),
+                Output("confirm-homing-dialog-secondary", "displayed"),
+                Output("confirm-align-dialog-primary", "displayed")
             ],
             [
                 Input("keyboard", "n_keydowns"),  # listen for keyboard input
 
                 #  master unit values
-                Input("motor-control-btn-up-master", "n_clicks"),
-                Input("motor-control-btn-left-master", "n_clicks"),
-                Input("motor-control-btn-down-master", "n_clicks"),
-                Input("motor-control-btn-right-master", "n_clicks"),
-                Input("motor-control-btn-center-master", "n_clicks"),
-                Input("led-slider-master", "checked"),
-                Input("confirm-homing-dialog-master", "submit_n_clicks"),
+                Input("motor-control-btn-up-primary", "n_clicks"),
+                Input("motor-control-btn-left-primary", "n_clicks"),
+                Input("motor-control-btn-down-primary", "n_clicks"),
+                Input("motor-control-btn-right-primary", "n_clicks"),
+                Input("motor-control-btn-center-primary", "n_clicks"),
+                Input("motor-control-btn-align-primary", "n_clicks"),
+                Input("led-slider-primary", "checked"),
+                Input("confirm-homing-dialog-primary", "submit_n_clicks"),
+                Input("confirm-align-dialog-primary", "submit_n_clicks"),
 
                 #  slave unit values
-                Input("motor-control-btn-up-slave", "n_clicks"),
-                Input("motor-control-btn-left-slave", "n_clicks"),
-                Input("motor-control-btn-down-slave", "n_clicks"),
-                Input("motor-control-btn-right-slave", "n_clicks"),
-                Input("motor-control-btn-center-slave", "n_clicks"),
-                Input("led-slider-slave", "checked"),
-                Input("confirm-homing-dialog-slave", "submit_n_clicks")
+                Input("motor-control-btn-up-secondary", "n_clicks"),
+                Input("motor-control-btn-left-secondary", "n_clicks"),
+                Input("motor-control-btn-down-secondary", "n_clicks"),
+                Input("motor-control-btn-right-secondary", "n_clicks"),
+                Input("motor-control-btn-center-secondary", "n_clicks"),
+                Input("led-slider-secondary", "checked"),
+                Input("confirm-homing-dialog-secondary", "submit_n_clicks")
             ],
             [
-                State("steps-dropdown-master", "value"),
-                State("steps-dropdown-slave", "value"),
+                State("steps-dropdown-primary", "value"),
+                State("steps-dropdown-secondary", "value"),
                 State("keyboard", "keydown")
             ]
         )
-        def update_button_action(n_keydowns, motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, led_toggle_m, confirm_center_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, led_toggle_s, confirm_center_s, steps_m, steps_s, event):
+        def update_button_action(n_keydowns, motor_up_m, motor_left_m, motor_down_m, motor_right_m, motor_center_m, units_align_m, led_toggle_m, confirm_center_m, confirm_align_m, motor_up_s, motor_left_s, motor_down_s, motor_right_s, motor_center_s, led_toggle_s, confirm_center_s, steps_m, steps_s, event):
             """
             Trigger button callbacks. On every click one of these callbacks is triggered.
             """
             display_master_homing_dialog = False
             display_slave_homing_dialog = False
+            
+            display_master_align_dialog = False
             
             ctx = dash.callback_context
             
@@ -291,7 +301,7 @@ class KoruzaGuiCallbacks():
 
 
                 #  master unit callbacks
-                if prop_id == "motor-control-btn-up-master":
+                if prop_id == "motor-control-btn-up-primary":
                     log.info(f"move master up for {steps_m}")
                     self.lock.acquire()
                     try:
@@ -300,7 +310,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-down-master":
+                if prop_id == "motor-control-btn-down-primary":
                     log.info(f"move master down for {steps_m}")
                     self.lock.acquire()
                     try:
@@ -309,7 +319,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-left-master":
+                if prop_id == "motor-control-btn-left-primary":
                     log.info(f"move master left for {steps_m}")
                     self.lock.acquire()
                     try:
@@ -318,7 +328,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-right-master":
+                if prop_id == "motor-control-btn-right-primary":
                     log.info(f"move master right for {steps_m}")
                     self.lock.acquire()
                     try:
@@ -327,7 +337,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "confirm-homing-dialog-master":
+                if prop_id == "confirm-homing-dialog-primary":
                     log.info(f"confirm home master")
 
                     self.lock.acquire()
@@ -337,10 +347,18 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-center-master":
+                if prop_id == "confirm-align-dialog-primary":
+                    log.info(f"confirm align master")
+
+                    self.spiral_align.align_alternatingly()  # start spiral align
+
+                if prop_id == "motor-control-btn-center-primary":
                     display_master_homing_dialog = True
 
-                if prop_id == "led-slider-master":
+                if prop_id == "motor-control-btn-align-primary":
+                    display_master_align_dialog = True
+
+                if prop_id == "led-slider-primary":
                     # print("TOGGLING LED")
                     self.lock.acquire()
                     if led_toggle_m:
@@ -357,7 +375,7 @@ class KoruzaGuiCallbacks():
                 
 
                 #  slave unit callbacks
-                if prop_id == "motor-control-btn-up-slave":
+                if prop_id == "motor-control-btn-up-secondary":
                     log.info(f"move slave up {steps_s}")
                     self.lock.acquire()
                     try:
@@ -366,7 +384,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-down-slave":
+                if prop_id == "motor-control-btn-down-secondary":
                     log.info(f"move slave down {steps_s}")
                     self.lock.acquire()
                     try:
@@ -375,7 +393,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-left-slave":
+                if prop_id == "motor-control-btn-left-secondary":
                     log.info(f"move slave left {steps_s}")
                     self.lock.acquire()
                     try:
@@ -384,7 +402,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-right-slave":
+                if prop_id == "motor-control-btn-right-secondary":
                     log.info(f"move slave right {steps_s}")
                     self.lock.acquire()
                     try:
@@ -393,7 +411,7 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "confirm-homing-dialog-slave":
+                if prop_id == "confirm-homing-dialog-secondary":
                     log.info(f"confirm home slave")
                     self.lock.acquire()
                     try:
@@ -402,10 +420,10 @@ class KoruzaGuiCallbacks():
                         log.warning(e)
                     self.lock.release()
 
-                if prop_id == "motor-control-btn-center-slave":
+                if prop_id == "motor-control-btn-center-secondary":
                     display_slave_homing_dialog = True
 
-                if prop_id == "led-slider-slave":
+                if prop_id == "led-slider-secondary":
                     self.lock.acquire()
                     # TODO implement synchronization of remote and local state of toggle
                     if led_toggle_s:
@@ -420,4 +438,4 @@ class KoruzaGuiCallbacks():
                             log.warning(e)
                     self.lock.release()
 
-            return display_master_homing_dialog, display_slave_homing_dialog
+            return display_master_homing_dialog, display_slave_homing_dialog, display_master_align_dialog

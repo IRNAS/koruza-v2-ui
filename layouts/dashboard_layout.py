@@ -36,10 +36,10 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 def dashboard_layout(led_data, calibration_data, mode):
 
     if mode == "master":
-        self_interval = dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0)
-        slave_interval = dcc.Interval(id="n-intervals-update-slave-info", interval=5000, n_intervals=0)
+        self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
+        slave_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
     if mode == "slave":
-        self_interval = dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0)
+        self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
         slave_interval = None
 
     return dbc.Container(
@@ -49,12 +49,11 @@ def dashboard_layout(led_data, calibration_data, mode):
         children=[
             html.Div(id="hidden-div", style={"display": "none"}),
             Keyboard(id="keyboard"),
-            # dcc.Interval(id="n-intervals-update-master-info", interval=1000, n_intervals=0),
-            # dcc.Interval(id="n-intervals-update-slave-info", interval=30000, n_intervals=0),
             self_interval,
             slave_interval,
-            dcc.ConfirmDialog(id="confirm-homing-dialog-master", message="Are you sure you want to start homing?"),
-            dcc.ConfirmDialog(id="confirm-homing-dialog-slave", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-homing-dialog-primary", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-homing-dialog-secondary", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-align-dialog-primary", message="Are you sure you want to start automatic alignment?"),
             dbc.Row(  # single bootstrap row
                 children=[
                     dbc.Col(
@@ -75,23 +74,16 @@ def dashboard_layout(led_data, calibration_data, mode):
                             html.Div(
                                 style={"margin-top": "28px"},
                                 children=[
-                                    control_panel("master", "Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
+                                    control_panel(unit_id="primary", title="Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
                                 ]
                             ),
                             html.Div(
                                 style={"margin-top": "30px"},
                                 children=[
-                                    control_panel("slave", "Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
+                                    control_panel(unit_id="secondary", title="Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
                                 ]
                             )
                         ]
-                    )
-                ]
-            ),
-            dbc.Row(
-                children=[
-                    dbc.Col(
-                        html.Div("", style={"height": "70px"})  # hack to enable scrolling past footer - TODO find a cleaner solution
                     )
                 ]
             )

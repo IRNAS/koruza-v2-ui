@@ -3,6 +3,9 @@
 ## Description
 The KORUZA v2 Pro Graphical User Interface enables monitoring and control of KORUZA v2 Pro units. The Graphical User Interface is written in Python with the help of Dash. The layout and user-facing features are documented [here](https://docs.koruza.net/software/graphical-user-interface).
 
+![image](https://user-images.githubusercontent.com/14543226/118773704-60418580-b885-11eb-8184-08199544570c.png)
+
+
 ## File Structure
 
 Included code is structured following the guidelines provided by [dash](https://dash.plotly.com/urls).

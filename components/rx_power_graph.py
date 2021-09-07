@@ -12,10 +12,6 @@ def rx_power_graph(unit_id):
 
     """
 
-    # TODO remove and replace with actual callbacks
-    x = list(range(0, 60))  # 1 datapoint every 10 seconds, for 10 minutes
-    y = np.sin(x)
-
     return html.Div(
         dcc.Graph(
             id=f"rx-power-graph-{unit_id}",
@@ -31,8 +27,8 @@ def rx_power_graph(unit_id):
                 "data": [
                     {
                         "type": "line",
-                        "x": x,  # TODO parse timestamps for x axis
-                        "y": y.tolist(),  # TODO gather data from unit and display on Y
+                        "x": [],
+                        "y": []
                     }
                 ],
                 "layout": {

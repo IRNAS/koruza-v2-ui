@@ -3,6 +3,7 @@ import dash
 import logging
 import json
 import time
+from random import randint
 from threading import Lock
 
 from dash.dependencies import Input, Output, State
@@ -25,11 +26,112 @@ class KoruzaGuiCallbacks():
         self.koruza_client = client
         self.lock = Lock()
 
-        if mode == "primary":
-            self.spiral_align = SpiralAlign()
+        self.mode = mode
+        if self.mode == "primary":
+            self.alignment_alg = SpiralAlign()
+        
     
-    def callbacks(self):
-        """Defines all callbacks used in GUI"""
+    def init_info_layout_callbacks(self):
+        """Defines callbacks used on link information page"""
+
+        # draw on graph
+        @app.callback(
+            [
+                Output("rx-power-graph-primary", "figure"),
+                Output("tx-power-primary", "children"),
+                Output("rx-power-primary", "children")
+            ],
+            [
+                Input("n-intervals-update-primary-info", "n_intervals")
+            ],
+            [
+                State("rx-power-graph-primary", "figure")
+            ]
+        )
+        def update_primary_information(n, rx_power_graph):
+            # update sfp diagnostics
+            sfp_data = None
+            self.lock.acquire()  # TODO maybe move locks to koruza.py?
+            try:
+                sfp_data = self.koruza_client.get_sfp_diagnostics()
+                # print(sfp_data)
+            except Exception as e:
+                log.error(e)
+            self.lock.release()
+
+            rx_power = 0
+            rx_power_dBm = -40
+            tx_power = 0
+            tx_power_dBm = -40
+            if sfp_data:
+                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
+                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
+                tx_power = sfp_data["sfp_0"]["diagnostics"]["tx_power"]
+                tx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["tx_power_dBm"]
+
+            rx_dBm_list = rx_power_graph["data"][0]["y"]
+            rx_dBm_list.append(rx_power_dBm)
+            rx_dBm_list = rx_dBm_list[-100:]
+
+            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+
+            rx_power_graph["data"][0]["y"] = rx_dBm_list
+            rx_power_graph["data"][0]["x"] = len(rx_dBm_list)
+            return rx_power_graph, tx_label, rx_label
+
+        # draw on graph
+        @app.callback(
+            [
+                Output("rx-power-graph-secondary", "figure"),
+                Output("tx-power-secondary", "children"),
+                Output("rx-power-secondary", "children")
+            ],
+            [
+                Input("n-intervals-update-secondary-info", "n_intervals")
+            ],
+            [
+                State("rx-power-graph-secondary", "figure")
+            ]
+        )
+        def update_secondary_information(n, rx_power_graph):
+            # update sfp diagnostics
+            self.lock.acquire()  # will block until completed
+            try:
+                # print("Getting remote sfp diagnostics")
+                sfp_data = self.koruza_client.issue_remote_command("get_sfp_diagnostics", ())
+                # print(f"Gotten remote sfp diagnostics: {sfp_data}")
+            except Exception as e:
+                sfp_data = None
+                log.warning(f"Error getting slave sfp data: {e}")
+            self.lock.release()
+
+            rx_power = 0
+            rx_power_dBm = -40
+            tx_power = 0
+            tx_power_dBm = -40
+
+            #TODO change to getters
+            if sfp_data:
+                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
+                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
+                tx_power = sfp_data["sfp_0"]["diagnostics"]["tx_power"]
+                tx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["tx_power_dBm"]
+
+            rx_dBm_list = rx_power_graph["data"][0]["y"]
+            rx_dBm_list.append(rx_power_dBm)
+            rx_dBm_list = rx_dBm_list[-100:]
+
+            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+
+            rx_power_graph["data"][0]["y"] = rx_dBm_list
+            rx_power_graph["data"][0]["x"] = len(rx_dBm_list)
+            return rx_power_graph, tx_label, rx_label
+
+
+    def init_dashboard_callbacks(self):
+        """Defines all callbacks used on unit dashboard page"""
 
         # draw on graph
         @app.callback(
@@ -133,10 +235,7 @@ class KoruzaGuiCallbacks():
         )
         def update_slave_info(n_intervals):
             """
-            PLACEHOLDER, WAITING FOR IMPLEMENTATION OF D2D MGMT.
-            TODO: MOVE TO MAIN!!
-           
-             Updates slave unit info:
+            Updates slave unit info:
                 - RX
                 - TX
                 - LEDs
@@ -350,8 +449,8 @@ class KoruzaGuiCallbacks():
                 if prop_id == "confirm-align-dialog-primary":
                     log.info(f"confirm align master")
 
-                    if mode == "primary":
-                        self.spiral_align.align_alternatingly()  # start spiral align
+                    if self.mode == "primary":
+                        self.alignment_alg.align_alternatingly()  # start spiral align
 
                 if prop_id == "motor-control-btn-center-primary":
                     display_master_homing_dialog = True

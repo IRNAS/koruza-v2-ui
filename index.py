@@ -68,21 +68,41 @@ ch = config["channel"]
 mode = config[ch]["mode"]
 
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
-KoruzaGuiCallbacks(client, mode).callbacks()
+koruza_callbacks = KoruzaGuiCallbacks(client, mode)
+koruza_callbacks.init_dashboard_callbacks()
+koruza_callbacks.init_info_layout_callbacks()
 
 # Update page
 # # # # # # # # #
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    calibration_data = client.get_calibration_data()
-    led_data = client.get_led_data()
+    try:
+        calibration_data = client.get_calibration_data()
+    except Exception as e:
+        calibration_data = None
+    try:
+        led_data = client.get_led_data()
+    except Exception as e:
+        led_data = None
    
+    sfp_data = {}
+    try:
+        sfp_data["primary"] = client.get_sfp_diagnostics()
+    except Exception as e:
+        sfp_data["primary"] = {}
+    
+    try:
+        sfp_data["secondary"] = client.issue_remote_command("get_sfp_diagnostics")
+    except Exception as e:
+        sfp_data["secodnary"] = {}
+
+
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
-    # if pathname == "/info":
-    #     return info_layout
+    if pathname == "/info":
+        return info_layout(mode, sfp_data)
     if pathname == "/dashboard":
         return dashboard_layout(led_data, calibration_data, mode)  # pass configs to layout
     else:

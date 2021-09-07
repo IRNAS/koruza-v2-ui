@@ -77,7 +77,8 @@ class KoruzaGuiCallbacks():
             tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
 
             rx_power_graph["data"][0]["y"] = rx_dBm_list
-            rx_power_graph["data"][0]["x"] = len(rx_dBm_list)
+            rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
+
             return rx_power_graph, tx_label, rx_label
 
         # draw on graph
@@ -126,7 +127,8 @@ class KoruzaGuiCallbacks():
             tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
 
             rx_power_graph["data"][0]["y"] = rx_dBm_list
-            rx_power_graph["data"][0]["x"] = len(rx_dBm_list)
+            rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
+
             return rx_power_graph, tx_label, rx_label
 
 

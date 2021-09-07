@@ -37,22 +37,24 @@ def rx_power_graph(unit_id):
                         "ticks": "",
                         "showgrid": False,
                         "zeroline": False,
-                        "fixedrange": True,
+                        "fixedrange": False,
+                        "range": [-110, 10]
                     },
                     "yaxis": {
                         "showticklabels": True,
                         "ticks": "outside",
                         "showgrid": True,
                         "zeroline": False,
-                        "fixedrange": False,
+                        "fixedrange": True,
+                        "range": [5, -50]
                     },
                     "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
                     "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
                     "margin": {
-                        "t": 0,
+                        "t": 20,
                         # "b": 0,
-                        "l": 30,
-                        "r": 10
+                        "l": 40,
+                        "r": 20
                     },
                     "clickmode": "event",
                     "hovermode": "closest",

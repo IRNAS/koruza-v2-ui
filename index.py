@@ -63,8 +63,12 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
+config = get_config()["device_mgmt"]
+ch = config["channel"]
+mode = config[ch]["mode"]
+
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
-KoruzaGuiCallbacks(client).callbacks()
+KoruzaGuiCallbacks(client, mode).callbacks()
 
 # Update page
 # # # # # # # # #
@@ -73,10 +77,6 @@ KoruzaGuiCallbacks(client).callbacks()
 def display_page(pathname):
     calibration_data = client.get_calibration_data()
     led_data = client.get_led_data()
-
-    config = get_config()["device_mgmt"]
-    ch = config["channel"]
-    mode = config[ch]["mode"]
    
     # layouts implemented in the future
     # if pathname == "/setup":  

@@ -35,12 +35,12 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 def dashboard_layout(led_data, calibration_data, mode):
 
-    if mode == "master":
+    if mode == "primary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
-        slave_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
-    if mode == "slave":
+        secondary_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
+    if mode == "secondary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
-        slave_interval = None
+        secondary_interval = None
 
     return dbc.Container(
         id="main-layout",
@@ -50,7 +50,7 @@ def dashboard_layout(led_data, calibration_data, mode):
             html.Div(id="hidden-div", style={"display": "none"}),
             Keyboard(id="keyboard"),
             self_interval,
-            slave_interval,
+            secondary_interval,
             dcc.ConfirmDialog(id="confirm-homing-dialog-primary", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-homing-dialog-secondary", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-align-dialog-primary", message="Are you sure you want to start automatic alignment?"),

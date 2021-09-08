@@ -50,7 +50,7 @@ class KoruzaGuiCallbacks():
         )
         def update_primary_information(n, rx_power_graph):
             # update sfp diagnostics
-            sfp_data = None
+            sfp_data = {}
             self.lock.acquire()  # TODO maybe move locks to koruza.py?
             try:
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
@@ -64,10 +64,10 @@ class KoruzaGuiCallbacks():
             tx_power = 0
             tx_power_dBm = -40
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
-                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
-                tx_power = sfp_data["sfp_0"]["diagnostics"]["tx_power"]
-                tx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["tx_power_dBm"]
+                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)
+                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
+                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
             rx_dBm_list.append(rx_power_dBm)
@@ -103,7 +103,7 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.issue_remote_command("get_sfp_diagnostics", ())
                 # print(f"Gotten remote sfp diagnostics: {sfp_data}")
             except Exception as e:
-                sfp_data = None
+                sfp_data = {}
                 log.warning(f"Error getting slave sfp data: {e}")
             self.lock.release()
 
@@ -112,12 +112,11 @@ class KoruzaGuiCallbacks():
             tx_power = 0
             tx_power_dBm = -40
 
-            #TODO change to getters
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
-                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
-                tx_power = sfp_data["sfp_0"]["diagnostics"]["tx_power"]
-                tx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["tx_power_dBm"]
+                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)  # TODO: is this informative enough? if there is no sfp should no info be displayed?
+                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
+                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
             rx_dBm_list.append(rx_power_dBm)

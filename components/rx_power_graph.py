@@ -28,7 +28,11 @@ def rx_power_graph(unit_id):
                     {
                         "type": "line",
                         "x": [],
-                        "y": []
+                        "y": [],
+                        "line": {
+                            "color": "rgb(200,200,50)",
+                            "opacity": "1.0"
+                        }
                     }
                 ],
                 "layout": {
@@ -46,7 +50,8 @@ def rx_power_graph(unit_id):
                         "showgrid": True,
                         "zeroline": False,
                         "fixedrange": True,
-                        "range": [5, -50]
+                        "range": [-45, 5],
+                        "title": "Rx Power (dBm)"
                     },
                     "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
                     "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
@@ -55,14 +60,6 @@ def rx_power_graph(unit_id):
                         # "b": 0,
                         "l": 40,
                         "r": 20
-                    },
-                    "clickmode": "event",
-                    "hovermode": "closest",
-                    "newshape": {
-                        "line": {
-                            "color": "#ff0000",
-                            "opacity": "1.0"
-                        }
                     }
                 }
             }

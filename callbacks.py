@@ -130,43 +130,91 @@ class KoruzaGuiCallbacks():
 
             return rx_power_graph, tx_label, rx_label
 
+        @app.callback(
+            Output("confirm-restore-calibration-dialog", "displayed"),
+            [
+                Input("btn-restore-calib", "n_clicks"),
+                Input("confirm-restore-calibration-dialog", "submit_n_clicks")
+            ],
+            prevent_initial_call=True  # TIL this is supposed to not trigger the initial
+        )
+        def update_restore_calibration(btn_restore, dialog_restore):
+            """Defines callbacks used to restore calibration"""
+
+            ctx = dash.callback_context
+            display_restore_calib_dialog = False
+
+            if ctx.triggered:
+                split = ctx.triggered[0]["prop_id"].split(".")
+                prop_id = split[0]
+
+                if prop_id == "btn-restore-calib":
+                    display_restore_calib_dialog = True
+                    
+                if prop_id == "confirm-restore-calibration-dialog":
+                    self.lock.acquire()
+                    self.koruza_client.restore_calibration_data()
+                    self.lock.release()
+            
+            return display_restore_calib_dialog
+
 
     def init_dashboard_callbacks(self):
         """Defines all callbacks used on unit dashboard page"""
 
         # draw on graph
         @app.callback(
-            Output("camera-overlay", "figure"),
             [
-                Input("camera-overlay", "clickData")
+                Output("camera-overlay", "figure"),
+                Output("confirm-calibration-dialog", "displayed")
+            ],
+            [
+                Input("camera-overlay", "clickData"),
+                Input("confirm-calibration-dialog", "submit_n_clicks")
             ],
             [
                 State("camera-overlay", "figure")
             ],
             prevent_initial_call=True  # TIL this is supposed to not trigger the initial
         )
-        def update_calibration_position(click_data, fig):
+        def update_calibration_position(click_data, confirm_calib, fig):
             """Update calibration position and save somewhere globally. TODO: a file with global config"""
             # HELP:
             # https://dash.plotly.com/annotations
             # https://plotly.com/python/creating-and-updating-figures/
-  
-            try:
-                line_lb_rt, line_lt_rb = generate_marker(click_data["points"][0]["x"], click_data["points"][0]["y"], SQUARE_SIZE)
 
-                # TODO convert camera coordinates to motor coordinates
-                fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+            ctx = dash.callback_context
+            display_confirm_calib_dialog = False
 
-                key_data_pairs = []
-                key_data_pairs.append(("offset_x", click_data["points"][0]["x"]))
-                key_data_pairs.append(("offset_y", click_data["points"][0]["y"]))
-                self.koruza_client.update_calibration_data(key_data_pairs)
+            print(ctx.triggered)
+
+            if ctx.triggered:
+                split = ctx.triggered[0]["prop_id"].split(".")
+                prop_id = split[0]
+
+                if prop_id == "camera-overlay":
+    
+                    try:
+                        line_lb_rt, line_lt_rb = generate_marker(click_data["points"][0]["x"], click_data["points"][0]["y"], SQUARE_SIZE)
+
+                        # TODO convert camera coordinates to motor coordinates
+                        fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+
+                        self.calib = []
+                        self.calib.append(("offset_x", click_data["points"][0]["x"]))
+                        self.calib.append(("offset_y", click_data["points"][0]["y"]))
+
+                        display_confirm_calib_dialog = True
+
+                    except Exception as e:
+                        log.warning(f"An error occured when setting calibration: {e}")
+                    
+                if prop_id == "confirm-calibration-dialog":
+                    self.lock.acquire()
+                    self.koruza_client.update_calibration_data(self.calib)
+                    self.lock.release()
             
-
-            except Exception as e:
-                log.warning(e)
-            
-            return fig
+            return fig, display_confirm_calib_dialog
 
         #  master unit info update
         @app.callback(
@@ -192,7 +240,7 @@ class KoruzaGuiCallbacks():
             """
             
             # update sfp diagnostics
-            sfp_data = None
+            sfp_data = {}
             self.lock.acquire()  # TODO maybe move locks to koruza.py?
             try:
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
@@ -204,8 +252,8 @@ class KoruzaGuiCallbacks():
             rx_power = 0
             rx_power_dBm = -40
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
-                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
+                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)
+                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
 
             rx_bar = update_rx_power_bar(id="master", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
@@ -245,21 +293,22 @@ class KoruzaGuiCallbacks():
                 n_intervals increment triggers this callback.
             """
             # update sfp diagnostics
+            sfp_data = {}
+            
             self.lock.acquire()  # will block until completed
             try:
                 # print("Getting remote sfp diagnostics")
                 sfp_data = self.koruza_client.issue_remote_command("get_sfp_diagnostics", ())
                 # print(f"Gotten remote sfp diagnostics: {sfp_data}")
             except Exception as e:
-                sfp_data = None
                 log.warning(f"Error getting slave sfp data: {e}")
             self.lock.release()
 
             rx_power = 0
             rx_power_dBm = -40
             if sfp_data:
-                rx_power = sfp_data["sfp_0"]["diagnostics"]["rx_power"]
-                rx_power_dBm = sfp_data["sfp_0"]["diagnostics"]["rx_power_dBm"]
+                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)
+                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
             
             rx_bar = update_rx_power_bar(id="slave", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)

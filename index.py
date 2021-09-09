@@ -12,6 +12,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+import socket
 import logging
 import xmlrpc.client
 
@@ -66,6 +67,13 @@ app.layout = html.Div([
 config = get_config()["device_mgmt"]
 ch = config["channel"]
 mode = config[ch]["mode"]
+remote_unit_ip = config[ch]["remote_unit_addr"]
+
+# get local ip
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+LOCALHOST = s.getsockname()[0]
+s.close()
 
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
 koruza_callbacks = KoruzaGuiCallbacks(client, mode)
@@ -80,10 +88,12 @@ def display_page(pathname):
     try:
         calibration_data = client.get_calibration_data()
     except Exception as e:
+        logging.warning(f"Error trying to get calibration data: {e}")
         calibration_data = None
     try:
         led_data = client.get_led_data()
     except Exception as e:
+        logging.warning(f"Error trying to get led data: {e}")
         led_data = None
    
     sfp_data = {}
@@ -102,7 +112,7 @@ def display_page(pathname):
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/info":
-        return info_layout(mode, sfp_data)
+        return info_layout(mode, sfp_data, LOCALHOST, remote_unit_ip)
     if pathname == "/dashboard":
         return dashboard_layout(led_data, calibration_data, mode)  # pass configs to layout
     else:

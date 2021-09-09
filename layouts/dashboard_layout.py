@@ -54,6 +54,7 @@ def dashboard_layout(led_data, calibration_data, mode):
             dcc.ConfirmDialog(id="confirm-homing-dialog-primary", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-homing-dialog-secondary", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-align-dialog-primary", message="Are you sure you want to start automatic alignment?"),
+            dcc.ConfirmDialog(id="confirm-calibration-dialog", message="Are you sure you want to set new calibration?"),
             dbc.Row(  # single bootstrap row
                 children=[
                     dbc.Col(

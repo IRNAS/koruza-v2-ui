@@ -30,7 +30,8 @@ def rx_power_graph(unit_id):
                         "x": [],
                         "y": [],
                         "line": {
-                            "color": "rgb(200,200,50)",
+                            # "color": range(-40, 1),
+                            # "colorscale": "Hot",
                             "opacity": "1.0"
                         }
                     }
@@ -58,7 +59,7 @@ def rx_power_graph(unit_id):
                     "margin": {
                         "t": 20,
                         # "b": 0,
-                        "l": 40,
+                        "l": 60,
                         "r": 20
                     }
                 }

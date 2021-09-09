@@ -10,7 +10,7 @@ import dash_core_components as dcc
 
 from ..components.unit_info_panel import unit_info_panel
 
-def info_layout(mode, sfp_data):
+def info_layout(mode, sfp_data, local_unit_ip, remote_unit_ip):
     if mode == "primary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
         secondary_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
@@ -24,16 +24,17 @@ def info_layout(mode, sfp_data):
         children=[
             self_interval,
             secondary_interval,
+            dcc.ConfirmDialog(id="confirm-restore-calibration-dialog", message="Restore calibration to factory default?"),
             dbc.Row(
                 children=[
                     dbc.Col(
                         children=[
-                            unit_info_panel("primary", sfp_data.get("primary", {})),
+                            unit_info_panel("primary", sfp_data.get("primary", {}), local_unit_ip, remote_unit_ip),
                         ]
                     ),
                     dbc.Col(
                         children=[
-                            unit_info_panel("secondary", sfp_data.get("secondary", {}))
+                            unit_info_panel("secondary", sfp_data.get("secondary", {}), local_unit_ip, remote_unit_ip)
                         ]
                     )
                 ]

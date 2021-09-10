@@ -86,7 +86,7 @@ koruza_callbacks.init_info_layout_callbacks()
               [Input('url', 'pathname')])
 def display_page(pathname):
     try:
-        calibration_data = client.get_calibration_data()
+        calibration_data = client.get_calibration()
     except Exception as e:
         logging.warning(f"Error trying to get calibration data: {e}")
         calibration_data = None

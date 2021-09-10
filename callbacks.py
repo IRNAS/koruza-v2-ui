@@ -153,7 +153,7 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "confirm-restore-calibration-dialog":
                     self.lock.acquire()
-                    self.koruza_client.restore_calibration_data()
+                    self.koruza_client.restore_calibration()
                     self.lock.release()
             
             return display_restore_calib_dialog
@@ -211,7 +211,7 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
-                    self.koruza_client.update_calibration_data(self.calib)
+                    self.koruza_client.update_calibration(self.calib)
                     self.lock.release()
             
             return fig, display_confirm_calib_dialog

@@ -40,7 +40,7 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                                         style={"width": "75%"},
                                                         children=[
                                                             html.P("RX Power", className="property-title"),
-                                                            html.P("0.7415 (-0.89 dBm)", id=f"sfp-rx-power-{unit_id}", className="property-value"),
+                                                            html.P("0.0000 mW (-40.0 dBm)", id=f"sfp-rx-power-{unit_id}", className="property-value"),
                                                         ]
                                                     ),
                                                     html.Div(
@@ -69,9 +69,9 @@ def control_panel(unit_id, title, is_master=False, checked=False):
                                         className="no-pad-l-10 background-koruza div-control-group",
                                         children=[
                                             html.P("Motor X", className="property-title"),
-                                            html.P("-1509", id=f"motor-coord-x-{unit_id}", className="property-value"),
+                                            html.P("0", id=f"motor-coord-x-{unit_id}", className="property-value"),
                                             html.P("Motor Y", className="property-title"),
-                                            html.P("-2125", id=f"motor-coord-y-{unit_id}", className="property-value")
+                                            html.P("0", id=f"motor-coord-y-{unit_id}", className="property-value")
                                         ]
                                     )
                                 ]

@@ -38,9 +38,28 @@ def dashboard_layout(led_data, calibration_data, mode):
     if mode == "primary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
         secondary_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
+        primary_control = html.Div(
+            style={"margin-top": "28px"},
+            children=[
+                control_panel(unit_id="primary", title="Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
+            ]
+        )
+        secondary_control = html.Div(
+            style={"margin-top": "30px"},
+            children=[
+                control_panel(unit_id="secondary", title="Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
+            ]
+        )
     if mode == "secondary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
         secondary_interval = None
+        primary_control = html.Div(
+            style={"margin-top": "28px"},
+            children=[
+                control_panel(unit_id="primary", title="Primary Unit", is_master=False, checked=led_data)  # master unit controls and transmit power indicator
+            ]
+        )
+        secondary_control = None
 
     return dbc.Container(
         id="main-layout",
@@ -72,18 +91,8 @@ def dashboard_layout(led_data, calibration_data, mode):
                         md=4,
                         lg=4,
                         children=[
-                            html.Div(
-                                style={"margin-top": "28px"},
-                                children=[
-                                    control_panel(unit_id="primary", title="Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
-                                ]
-                            ),
-                            html.Div(
-                                style={"margin-top": "30px"},
-                                children=[
-                                    control_panel(unit_id="secondary", title="Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
-                                ]
-                            )
+                            primary_control,
+                            secondary_control
                         ]
                     )
                 ]

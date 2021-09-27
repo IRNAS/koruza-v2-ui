@@ -64,7 +64,7 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
-config = get_config()["device_mgmt"]
+config = get_config()["link_config"]
 ch = config["channel"]
 mode = config[ch]["mode"]
 remote_unit_ip = config[ch]["remote_unit_addr"]

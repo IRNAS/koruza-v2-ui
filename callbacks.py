@@ -13,7 +13,6 @@ from .components.functions import generate_marker, update_rx_power_bar
 
 from ..src.constants import SQUARE_SIZE
 from ..koruza_v2_tracking.algorithms.spiral_align import SpiralAlign
-from ..koruza_v2_tracking.src.heatmap import Heatmap
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -260,6 +259,7 @@ class KoruzaGuiCallbacks():
             # print(rx_power_label)
 
             self.lock.acquire()
+            # print(f"Acquiring motor position lock")
             try:
                 # print("Getting local motors position")
                 motor_x, motor_y = self.koruza_client.get_motors_position()
@@ -267,6 +267,7 @@ class KoruzaGuiCallbacks():
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
+            # print(f"Releasing motor position lock")
                 
             return motor_x, motor_y, rx_power_label, rx_bar
 
@@ -295,6 +296,7 @@ class KoruzaGuiCallbacks():
             # update sfp diagnostics
             sfp_data = {}
             
+            start_time = time.time()
             self.lock.acquire()  # will block until completed
             try:
                 # print("Getting remote sfp diagnostics")
@@ -303,6 +305,7 @@ class KoruzaGuiCallbacks():
             except Exception as e:
                 log.warning(f"Error getting slave sfp data: {e}")
             self.lock.release()
+            # print(f"Duration of get_sfp_diagnostics on remote RPC call: {time.time() - start_time}")
 
             rx_power = 0
             rx_power_dBm = -40
@@ -313,6 +316,7 @@ class KoruzaGuiCallbacks():
             rx_bar = update_rx_power_bar(id="slave", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
 
+            start_time = time.time()
             self.lock.acquire()
             try:
                 # print("Getting remote motors position")
@@ -322,6 +326,7 @@ class KoruzaGuiCallbacks():
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
+            # print(f"Duration of get_motors_position on remote RPC call: {time.time() - start_time}")
                 
             return motor_x, motor_y, rx_power_label, rx_bar
 

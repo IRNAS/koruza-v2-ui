@@ -133,7 +133,8 @@ class KoruzaGuiCallbacks():
             [
                 Output("confirm-restore-calibration-dialog", "displayed"),
                 Output("confirm-update-unit-dialog", "displayed"),
-                Output("wait-for-update-completion-dialog", "displayed")
+                Output("update-status-dialog", "displayed"),
+                Output("update-status-dialog", "message")
             ],
             [
                 Input("btn-restore-calib", "n_clicks"),
@@ -149,7 +150,8 @@ class KoruzaGuiCallbacks():
             ctx = dash.callback_context
             display_restore_calib_dialog = False
             display_update_unit_dialog = False
-            display_wait_for_update_dialog = False
+            display_update_status_dialog = False
+            message = ""
 
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
@@ -168,11 +170,16 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "confirm-update-unit-dialog":
                     self.lock.acquire()
-                    self.koruza_client.update_unit()
+                    ret, ver = self.koruza_client.update_unit()
                     self.lock.release()
-                    display_wait_for_update_dialog = True
+                    display_update_status_dialog = True
+                    if ret is True:
+                        message = f"The unit is updating to version: {ver}. The unit will restart once the update is finished!"
+                    if ret is False:
+                        message = f"The unit is already at the latest version: {ver}!"
+
             
-            return display_restore_calib_dialog, display_update_unit_dialog, display_wait_for_update_dialog
+            return display_restore_calib_dialog, display_update_unit_dialog, display_update_status_dialog, message
 
 
     def init_dashboard_callbacks(self):

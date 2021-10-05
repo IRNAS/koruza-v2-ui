@@ -70,6 +70,7 @@ ch = link_config["channel"]
 mode = link_config[ch]["mode"]
 remote_unit_ip = link_config[ch]["remote_unit_addr"]
 local_unit_id = config["unit_id"]
+local_version = config["version"]
 
 # get local ip
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -113,9 +114,15 @@ def display_page(pathname):
     if sfp_data["remote"] is None:
         sfp_data["remote"] = {}
 
-    remote_unit_id = ""
+    remote_unit_id = "Not Set"
     try:
         remote_unit_id = client.issue_remote_command("get_unit_id", ())
+    except Exception as e:
+        pass
+
+    remote_version = "Not Set"
+    try:
+        remote_version = client.issue_remote_command("get_unit_version", ())
     except Exception as e:
         pass
 
@@ -123,7 +130,7 @@ def display_page(pathname):
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/info":
-        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip)
+        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_version, remote_version)
     if pathname == "/dashboard":
         return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip)  # pass configs to layout
     else:

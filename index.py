@@ -105,13 +105,13 @@ def display_page(pathname):
         sfp_data["local"] = {}
     
     try:
-        sfp_data["remote"] = client.issue_remote_command("get_sfp_diagnostics")
+        sfp_data["remote"] = client.issue_remote_command("get_sfp_diagnostics", ())
     except Exception as e:
         sfp_data["remote"] = {}
 
     remote_unit_id = ""
     try:
-        remote_unit_id = client.issue_remote_command("get_remote_unit_ip")
+        remote_unit_id = client.issue_remote_command("get_unit_id", ())
     except Exception as e:
         pass
 
@@ -131,6 +131,6 @@ if __name__ == '__main__':
 
     app.run_server(
         port=port,
-        debug=True,
+        debug=False,
         host=hostname
     )

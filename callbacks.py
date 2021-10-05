@@ -363,71 +363,71 @@ class KoruzaGuiCallbacks():
                 if prop_id == "keyboard":
                     # secondary unit movement
                     if event["key"] == "ArrowUp":
-                        log.info(f"move secondary up for {steps_s}")
+                        log.info(f"move secondary up for {steps}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, steps, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowDown":
-                        log.info(f"move secondary down for {steps_s}")
+                        log.info(f"move secondary down for {steps}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (0, -steps, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowRight":
-                        log.info(f"move secondary left for {steps_s}")
+                        log.info(f"move secondary left for {steps}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (steps_s, 0, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (steps, 0, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
                     if event["key"] == "ArrowLeft":
-                        log.info(f"move secondary right for {steps_s}")
+                        log.info(f"move secondary right for {steps}")
                         self.lock.acquire()
                         try:
-                            self.koruza_client.issue_remote_command("move_motors", (-steps_s, 0, 0))
+                            self.koruza_client.issue_remote_command("move_motors", (-steps, 0, 0))
                         except Exception as e:
                             log.warning(e)
                         self.lock.release()
 
                 #  remote unit callbacks
                 if prop_id == "motor-control-btn-up-remote":
-                    log.info(f"move secondary up {steps_s}")
+                    log.info(f"move secondary up {steps}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (0, steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, steps, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-down-remote":
-                    log.info(f"move secondary down {steps_s}")
+                    log.info(f"move secondary down {steps}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (0, -steps_s, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (0, -steps, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-left-remote":
-                    log.info(f"move secondary left {steps_s}")
+                    log.info(f"move secondary left {steps}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (-steps_s, 0, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (-steps, 0, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-right-remote":
-                    log.info(f"move secondary right {steps_s}")
+                    log.info(f"move secondary right {steps}")
                     self.lock.acquire()
                     try:
-                        self.koruza_client.issue_remote_command("move_motors", (steps_s, 0, 0))
+                        self.koruza_client.issue_remote_command("move_motors", (steps, 0, 0))
                     except Exception as e:
                         log.warning(e)
                     self.lock.release()
@@ -447,7 +447,7 @@ class KoruzaGuiCallbacks():
                 if prop_id == "led-slider-remote":
                     self.lock.acquire()
                     # TODO implement synchronization of remote and local state of toggle
-                    if led_toggle_s:
+                    if led_toggle:
                         try:
                             self.koruza_client.issue_remote_command("toggle_led", ())
                         except Exception as e:

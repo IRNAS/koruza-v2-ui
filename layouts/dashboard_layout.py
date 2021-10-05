@@ -36,31 +36,36 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip):
 
     if mode == "primary":
-        self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
-        secondary_interval = dcc.Interval(id="n-intervals-update-secondary-info", interval=1000, n_intervals=0)
-        primary_control = html.Div(
+        local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
+        remote_interval = dcc.Interval(id="n-intervals-update-remote-info", interval=1000, n_intervals=0)
+        local_control = html.Div(
             style={"margin-top": "28px"},
             children=[
-                control_panel(unit_id="primary", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data)  # primary unit controls and transmit power indicator
+                control_panel(unit="local", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
-        secondary_control = html.Div(
+        remote_control = html.Div(
             style={"margin-top": "30px"},
             children=[
-                control_panel(unit_id="secondary", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
+                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
             ]
         )
     if mode == "secondary":
-        self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
-        secondary_interval = None
-        primary_control = html.Div(
+        local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
+        remote_interval = None
+        local_control = html.Div(
             style={"margin-top": "28px"},
             children=[
                 # NOTE: we set unit_id to primary, as this is the primary control panel, we change the title however
-                control_panel(unit_id="primary", title=f"Secondary Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
+                control_panel(unit="local", title=f"Secondary Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
-        secondary_control = None
+        remote_control = remote_control = html.Div(
+            style={"margin-top": "30px", "visibility": "hidden"},
+            children=[
+                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
+            ]
+        )
 
     return dbc.Container(
         id="main-layout",
@@ -69,11 +74,11 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
         children=[
             html.Div(id="hidden-div", style={"display": "none"}),
             Keyboard(id="keyboard"),
-            self_interval,
-            secondary_interval,
-            dcc.ConfirmDialog(id="confirm-homing-dialog-primary", message="Are you sure you want to start homing?"),
-            dcc.ConfirmDialog(id="confirm-homing-dialog-secondary", message="Are you sure you want to start homing?"),
-            dcc.ConfirmDialog(id="confirm-align-dialog-primary", message="Are you sure you want to start automatic alignment?"),
+            local_interval,
+            remote_interval,
+            dcc.ConfirmDialog(id="confirm-homing-dialog-local", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-homing-dialog-remote", message="Are you sure you want to start homing?"),
+            dcc.ConfirmDialog(id="confirm-align-dialog-local", message="Are you sure you want to start automatic alignment?"),
             dcc.ConfirmDialog(id="confirm-calibration-dialog", message="Are you sure you want to set new calibration?"),
             dbc.Row(  # single bootstrap row
                 children=[
@@ -92,8 +97,8 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
                         md=4,
                         lg=4,
                         children=[
-                            primary_control,
-                            secondary_control
+                            local_control,
+                            remote_control
                         ]
                     )
                 ]

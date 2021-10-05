@@ -3,7 +3,7 @@ import dash_daq as daq
 import dash_html_components as html
 import dash_core_components as dcc
 
-def rx_power_graph(unit_id):
+def rx_power_graph(mode):
     """
     Generate rx power graph
 
@@ -14,7 +14,7 @@ def rx_power_graph(unit_id):
 
     return html.Div(
         dcc.Graph(
-            id=f"rx-power-graph-{unit_id}",
+            id=f"rx-power-graph-{mode}",
             config={
                 # "modeBarButtonsToAdd": [ "drawrect" ],
                 "displayModeBar": False,

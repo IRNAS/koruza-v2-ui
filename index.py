@@ -64,15 +64,17 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
-config = get_config()["link_config"]
-ch = config["channel"]
-mode = config[ch]["mode"]
-remote_unit_ip = config[ch]["remote_unit_addr"]
+config = get_config()
+link_config = config["link_config"]
+ch = link_config["channel"]
+mode = link_config[ch]["mode"]
+remote_unit_ip = link_config[ch]["remote_unit_addr"]
+local_unit_id = config["unit_id"]
 
 # get local ip
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
-LOCALHOST = s.getsockname()[0]
+local_unit_ip = s.getsockname()[0]
 s.close()
 
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
@@ -98,23 +100,28 @@ def display_page(pathname):
    
     sfp_data = {}
     try:
-        sfp_data["primary"] = client.get_sfp_diagnostics()
+        sfp_data["local"] = client.get_sfp_diagnostics()
     except Exception as e:
-        sfp_data["primary"] = {}
+        sfp_data["local"] = {}
     
     try:
-        sfp_data["secondary"] = client.issue_remote_command("get_sfp_diagnostics")
+        sfp_data["remote"] = client.issue_remote_command("get_sfp_diagnostics")
     except Exception as e:
-        sfp_data["secodnary"] = {}
+        sfp_data["remote"] = {}
 
+    remote_unit_id = ""
+    try:
+        remote_unit_id = client.issue_remote_command("get_remote_unit_ip")
+    except Exception as e:
+        pass
 
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/info":
-        return info_layout(mode, sfp_data, LOCALHOST, remote_unit_ip)
+        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip)
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, calibration_data, mode)  # pass configs to layout
+        return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip)  # pass configs to layout
     else:
         return landing_page_layout
 

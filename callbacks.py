@@ -36,15 +36,15 @@ class KoruzaGuiCallbacks():
         # draw on graph
         @app.callback(
             [
-                Output("rx-power-graph-primary", "figure"),
-                Output("tx-power-primary", "children"),
-                Output("rx-power-primary", "children")
+                Output("rx-power-graph-local", "figure"),
+                Output("tx-power-local", "children"),
+                Output("rx-power-local", "children")
             ],
             [
-                Input("n-intervals-update-primary-info", "n_intervals")
+                Input("n-intervals-update-local-info", "n_intervals")
             ],
             [
-                State("rx-power-graph-primary", "figure")
+                State("rx-power-graph-local", "figure")
             ]
         )
         def update_primary_information(n, rx_power_graph):
@@ -83,15 +83,15 @@ class KoruzaGuiCallbacks():
         # draw on graph
         @app.callback(
             [
-                Output("rx-power-graph-secondary", "figure"),
-                Output("tx-power-secondary", "children"),
-                Output("rx-power-secondary", "children")
+                Output("rx-power-graph-remote", "figure"),
+                Output("tx-power-remote", "children"),
+                Output("rx-power-remote", "children")
             ],
             [
-                Input("n-intervals-update-secondary-info", "n_intervals")
+                Input("n-intervals-update-remote-info", "n_intervals")
             ],
             [
-                State("rx-power-graph-secondary", "figure")
+                State("rx-power-graph-remote", "figure")
             ]
         )
         def update_secondary_information(n, rx_power_graph):

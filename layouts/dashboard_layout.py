@@ -33,7 +33,7 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, calibration_data, mode):
+def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip):
 
     if mode == "primary":
         self_interval = dcc.Interval(id="n-intervals-update-primary-info", interval=1000, n_intervals=0)
@@ -41,13 +41,13 @@ def dashboard_layout(led_data, calibration_data, mode):
         primary_control = html.Div(
             style={"margin-top": "28px"},
             children=[
-                control_panel(unit_id="primary", title="Primary Unit", is_master=True, checked=led_data)  # master unit controls and transmit power indicator
+                control_panel(unit_id="primary", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
         secondary_control = html.Div(
             style={"margin-top": "30px"},
             children=[
-                control_panel(unit_id="secondary", title="Secondary Unit", is_master=False, checked=led_data)  # slave unit controls and transmit power indicator
+                control_panel(unit_id="secondary", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
             ]
         )
     if mode == "secondary":
@@ -56,7 +56,8 @@ def dashboard_layout(led_data, calibration_data, mode):
         primary_control = html.Div(
             style={"margin-top": "28px"},
             children=[
-                control_panel(unit_id="primary", title="Primary Unit", is_master=False, checked=led_data)  # master unit controls and transmit power indicator
+                # NOTE: we set unit_id to primary, as this is the primary control panel, we change the title however
+                control_panel(unit_id="primary", title=f"Secondary Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
         secondary_control = None

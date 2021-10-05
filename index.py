@@ -103,10 +103,14 @@ def display_page(pathname):
         sfp_data["local"] = client.get_sfp_diagnostics()
     except Exception as e:
         sfp_data["local"] = {}
+    if sfp_data["local"] is None:
+        sfp_data["local"] = {}
     
     try:
         sfp_data["remote"] = client.issue_remote_command("get_sfp_diagnostics", ())
     except Exception as e:
+        sfp_data["remote"] = {}
+    if sfp_data["remote"] is None:
         sfp_data["remote"] = {}
 
     remote_unit_id = ""

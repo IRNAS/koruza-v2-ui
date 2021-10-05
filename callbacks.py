@@ -130,18 +130,26 @@ class KoruzaGuiCallbacks():
             return rx_power_graph, tx_label, rx_label
 
         @app.callback(
-            Output("confirm-restore-calibration-dialog", "displayed"),
+            [
+                Output("confirm-restore-calibration-dialog", "displayed"),
+                Output("confirm-update-unit-dialog", "displayed"),
+                Output("wait-for-update-completion-dialog", "displayed")
+            ],
             [
                 Input("btn-restore-calib", "n_clicks"),
-                Input("confirm-restore-calibration-dialog", "submit_n_clicks")
+                Input("confirm-restore-calibration-dialog", "submit_n_clicks"),
+                Input("btn-update-unit", "n_clicks"),
+                Input("confirm-update-unit-dialog", "submit_n_clicks")
             ],
             prevent_initial_call=True  # TIL this is supposed to not trigger the initial
         )
-        def update_restore_calibration(btn_restore, dialog_restore):
+        def update_restore_calibration(btn_restore, dialog_restore, btn_update, dialog_update):
             """Defines callbacks used to restore calibration"""
 
             ctx = dash.callback_context
             display_restore_calib_dialog = False
+            display_update_unit_dialog = False
+            display_wait_for_update_dialog = False
 
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
@@ -154,8 +162,17 @@ class KoruzaGuiCallbacks():
                     self.lock.acquire()
                     self.koruza_client.restore_calibration()
                     self.lock.release()
+
+                if prop_id == "btn-update-unit":
+                    display_update_unit_dialog = True
+
+                if prop_id == "confirm-update-unit-dialog":
+                    self.lock.acquire()
+                    self.koruza_client.update_unit()
+                    self.lock.release()
+                    display_wait_for_update_dialog = True
             
-            return display_restore_calib_dialog
+            return display_restore_calib_dialog, display_update_unit_dialog, display_wait_for_update_dialog
 
 
     def init_dashboard_callbacks(self):

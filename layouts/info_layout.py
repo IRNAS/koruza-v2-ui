@@ -39,11 +39,12 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
             local_interval,
             remote_interval,
             dcc.ConfirmDialog(id="confirm-restore-calibration-dialog", message="Restore calibration to factory default?"),
+            dcc.ConfirmDialog(id="confirm-update-unit-dialog", message="Update unit to latest version?"),
+            dcc.ConfirmDialog(id="wait-for-update-completion-dialog", message="The unit is updating. The unit will restart once the update is finished!"),
             dbc.Row(
                 children=[
                     dbc.Col(
                         children=[
-                            # unit_info_panel("primary", unit_id, sfp_data.get("primary", {}), local_unit_ip, remote_unit_ip),
                             info_panel_local,
                             buttons_local,
                             rx_power_graph_local
@@ -51,7 +52,6 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
                     ),
                     dbc.Col(
                         children=[
-                            # unit_info_panel("secondary", remote_unit_id, sfp_data.get("secondary", {}), local_unit_ip, remote_unit_ip)
                             info_panel_remote,
                             buttons_remote,
                             rx_power_graph_remote

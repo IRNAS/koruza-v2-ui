@@ -16,8 +16,8 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
     if mode == "primary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
         remote_interval = dcc.Interval(id="n-intervals-update-remote-info", interval=1000, n_intervals=0)
-        info_panel_local = unit_info_panel("local", local_unit_ip, unit_id, sfp_data.get("primary", {}))
-        info_panel_remote = unit_info_panel("remote", remote_unit_ip, remote_unit_id, sfp_data.get("secondary", {}))
+        info_panel_local = unit_info_panel("local", local_unit_ip, unit_id, sfp_data.get("local", {}))
+        info_panel_remote = unit_info_panel("remote", remote_unit_ip, remote_unit_id, sfp_data.get("remote", {}))
         rx_power_graph_local = rx_power_graph("local")
         rx_power_graph_remote = rx_power_graph("remote")
         buttons_local = info_panel_buttons("local")
@@ -25,7 +25,7 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
     if mode == "secondary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
         remote_interval = None
-        info_panel_local = unit_info_panel("local", local_unit_ip, unit_id, sfp_data.get("primary", {}))  # koruza is in secodary mode but data is from "primary" as it's local
+        info_panel_local = unit_info_panel("local", local_unit_ip, unit_id, sfp_data.get("local", {}))  # koruza is in secodary mode but data is from "primary" as it's local
         info_panel_remote = None
         rx_power_graph_local = rx_power_graph("local")
         rx_power_graph_remote = None

@@ -33,7 +33,7 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip):
+def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, set_camera_zoom):
 
     if mode == "primary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
@@ -80,6 +80,7 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
             dcc.ConfirmDialog(id="confirm-homing-dialog-remote", message="Are you sure you want to start homing?"),
             dcc.ConfirmDialog(id="confirm-align-dialog-local", message="Are you sure you want to start automatic alignment?"),
             dcc.ConfirmDialog(id="confirm-calibration-dialog", message="Are you sure you want to set new calibration?"),
+            dcc.ConfirmDialog(id="camera-zoom-dialog", message="Are you sure you want to change the zoom level?"),
             dbc.Row(  # single bootstrap row
                 children=[
                     dbc.Col(
@@ -88,7 +89,7 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
                         md=6,
                         lg=6,
                         children=[
-                            camera_display(calibration_data, src=VIDEO_STREAM_SRC)
+                            camera_display(calibration_data, VIDEO_STREAM_SRC, set_camera_zoom)
                         ]
                     ),
                     dbc.Col(

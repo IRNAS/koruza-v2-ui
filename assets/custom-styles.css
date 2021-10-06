@@ -297,6 +297,12 @@ input:checked+.slider-toggle:before {
         top: -760px;
         left: 0px;
     }
+    
+    .camera-zoom-div {
+        width: 80%;
+        position: relative;
+        left: 86px;
+    }
 }
 
 @media (min-width: 1780px) {
@@ -315,6 +321,12 @@ input:checked+.slider-toggle:before {
         position: relative;
         top: -760px;
         left: 0px;
+    }
+    
+    .camera-zoom-div {
+        width: 80%;
+        position: relative;
+        left: 86px;
     }
 }
 

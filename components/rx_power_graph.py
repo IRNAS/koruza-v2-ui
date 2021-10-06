@@ -13,57 +13,61 @@ def rx_power_graph(mode):
     """
 
     return html.Div(
-        dcc.Graph(
-            id=f"rx-power-graph-{mode}",
-            config={
-                # "modeBarButtonsToAdd": [ "drawrect" ],
-                "displayModeBar": False,
-                # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
-                # "showAxisDragHandles": False,
-                "displaylogo": False,
-                "editable": False
-            },
-            figure={
-                "data": [
-                    {
-                        "type": "line",
-                        "x": [],
-                        "y": [],
-                        "line": {
-                            # "color": range(-40, 1),
-                            # "colorscale": "Hot",
-                            "opacity": "1.0"
+        className="mt-3",
+        children=[
+            dcc.Graph(
+                id=f"rx-power-graph-{mode}",
+                style={"height": "260px"},
+                config={
+                    # "modeBarButtonsToAdd": [ "drawrect" ],
+                    "displayModeBar": False,
+                    # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
+                    # "showAxisDragHandles": False,
+                    "displaylogo": False,
+                    "editable": False
+                },
+                figure={
+                    "data": [
+                        {
+                            "type": "line",
+                            "x": [],
+                            "y": [],
+                            "line": {
+                                # "color": range(-40, 1),
+                                # "colorscale": "Hot",
+                                "opacity": "1.0"
+                            }
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {
+                            "showticklabels": True,
+                            "ticks": "",
+                            "showgrid": False,
+                            "zeroline": False,
+                            "fixedrange": False,
+                            "range": [-110, 10]
+                        },
+                        "yaxis": {
+                            "showticklabels": True,
+                            "ticks": "outside",
+                            "showgrid": True,
+                            "zeroline": False,
+                            "fixedrange": True,
+                            "range": [-45, 5],
+                            "title": "Rx Power (dBm)"
+                        },
+                        "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
+                        "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
+                        "margin": {
+                            "t": 20,
+                            # "b": 0,
+                            "l": 60,
+                            "r": 20
                         }
                     }
-                ],
-                "layout": {
-                    "xaxis": {
-                        "showticklabels": True,
-                        "ticks": "",
-                        "showgrid": False,
-                        "zeroline": False,
-                        "fixedrange": False,
-                        "range": [-110, 10]
-                    },
-                    "yaxis": {
-                        "showticklabels": True,
-                        "ticks": "outside",
-                        "showgrid": True,
-                        "zeroline": False,
-                        "fixedrange": True,
-                        "range": [-45, 5],
-                        "title": "Rx Power (dBm)"
-                    },
-                    "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
-                    "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
-                    "margin": {
-                        "t": 20,
-                        # "b": 0,
-                        "l": 60,
-                        "r": 20
-                    }
                 }
-            }
-        )
+            )
+        ]
     )
    

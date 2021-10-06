@@ -5,6 +5,7 @@ import dash_html_components as html
 def info_panel_buttons(unit):
     if unit == "local":
         buttons = html.Div(
+            className="mt-3",
             children=[
                 dbc.Button(
                     html.Span("Restore Calibration", style={"font-size": "18px"}),
@@ -29,7 +30,7 @@ def info_panel_buttons(unit):
         )
     if unit == "remote":
         buttons = html.Div("",
-            style={"margin-top": "52px"}
+            style={"margin-top": "70px"}
         )
 
     return buttons

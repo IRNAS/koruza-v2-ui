@@ -71,6 +71,8 @@ mode = link_config[ch]["mode"]
 remote_unit_ip = link_config[ch]["remote_unit_addr"]
 local_unit_id = config["unit_id"]
 local_version = config["version"]
+local_unit_mode = mode
+remote_unit_mode = "secondary" if mode == "primary" else mode
 
 # get local ip
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -130,7 +132,7 @@ def display_page(pathname):
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/info":
-        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_version, remote_version)
+        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
         return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip)  # pass configs to layout
     else:

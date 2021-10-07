@@ -24,10 +24,11 @@ class KoruzaGuiCallbacks():
         """
         self.koruza_client = client
         self.lock = Lock()
-        self.calib = {
-            "offset_x": 0,
-            "offset_y": 0
-        }
+
+        # load calibration into local storage
+        self.lock.acquire()
+        self.calib = self.koruza_client.get_calibration()["calibration"]
+        self.lock.release()
 
         self.mode = mode
         if self.mode == "primary":
@@ -188,60 +189,25 @@ class KoruzaGuiCallbacks():
     def init_dashboard_callbacks(self):
         """Defines all callbacks used on unit dashboard page"""
 
-        # update zoom
-        @app.callback(
-            [
-                Output("camera-zoom-dialog", "displayed"),
-                Output("javascript", "run")
-            ],
-            [
-                Input("camera-zoom-slider", "value"),
-                Input("camera-zoom-dialog", "submit_n_clicks")
-            ],
-            [
-                State("camera-zoom-slider", "value")
-            ]
-        )
-        def update_camera_zoom(zoom_changed, confirm_change, zoom_factor):
-            """Update set camera zoom"""
-
-            display_zoom_change_dialog = False
-            js = ""
-
-            ctx = dash.callback_context
-
-            if ctx.triggered:
-                split = ctx.triggered[0]["prop_id"].split(".")
-                prop_id = split[0]
-
-                if prop_id == "camera-zoom-slider":
-                    display_zoom_change_dialog = True
-
-                if prop_id == "camera-zoom-dialog":
-                    self.lock.acquire()
-                    self.koruza_client.update_camera_config(zoom_factor)
-                    self.lock.release()
-
-                    js = "location.reload();"
-
-            return display_zoom_change_dialog, js
-
         # draw on graph
         @app.callback(
             [
                 Output("camera-overlay", "figure"),
-                Output("confirm-calibration-dialog", "displayed")
+                Output("confirm-calibration-dialog", "displayed"),
+                Output("javascript", "run")
             ],
             [
                 Input("camera-overlay", "clickData"),
-                Input("confirm-calibration-dialog", "submit_n_clicks")
+                Input("confirm-calibration-dialog", "submit_n_clicks"),
+                Input("camera-zoom-toggle", "checked")
             ],
             [
-                State("camera-overlay", "figure")
+                State("camera-overlay", "figure"),
+                State("camera-zoom-toggle", "checked")
             ],
             prevent_initial_call=True  # TIL this is supposed to not trigger the initial
         )
-        def update_calibration_position(click_data, confirm_calib, fig):
+        def update_calibration_position(click_data, confirm_calib, zoom_checked, fig, zoom_state):
             """Update calibration position and save somewhere globally. TODO: a file with global config"""
             # HELP:
             # https://dash.plotly.com/annotations
@@ -249,6 +215,7 @@ class KoruzaGuiCallbacks():
 
             ctx = dash.callback_context
             display_confirm_calib_dialog = False
+            js = ""
 
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
@@ -256,24 +223,40 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "camera-overlay":
                     try:
-                        self.calib = []
-                        self.calib.append(("offset_x", click_data["points"][0]["x"]))
-                        self.calib.append(("offset_y", click_data["points"][0]["y"]))
+                        self.calib["offset_x"] = click_data["points"][0]["x"]
+                        self.calib["offset_y"] = click_data["points"][0]["y"]
                         print(f"Clicked on: {self.calib}")
-                        display_confirm_calib_dialog = True
+                        if not zoom_state:
+                            display_confirm_calib_dialog = True
 
                     except Exception as e:
                         log.warning(f"An error occured when setting calibration: {e}")
                     
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
+                    print(f"calib: {self.calib}")
                     self.koruza_client.update_calibration(self.calib)
-                    # TODO convert camera coordinates to motor coordinates
-                    line_lb_rt, line_lt_rb = generate_marker(self.calib[0][1], self.calib[1][1], SQUARE_SIZE)
+                    x = self.calib["offset_x"]
+                    y = self.calib["offset_y"]
+                    line_lb_rt, line_lt_rb = generate_marker(x, y, SQUARE_SIZE)
                     fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     self.lock.release()
+
+                if prop_id == "camera-zoom-toggle":
+                    self.lock.acquire()
+                    self.koruza_client.update_zoom_data(zoom_checked)
+                    marker_x = self.calib["offset_x"]
+                    marker_y = self.calib["offset_y"]
+                    if zoom_checked:
+                        img_p = 0.5  # default zoom of 4x
+                        self.koruza_client.update_camera_config(marker_x, marker_y, img_p, None)
+                    else:
+                        self.koruza_client.update_camera_config(0, 0, 0.5, 1)  # default zoomed out settings
+                    self.lock.release()
+
+                    js = "location.reload();"
             
-            return fig, display_confirm_calib_dialog
+            return fig, display_confirm_calib_dialog, js
 
         #  local unit info update
         @app.callback(

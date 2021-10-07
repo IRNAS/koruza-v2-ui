@@ -101,6 +101,12 @@ def display_page(pathname):
     except Exception as e:
         logging.warning(f"Error trying to get led data: {e}")
         led_data = None
+
+    try:
+        zoom_data = client.get_zoom_data()
+    except Exception as e:
+        logging.warning(f"Error trying to get zoom data: {e}")
+        zoom_data = None
    
     sfp_data = {}
     try:
@@ -129,20 +135,13 @@ def display_page(pathname):
     except Exception as e:
         pass
 
-    set_camera_zoom = 1.0
-    set_camera_zoom = get_set_zoom()
-    try:
-        print(f"Set camera zoom: {set_camera_zoom}")
-    except Exception as e:
-        pass
-
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/info":
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, set_camera_zoom)  # pass configs to layout
+        return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data)  # pass configs to layout
     else:
         return landing_page_layout
 

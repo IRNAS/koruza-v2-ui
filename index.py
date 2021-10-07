@@ -103,6 +103,12 @@ def display_page(pathname):
         led_data = None
 
     try:
+        remote_unit_led_data = client.issue_remote_command("get_led_data", ())
+    except Exception as e:
+        logging.warning(f"Error trying to get remote unit led data: {e}")
+        remote_unit_led_data = None
+
+    try:
         zoom_data = client.get_zoom_data()
     except Exception as e:
         logging.warning(f"Error trying to get zoom data: {e}")
@@ -141,7 +147,7 @@ def display_page(pathname):
     if pathname == "/info":
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data)  # pass configs to layout
+        return dashboard_layout(led_data, remote_unit_led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data)  # pass configs to layout
     else:
         return landing_page_layout
 

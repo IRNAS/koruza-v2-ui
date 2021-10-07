@@ -33,7 +33,7 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data):
+def dashboard_layout(led_data, remote_unit_led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data):
 
     if mode == "primary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
@@ -47,7 +47,7 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
         remote_control = html.Div(
             style={"margin-top": "30px"},
             children=[
-                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
+                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=remote_unit_led_data)  # secondary unit controls and transmit power indicator
             ]
         )
     if mode == "secondary":
@@ -60,12 +60,7 @@ def dashboard_layout(led_data, calibration_data, mode, local_unit_ip, remote_uni
                 control_panel(unit="local", title=f"Secondary Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
-        remote_control = remote_control = html.Div(
-            style={"margin-top": "30px", "visibility": "hidden"},
-            children=[
-                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=led_data)  # secondary unit controls and transmit power indicator
-            ]
-        )
+        remote_control = None
 
     return dbc.Container(
         id="main-layout",

@@ -1,3 +1,4 @@
+import time
 import logging
 import visdcc
 import dash_core_components as dcc
@@ -44,7 +45,7 @@ def camera_display(calibration_data, src, zoom_data):
                     html.Div(
                         className="video-container",
                         children=[
-                            html.Img(src=src, id="video-stream-container", className="video-container", style={"absolute": "relative", "top": "0px", "left": "0px"}),
+                            html.Img(src=f"{src}?{time.time()}", id="video-stream-container", className="video-container", style={"absolute": "relative", "top": "0px", "left": "0px"}),
                             dcc.Graph(
                                 id="camera-overlay",
                                 className="graph-container",

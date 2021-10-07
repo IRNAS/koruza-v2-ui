@@ -1,21 +1,29 @@
-import random
-import dash
-import logging
-import json
 import time
+import dash
+import json
+import socket
+import random
+import logging
 from random import randint
 from threading import Lock
 
 from dash.dependencies import Input, Output, State
 
 from .app import app
-from .components.functions import generate_marker, update_rx_power_bar
+from .components.functions import generate_marker, update_rx_power_bar, calculate_zoom_area_position
 
 from ..src.constants import SQUARE_SIZE
 from ..koruza_v2_tracking.algorithms.spiral_align import SpiralAlign
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+LOCALHOST = s.getsockname()[0]
+s.close()
+PORT = 8080
+VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 class KoruzaGuiCallbacks():
     def __init__(self, client, mode):
@@ -194,7 +202,7 @@ class KoruzaGuiCallbacks():
             [
                 Output("camera-overlay", "figure"),
                 Output("confirm-calibration-dialog", "displayed"),
-                Output("javascript", "run")
+                Output("video-stream-container", "src")
             ],
             [
                 Input("camera-overlay", "clickData"),
@@ -215,7 +223,8 @@ class KoruzaGuiCallbacks():
 
             ctx = dash.callback_context
             display_confirm_calib_dialog = False
-            js = ""
+            # js = ""
+            img_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
 
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
@@ -249,14 +258,36 @@ class KoruzaGuiCallbacks():
                     marker_y = self.calib["offset_y"]
                     if zoom_checked:
                         img_p = 0.5  # default zoom of 4x
-                        self.koruza_client.update_camera_config(marker_x, marker_y, img_p, None)
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        self.koruza_client.update_camera_config(clamped_x, clamped_y, img_p, None)
+
+                        # move marker if zoomed in image is outside of bounds
+                        if x < 0:
+                            marker_x = 360.0 + ((1 / img_p) * x * 720.0)
+                        elif x > 0.5:
+                            marker_x = 360.0 + ((1 / img_p) * (x - 0.5)) * 720.0
+                        else:
+                            marker_x = 360.0
+                        
+                        if y < 0:
+                            marker_y = 360.0 - ((1 / img_p) * y * 720.0)
+                        elif y > 0.5:
+                            marker_y = 360.0 - ((1 / img_p) * (y - 0.5)) * 720.0
+                        else:
+                            marker_y = 360.0
+
+                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+
                     else:
+                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                         self.koruza_client.update_camera_config(0, 0, 0.5, 1)  # default zoomed out settings
+
+                    fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     self.lock.release()
 
-                    js = "location.reload();"
+                    # js = "location.reload();"
             
-            return fig, display_confirm_calib_dialog, js
+            return fig, display_confirm_calib_dialog, img_src
 
         #  local unit info update
         @app.callback(

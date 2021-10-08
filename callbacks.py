@@ -10,9 +10,10 @@ from threading import Lock
 from dash.dependencies import Input, Output, State
 
 from .app import app
-from .components.functions import generate_marker, update_rx_power_bar, calculate_zoom_area_position
+from .components.functions import generate_marker, update_rx_power_bar, calculate_zoom_area_position, calculate_marker_pos
 
 from ..src.constants import SQUARE_SIZE
+from ..src.camera_settings import get_camera_config
 from ..koruza_v2_tracking.algorithms.spiral_align import SpiralAlign
 
 log = logging.getLogger('werkzeug')
@@ -35,7 +36,12 @@ class KoruzaGuiCallbacks():
 
         # load calibration into local storage
         self.lock.acquire()
+        self.curr_calib = self.koruza_client.get_calibration()["calibration"]
         self.calib = self.koruza_client.get_calibration()["calibration"]
+        self.lock.release()
+
+        self.lock.acquire()
+        self.zoomed_in = self.koruza_client.get_zoom_data()
         self.lock.release()
 
         self.mode = mode
@@ -232,28 +238,68 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "camera-overlay":
                     try:
-                        self.calib["offset_x"] = click_data["points"][0]["x"]
-                        self.calib["offset_y"] = click_data["points"][0]["y"]
-                        print(f"Clicked on: {self.calib}")
-                        if not zoom_state:
-                            display_confirm_calib_dialog = True
+                        self.curr_calib["offset_x"] = click_data["points"][0]["x"]
+                        self.curr_calib["offset_y"] = click_data["points"][0]["y"]
+                        # if not zoom_state:
+                        display_confirm_calib_dialog = True
 
                     except Exception as e:
                         log.warning(f"An error occured when setting calibration: {e}")
                     
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
-                    print(f"calib: {self.calib}")
+
+                    # update calibration depending on zoom level
+                    if self.zoomed_in:
+                        cam_config = get_camera_config()    
+                        img_p = cam_config["img_p"]
+                        # calcuate global coordinates from zoomed in coordinates
+                        # 1. get camera settings to get position in picture
+
+                        current_marker_x = self.curr_calib["offset_x"]
+                        current_marker_y = self.curr_calib["offset_y"]
+
+                        global_marker_x = current_marker_x * cam_config["img_p"] + cam_config["x"] * 720.0
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - current_marker_y) * img_p
+                        global_marker_x = ((global_marker_x * 2) - 1) // 2
+                        global_marker_y = ((global_marker_y * 2) - 1) // 2
+                        self.calib["offset_x"] = global_marker_x
+                        self.calib["offset_y"] = global_marker_y
+
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(global_marker_x, global_marker_y, img_p)
+
+                        # update camera config if cam position is different from current position
+                        if clamped_x != cam_config["x"] or clamped_y != cam_config["y"]:
+                            self.koruza_client.update_camera_config(clamped_x, clamped_y, img_p, None)
+
+
+                        marker_x = current_marker_x
+                        marker_y = current_marker_y
+
+                        # move marker if zoomed in image is outside of bounds
+                        if x > 0 and x < 0.5:
+                            marker_x = 360.0
+                        
+                        if y > 0 and y < 0.5:
+                            marker_y = 360.0
+
+                        # line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+
+                    else:
+                        self.calib["offset_x"] = self.curr_calib["offset_x"]
+                        self.calib["offset_y"] = self.curr_calib["offset_y"]
+                        marker_x = self.calib["offset_x"]
+                        marker_y = self.calib["offset_y"]
+
                     self.koruza_client.update_calibration(self.calib)
-                    x = self.calib["offset_x"]
-                    y = self.calib["offset_y"]
-                    line_lb_rt, line_lt_rb = generate_marker(x, y, SQUARE_SIZE)
+                    line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                     fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     self.lock.release()
 
                 if prop_id == "camera-zoom-toggle":
                     self.lock.acquire()
                     self.koruza_client.update_zoom_data(zoom_checked)
+                    self.zoomed_in = zoom_checked
                     marker_x = self.calib["offset_x"]
                     marker_y = self.calib["offset_y"]
                     if zoom_checked:
@@ -261,26 +307,13 @@ class KoruzaGuiCallbacks():
                         x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
                         self.koruza_client.update_camera_config(clamped_x, clamped_y, img_p, None)
 
-                        # move marker if zoomed in image is outside of bounds
-                        if x < 0:
-                            marker_x = 360.0 + ((1 / img_p) * x * 720.0)
-                        elif x > 0.5:
-                            marker_x = 360.0 + ((1 / img_p) * (x - 0.5)) * 720.0
-                        else:
-                            marker_x = 360.0
-                        
-                        if y < 0:
-                            marker_y = 360.0 - ((1 / img_p) * y * 720.0)
-                        elif y > 0.5:
-                            marker_y = 360.0 - ((1 / img_p) * (y - 0.5)) * 720.0
-                        else:
-                            marker_y = 360.0
+                        marker_x, marker_y = calculate_marker_pos(x, y, img_p)
 
                         line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
 
                     else:
-                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                         self.koruza_client.update_camera_config(0, 0, 0.5, 1)  # default zoomed out settings
+                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
 
                     fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     self.lock.release()

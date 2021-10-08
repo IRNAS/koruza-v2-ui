@@ -66,3 +66,21 @@ def calculate_zoom_area_position(marker_x, marker_y, img_p):
 
 def clamp(n, smallest, largest): 
     return max(smallest, min(n, largest))
+
+def calculate_marker_pos(x, y, img_p):
+    # move marker if zoomed in image is outside of bounds
+    if x < 0:
+        marker_x = 360.0 + ((1 / img_p) * x * 720.0)
+    elif x > 0.5:
+        marker_x = 360.0 + ((1 / img_p) * (x - 0.5)) * 720.0
+    else:
+        marker_x = 360.0
+    
+    if y < 0:
+        marker_y = 360.0 - ((1 / img_p) * y * 720.0)
+    elif y > 0.5:
+        marker_y = 360.0 - ((1 / img_p) * (y - 0.5)) * 720.0
+    else:
+        marker_y = 360.0
+
+    return marker_x, marker_y

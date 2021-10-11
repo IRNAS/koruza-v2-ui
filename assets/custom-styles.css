@@ -193,11 +193,10 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 600px;
+        position: absolute;
         width: 540px;
-        position: relative;
-        top: -570px;
-        left: 0px;
+        height: 600px;
+        top: -30px;
     }
 }
 
@@ -233,11 +232,10 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 712px;
+        position: absolute;
         width: 640px;
-        position: relative;
-        top: -676px;
-        left: 0px;
+        height: 712px;
+        top: -36px;
     }
 }
 
@@ -253,11 +251,10 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 712px;
+        position: absolute;
         width: 640px;
-        position: relative;
-        top: -676px;
-        left: 0px;
+        height: 712px;
+        top: -36px;
     }
 }
 
@@ -272,11 +269,10 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 712px;
+        position: absolute;
         width: 640px;
-        position: relative;
-        top: -676px;
-        left: 0px;
+        height: 712px;
+        top: -36px;
     }
 }
 
@@ -291,17 +287,10 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 800px;
+        position: absolute;
         width: 720px;
-        position: relative;
-        top: -760px;
-        left: 0px;
-    }
-    
-    .camera-zoom-div {
-        width: 80%;
-        position: relative;
-        left: 86px;
+        height: 800px;
+        top: -40px;
     }
 }
 
@@ -316,18 +305,12 @@ input:checked+.slider-toggle:before {
     }
 
     .graph-container {
-        height: 800px;
+        position: absolute;
         width: 720px;
-        position: relative;
-        top: -760px;
-        left: 0px;
+        height: 800px;
+        top: -40px;
     }
-    
-    .camera-zoom-div {
-        width: 80%;
-        position: relative;
-        left: 86px;
-    }
+
 }
 
 

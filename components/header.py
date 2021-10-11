@@ -29,7 +29,12 @@ def header():
                                     dbc.NavItem(dbc.NavLink(id="dashboard-navlink", className="custom-nav-link", children="Unit Dashboard", href="/dashboard", active="exact"))
                                 ]
                             ),
-                            
+                            html.Li(
+                                style={"height": "33px"},
+                                children=[
+                                    dbc.NavItem(dbc.NavLink(id="calibration-navlink", className="custom-nav-link", children="Unit Calibration", href="/calibration", active="exact"))
+                                ]
+                            ),
                         ]
                     )
                 ]

@@ -31,10 +31,11 @@ from .components.footer import footer
 from .layouts.info_layout import info_layout
 from .layouts.dashboard_layout import dashboard_layout
 from .layouts.landing_page_layout import landing_page_layout
+from .layouts.calibration_layout import calibration_layout
 
 from ..src.config_manager import get_config
 from ..src.constants import KORUZA_MAIN_PORT
-from ..src.camera_settings import get_set_zoom
+from ..src.camera_util import get_set_zoom
 
 log = logging.getLogger()
 
@@ -85,6 +86,7 @@ client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow
 koruza_callbacks = KoruzaGuiCallbacks(client, mode)
 koruza_callbacks.init_dashboard_callbacks()
 koruza_callbacks.init_info_layout_callbacks()
+koruza_callbacks.init_calibration_callbacks()
 
 # Update page
 # # # # # # # # #
@@ -108,6 +110,7 @@ def display_page(pathname):
         logging.warning(f"Error trying to get remote unit led data: {e}")
         remote_unit_led_data = None
 
+    # TODO add zoom level with calibration, change image according to that
     try:
         zoom_data = client.get_zoom_data()
     except Exception as e:
@@ -141,13 +144,31 @@ def display_page(pathname):
     except Exception as e:
         pass
 
+    camera_config = {}
+    try:
+        camera_config = client.get_camera_config()
+    except Exception as e:
+        pass
+
+    print(f"Camera config: {camera_config}")
+
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
+    if pathname == "/calibration":
+        # update camera based on requested layout
+        client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+        return calibration_layout(calibration_data)
     if pathname == "/info":
+        # update camera based on requested layout
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, remote_unit_led_data, calibration_data, mode, local_unit_ip, remote_unit_ip, zoom_data)  # pass configs to layout
+        zoom_factor = 1 if zoom_data is False else calibration_data["calibration"]["zoom_level"]
+        if zoom_data:
+            client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+        else:
+            client.update_camera_config(None, 0, 0, 1)
+        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data)  # pass configs to layout
     else:
         return landing_page_layout
 

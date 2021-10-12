@@ -4,11 +4,13 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 
+from ..app import app
+
 from ..components.custom_toggle import custom_toggle
 
 log = logging.getLogger()
 
-def camera_display(src, zoom_data):
+def camera_display(src, zoom_data, zoom_level):
     """Generate video stream div with overlay"""
 
     camera_div = html.Div(
@@ -21,7 +23,7 @@ def camera_display(src, zoom_data):
                         className="video-container",
                         children=[ 
                             html.Img(src=f"{src}?{time.time()}", id="video-stream-container", className="video-container"),
-                            html.Img(src=f"calibration-{zoom_data}.jpg", id="calibration-img-container")
+                            html.Img(src=app.get_asset_url(f"markers/marker_{zoom_level}.png?{time.time()}"), id="calibration-img-container", className="calibration-overlay-container")
                         ]
                     )
                 ]

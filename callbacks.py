@@ -14,7 +14,7 @@ from .app import app
 from .components.functions import generate_marker, update_rx_power_bar
 
 from ..src.constants import SQUARE_SIZE
-from ..src.camera_util import get_camera_config, get_set_zoom, calculate_zoom_area_position, calculate_marker_pos
+from ..src.camera_util import get_camera_config, get_set_zoom, calculate_zoom_area_position, calculate_marker_pos, generate_overlay_image, clamp
 from ..koruza_v2_tracking.algorithms.spiral_align import SpiralAlign
 
 log = logging.getLogger('werkzeug')
@@ -28,12 +28,12 @@ PORT = 8080
 VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 class KoruzaGuiCallbacks():
-    def __init__(self, client, mode):
+    def __init__(self, client, mode, lock):
         """
         Initialize koruzaGuiCallbacks class. Initializes tcp client used to send requests and listen for responses
         """
         self.koruza_client = client
-        self.lock = Lock()
+        self.lock = lock
 
         # load calibration into local storage
         self.lock.acquire()
@@ -75,7 +75,7 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
                 # print(sfp_data)
             except Exception as e:
-                log.error(e)
+                print(e)
             self.lock.release()
 
             rx_power = 0
@@ -123,7 +123,7 @@ class KoruzaGuiCallbacks():
                 # print(f"Gotten remote sfp diagnostics: {sfp_data}")
             except Exception as e:
                 sfp_data = {}
-                log.warning(f"Error getting secondary sfp data: {e}")
+                print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
 
             rx_power = 0
@@ -151,24 +151,20 @@ class KoruzaGuiCallbacks():
 
         @app.callback(
             [
-                Output("confirm-restore-calibration-dialog", "displayed"),
                 Output("confirm-update-unit-dialog", "displayed"),
                 Output("update-status-dialog", "displayed"),
                 Output("update-status-dialog", "message")
             ],
             [
-                Input("btn-restore-calib", "n_clicks"),
-                Input("confirm-restore-calibration-dialog", "submit_n_clicks"),
                 Input("btn-update-unit", "n_clicks"),
                 Input("confirm-update-unit-dialog", "submit_n_clicks")
             ],
             prevent_initial_call=True  # TIL this is supposed to not trigger the initial
         )
-        def update_restore_calibration(btn_restore, dialog_restore, btn_update, dialog_update):
+        def update_unit(btn_update, dialog_update):
             """Defines callbacks used to restore calibration"""
 
             ctx = dash.callback_context
-            display_restore_calib_dialog = False
             display_update_unit_dialog = False
             display_update_status_dialog = False
             message = ""
@@ -176,14 +172,6 @@ class KoruzaGuiCallbacks():
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
-
-                if prop_id == "btn-restore-calib":
-                    display_restore_calib_dialog = True
-                    
-                if prop_id == "confirm-restore-calibration-dialog":
-                    self.lock.acquire()
-                    self.koruza_client.restore_calibration()
-                    self.lock.release()
 
                 if prop_id == "btn-update-unit":
                     display_update_unit_dialog = True
@@ -199,7 +187,7 @@ class KoruzaGuiCallbacks():
                         message = f"The unit is already at the latest version: {ver}!"
 
             
-            return display_restore_calib_dialog, display_update_unit_dialog, display_update_status_dialog, message
+            return display_update_unit_dialog, display_update_status_dialog, message
 
     def init_calibration_callbacks(self):
         """Defines all callbacks used on unit calibration page"""
@@ -208,13 +196,17 @@ class KoruzaGuiCallbacks():
             [
                 Output("camera-overlay", "figure"),
                 Output("confirm-calibration-dialog", "displayed"),
-                Output("calibration-stream-container", "src")
+                Output("calibration-stream-container", "src"),
+                Output("confirm-restore-calibration-dialog", "displayed"),
+                Output("javascript", "run")
             ],
             [
                 Input("camera-overlay", "clickData"),
                 Input("confirm-calibration-dialog", "submit_n_clicks"),
                 Input("camera-zoom-slider", "value"),
                 Input("calibration-btn", "n_clicks"),
+                Input("btn-restore-calib", "n_clicks"),
+                Input("confirm-restore-calibration-dialog", "submit_n_clicks")
             ],
             [
                 State("camera-overlay", "figure"),
@@ -222,7 +214,7 @@ class KoruzaGuiCallbacks():
             ],
             prevent_initial_call=True  # TIL this is supposed to not trigger the initial
         )
-        def update_calibration_position(click_data, confirm_calib, zoom_changed, calib_btn, fig, zoom_state):
+        def update_calibration_position(click_data, confirm_calib, zoom_changed, calib_btn, restore_calib_btn, confirm_restore_calib, fig, zoom_state):
             """Update calibration position and save somewhere globally. TODO: a file with global config"""
             # HELP:
             # https://dash.plotly.com/annotations
@@ -230,14 +222,32 @@ class KoruzaGuiCallbacks():
 
             ctx = dash.callback_context
             display_confirm_calib_dialog = False
-            # js = ""
+            display_restore_calib_dialog = False
+
+            js = ""
             img_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
 
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
 
-                print(f"split: {split}")
+                # print(f"split: {split}")
+
+                if prop_id == "btn-restore-calib":
+                    display_restore_calib_dialog = True
+                    
+                if prop_id == "confirm-restore-calibration-dialog":
+                    self.lock.acquire()
+                    self.koruza_client.restore_calibration()
+
+                    cam_config = self.koruza_client.get_camera_config()
+                    self.calib = self.koruza_client.get_calibration()["calibration"]
+
+                    self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
+                    self.koruza_client.update_calibration(self.calib)
+
+                    js = "location.reload();"
+                    self.lock.release()
 
                 if prop_id == "calibration-btn":
                     display_confirm_calib_dialog = True
@@ -256,22 +266,29 @@ class KoruzaGuiCallbacks():
                     # covert to global coordinates
                     global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
                     global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
-                    marker_x = round(global_marker_x)
-                    marker_y = round(global_marker_y)
+
+                    if img_p == 1.0:
+                        pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
+                        marker_x = sum(pixels_x) / len(pixels_x)
+                        pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
+                        marker_y = sum(pixels_y) / len(pixels_y)
+                    else:
+                        marker_x = round(global_marker_x)
+                        marker_y = round(global_marker_y)
 
                     # get new position of top left zoom area based on calculation
                     x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                    self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
                     
                     if img_p != 1.0:
                         marker_x, marker_y = calculate_marker_pos(x, y, img_p)
 
                     self.curr_calib["offset_x"] = marker_x
                     self.curr_calib["offset_y"] = marker_y
-                    self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
                     line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                     fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
-                    
                     self.lock.release()
+                    
 
                 if prop_id == "camera-overlay":
                     try:
@@ -281,23 +298,71 @@ class KoruzaGuiCallbacks():
 
                         print(f"curr_calib: {self.curr_calib}")
 
-                        line_lb_rt, line_lt_rb = generate_marker(self.curr_calib["offset_x"], self.curr_calib["offset_y"], SQUARE_SIZE)
+                        img_p = math.sqrt(1.0 / zoom_state)
+
+                        cam_config = get_camera_config()
+
+                        marker_x = self.curr_calib["offset_x"]
+                        marker_y = self.curr_calib["offset_y"]
+
+                        # covert to global coordinates
+                        global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+
+                        if img_p == 1.0:
+                            pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
+                            marker_x = sum(pixels_x) / len(pixels_x)
+                            pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
+                            marker_y = sum(pixels_y) / len(pixels_y)
+                        else:
+                            marker_x = round(global_marker_x)
+                            marker_y = round(global_marker_y)
+
+                        # get new position of top left zoom area based on calculation
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
+                        
+                        if img_p != 1.0:
+                            marker_x, marker_y = calculate_marker_pos(x, y, img_p)
+
+                        self.curr_calib["offset_x"] = marker_x
+                        self.curr_calib["offset_y"] = marker_y
+                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                         fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:
-                        log.warning(f"An error occured when setting calibration: {e}")
+                        print(f"An error occured when setting calibration: {e}")
 
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
                     self.calib["offset_x"] = self.curr_calib["offset_x"]
                     self.calib["offset_y"] = self.curr_calib["offset_y"]
                     self.calib["zoom_level"] = self.curr_calib["zoom_level"]
-                    
+
+                    cam_config = get_camera_config()
+                    # generate overlay image with zoom level set
+                    generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
+
+                    # generate overlay image with zoom = 1x
+
+                    marker_x = self.calib["offset_x"]
+                    marker_y = self.calib["offset_y"]
+                    self.calib["zoom_level"] = zoom_state
+
+                    img_p = math.sqrt(1.0 / zoom_state)
+
+                    # covert to global coordinates
+                    global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                    global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+                    marker_x = global_marker_x
+                    marker_y = global_marker_y
+
+                    generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
 
                     self.koruza_client.update_calibration(self.calib)
                     self.koruza_client.update_camera_calib()
                     self.lock.release()
             
-            return fig, display_confirm_calib_dialog, img_src
+            return fig, display_confirm_calib_dialog, img_src, display_restore_calib_dialog, js
 
 
     def init_dashboard_callbacks(self):
@@ -326,8 +391,8 @@ class KoruzaGuiCallbacks():
             ctx = dash.callback_context
             display_confirm_calib_dialog = False
             # js = ""
-            img_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
-
+            video_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
+            zoom_level = 1
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
@@ -339,13 +404,17 @@ class KoruzaGuiCallbacks():
                     marker_x = self.calib["offset_x"]
                     marker_y = self.calib["offset_y"]
                     camera_config = self.koruza_client.get_camera_config()
+                    # print(f"Camera config json: {camera_config}")
                     if zoom_checked:
+                        # print(f"Focus on marker!")
+                        zoom_level = self.calib["zoom_level"]
                         self.koruza_client.focus_on_marker(marker_x, marker_y, camera_config["IMG_P"], camera_config)
                     else:
                         self.koruza_client.update_camera_config(None, 0, 0, 1)  # default zoomed out settings
                     self.lock.release()
             
-            return img_src, img_src
+            img_src = app.get_asset_url(f"markers/marker_{zoom_level}.png?{time.time()}")
+            return video_src, img_src
 
         #  local unit info update
         @app.callback(
@@ -377,7 +446,7 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
                 # print(sfp_data)
             except Exception as e:
-                log.error(e)
+                print(e)
             self.lock.release()
 
             rx_power = 0
@@ -435,7 +504,7 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.issue_remote_command("get_sfp_diagnostics", ())
                 # print(f"Gotten remote sfp diagnostics: {sfp_data}")
             except Exception as e:
-                log.warning(f"Error getting secondary sfp data: {e}")
+                print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
             # print(f"Duration of get_sfp_diagnostics on remote RPC call: {time.time() - start_time}")
 
@@ -502,7 +571,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_remote_command("move_motors", (0, steps, 0))
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "ArrowDown":
                         log.info(f"move secondary down for {steps}")
@@ -510,7 +579,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_remote_command("move_motors", (0, -steps, 0))
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "ArrowRight":
                         log.info(f"move secondary left for {steps}")
@@ -518,7 +587,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_remote_command("move_motors", (steps, 0, 0))
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "ArrowLeft":
                         log.info(f"move secondary right for {steps}")
@@ -526,7 +595,7 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_remote_command("move_motors", (-steps, 0, 0))
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
 
                 #  remote unit callbacks
@@ -536,7 +605,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.issue_remote_command("move_motors", (0, steps, 0))
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-down-remote":
@@ -545,7 +614,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.issue_remote_command("move_motors", (0, -steps, 0))
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-left-remote":
@@ -554,7 +623,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.issue_remote_command("move_motors", (-steps, 0, 0))
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-right-remote":
@@ -563,7 +632,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.issue_remote_command("move_motors", (steps, 0, 0))
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "confirm-homing-dialog-remote":
@@ -572,7 +641,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.issue_remote_command("home", ())
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-center-remote":
@@ -585,12 +654,12 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.issue_remote_command("toggle_led", ())
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                     else:
                         try:
                             self.koruza_client.issue_remote_command("toggle_led", ())
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                     self.lock.release()
 
             return display_remote_homing_dialog
@@ -646,28 +715,28 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.move_motors(0, steps, 0)
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "s":
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(0, -steps, 0)
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "d":
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(steps, 0, 0)
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
                     if event["key"] == "a":
                         self.lock.acquire()
                         try:
                             self.koruza_client.move_motors(-steps, 0, 0)
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                         self.lock.release()
 
                 #  primary unit callbacks
@@ -677,7 +746,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.move_motors(0, steps, 0)
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-down-local":
@@ -686,7 +755,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.move_motors(0, -steps, 0)
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-left-local":
@@ -695,7 +764,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.move_motors(-steps, 0, 0)
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "motor-control-btn-right-local":
@@ -704,7 +773,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.move_motors(steps, 0, 0)
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "confirm-homing-dialog-local":
@@ -714,7 +783,7 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.home()
                     except Exception as e:
-                        log.warning(e)
+                        print(e)
                     self.lock.release()
 
                 if prop_id == "confirm-align-dialog-local":
@@ -736,12 +805,12 @@ class KoruzaGuiCallbacks():
                         try:
                             self.koruza_client.toggle_led()
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                     else:
                         try:
                             self.koruza_client.toggle_led()
                         except Exception as e:
-                            log.warning(e)
+                            print(e)
                     self.lock.release()
                 
             return display_local_homing_dialog, display_local_align_dialog

@@ -38,7 +38,6 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
         children=[
             local_interval,
             remote_interval,
-            dcc.ConfirmDialog(id="confirm-restore-calibration-dialog", message="Restore calibration to factory default?"),
             dcc.ConfirmDialog(id="confirm-update-unit-dialog", message="Check for updates?"),
             dcc.ConfirmDialog(id="update-status-dialog", message="The unit is updating. The unit will restart once the update is finished!"),
             dbc.Row(

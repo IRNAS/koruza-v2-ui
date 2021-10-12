@@ -33,7 +33,7 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data):
+def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_level):
 
     if mode == "primary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
@@ -79,17 +79,17 @@ def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote
                     dbc.Col(
                         xs=12,  # put content in columns when viewing on small devices
                         sm=12,
-                        md=6,
-                        lg=6,
+                        md=7,
+                        lg=7,
                         children=[
-                            camera_display(VIDEO_STREAM_SRC, zoom_data)
+                            camera_display(VIDEO_STREAM_SRC, zoom_data, zoom_level)
                         ]
                     ),
                     dbc.Col(
                         xs=12,
                         sm=12,
-                        md=4,
-                        lg=4,
+                        md=5,
+                        lg=5,
                         children=[
                             local_control,
                             remote_control

@@ -1,4 +1,5 @@
 import socket
+import visdcc
 import dash_daq as daq
 import dash_html_components as html
 import dash_core_components as dcc
@@ -19,8 +20,10 @@ def calibration_layout(calibration_data):
         className="float-left",
         style={"margin-left": "20px"},
         children=[
+            visdcc.Run_js("javascript"),  # run javascript to refresh page on demand
             dcc.ConfirmDialog(id="confirm-calibration-dialog", message="Are you sure you want to set new calibration?"),
             dcc.ConfirmDialog(id="confirm-zoom-dialog", message="Are you sure you want to change the zoom level?"),
+            dcc.ConfirmDialog(id="confirm-restore-calibration-dialog", message="Restore calibration to factory default?"),
             dbc.Row(  # single bootstrap row
                 className="mt-5",
                 children=[
@@ -54,21 +57,22 @@ def calibration_layout(calibration_data):
                                                 id='camera-zoom-slider',
                                                 updatemode="mouseup",
                                                 min=1,
-                                                max=20,
-                                                step=0.5,
+                                                max=21,
+                                                step=1,
                                                 value=calibration_data["calibration"]["zoom_level"],
                                                 marks={
                                                     1: {"label": "1x", "style": {"font-size": "14px"}},
                                                     2: {"label": "2x", "style": {"font-size": "14px"}},
-                                                    4: {"label": "4x", "style": {"font-size": "14px"}},
-                                                    6: {"label": "6x", "style": {"font-size": "14px"}},
-                                                    8: {"label": "8x", "style": {"font-size": "14px"}},
-                                                    10: {"label": "10x", "style": {"font-size": "14px"}},
-                                                    12: {"label": "12x", "style": {"font-size": "14px"}},
-                                                    14: {"label": "14x", "style": {"font-size": "14px"}},
-                                                    16: {"label": "16x", "style": {"font-size": "14px"}},
-                                                    18: {"label": "18x", "style": {"font-size": "14px"}},
-                                                    20: {"label": "20x", "style": {"font-size": "14px"}}
+                                                    3: {"label": "3x", "style": {"font-size": "14px"}},
+                                                    5: {"label": "5x", "style": {"font-size": "14px"}},
+                                                    7: {"label": "7x", "style": {"font-size": "14px"}},
+                                                    9: {"label": "9x", "style": {"font-size": "14px"}},
+                                                    11: {"label": "11x", "style": {"font-size": "14px"}},
+                                                    13: {"label": "13x", "style": {"font-size": "14px"}},
+                                                    15: {"label": "15x", "style": {"font-size": "14px"}},
+                                                    17: {"label": "17x", "style": {"font-size": "14px"}},
+                                                    19: {"label": "19x", "style": {"font-size": "14px"}},
+                                                    21: {"label": "21x", "style": {"font-size": "14px"}}
                                                 }
                                             )
                                         ]
@@ -81,7 +85,17 @@ def calibration_layout(calibration_data):
                                         size="lg",
                                         n_clicks=0,
                                         color="#00aacf"
-                                    )
+                                    ),
+                                    dbc.Button(
+                                        html.Span("Restore Calibration", style={"font-size": "18px"}),
+                                        id="btn-restore-calib",
+                                        className="align-self-center control-btn", 
+                                        style={"width": "200px", "margin-top": "20px", "margin-left": "20px"},
+                                        # style=style, 
+                                        size="lg",
+                                        n_clicks=0,
+                                        color="#00aacf"
+                                    ),
                                 ]
                             )
                         ]

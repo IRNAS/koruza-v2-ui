@@ -184,7 +184,8 @@ input:checked+.slider-toggle:before {
 @media (min-width: 0px) {
     .container, .container-sm {
         max-width: 540px;
-        min-width: 540px
+        min-width: 540px;
+        margin-left: 20px;
     }
 
     .video-container {
@@ -197,6 +198,13 @@ input:checked+.slider-toggle:before {
         width: 540px;
         height: 600px;
         top: -30px;
+    }
+
+    .calibration-overlay-container {
+        height: 540px;
+        width: 540px;
+        position: absolute;
+        left: 5px;
     }
 }
 
@@ -223,7 +231,7 @@ input:checked+.slider-toggle:before {
 @media (min-width: 768px) {
     .container, .container-sm, .container-md .video-container-md {
         max-width: 1240px;
-        min-width: 1240px
+        min-width: 1240px;
     }
 
     .video-container {
@@ -236,6 +244,13 @@ input:checked+.slider-toggle:before {
         width: 640px;
         height: 712px;
         top: -36px;
+    }
+
+    .calibration-overlay-container {
+        height: 640px;
+        width: 640px;
+        position: absolute;
+        left: 45px;
     }
 }
 
@@ -256,6 +271,13 @@ input:checked+.slider-toggle:before {
         height: 712px;
         top: -36px;
     }
+
+    .calibration-overlay-container {
+        height: 640px;
+        width: 640px;
+        position: absolute;
+        left: 45px;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -274,6 +296,13 @@ input:checked+.slider-toggle:before {
         height: 712px;
         top: -36px;
     }
+
+    .calibration-overlay-container {
+        height: 640px;
+        width: 640px;
+        position: absolute;
+        left: 45px;
+    }
 }
 
 @media (min-width: 1440px) {
@@ -291,6 +320,13 @@ input:checked+.slider-toggle:before {
         width: 720px;
         height: 800px;
         top: -40px;
+    }
+
+    .calibration-overlay-container {
+        height: 720px;
+        width: 720px;
+        position: absolute;
+        left: 63px;
     }
 }
 
@@ -311,6 +347,12 @@ input:checked+.slider-toggle:before {
         top: -40px;
     }
 
+    .calibration-overlay-container {
+        height: 720px;
+        width: 720px;
+        position: absolute;
+        left: 162px;
+    }
 }
 
 

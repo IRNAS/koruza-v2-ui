@@ -80,6 +80,16 @@
     transition: .2s;
 }
 
+.slider-toggle-delayed {
+    -webkit-transition: .5s;
+    transition: .5s;
+}
+
+.slider-toggle-delayed:before {
+    -webkit-transition: .5s;
+    transition: .5s;
+}
+
 input:checked+.slider-toggle {
     background-color: #00aacf;
 }

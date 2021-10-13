@@ -28,32 +28,7 @@ def camera_display(src, zoom_data, zoom_level):
                     )
                 ]
             ),
-            html.Div(
-                className="mt-4 camera-zoom-div",
-                style={"text-align": "center"},
-                children=[
-                    html.Div(
-                        children=[
-                            dbc.FormGroup(
-                                children=[
-                                    dbc.Label(
-                                        className="switch",
-                                        children=[
-                                            dbc.Checkbox(
-                                                id="camera-zoom-toggle",
-                                                checked=zoom_data
-                                            ),
-                                            html.Span(className="slider-toggle round")
-                                        ]
-                                    )
-                                ],
-                                check=True
-                            ),
-                            html.P(children="Zoom", style={"position": "relative", "left": "6px"}, className="property-value")
-                        ]
-                    )
-                ]
-            )
+            custom_toggle(id="camera-zoom-toggle", checked=zoom_data, label="Zoom", style={"text-align": "center"}, className="mt-4 camera-zoom-div", delayed=True, label_left_offset="6px")
         ]
     )
     return camera_div

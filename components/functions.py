@@ -1,8 +1,10 @@
 """
 Functions used in callbacks and layouts
 """
-
+import json
 from .rx_indicator import rx_indicator
+
+SECRETS_FILENAME = "./koruza_v2/koruza_v2_ui/secrets.json"
 
 def update_rx_power_bar(id, signal_str):
     class_name = ""
@@ -52,3 +54,15 @@ def generate_marker(pos_x, pos_y, SQUARE_SIZE):
     }
 
     return marker_lb_rt, marker_lt_rb
+
+def get_valid_users():
+    """Load valid users from secrets file for basic authentication"""
+    valid_user_pass_pairs = {}
+    with open(SECRETS_FILENAME, "r") as file:
+        secrets_json = json.load(file)
+        for user in secrets_json["users"]:
+            print(f"User: {user}")
+            for username, password in user.items():
+                valid_user_pass_pairs[username] = password
+
+    return valid_user_pass_pairs

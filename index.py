@@ -8,15 +8,16 @@
 # run with sudo python3 -m koruza_v2.koruza_v2_ui.index
 
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, Output
-
-from threading import Lock
-
 import socket
 import logging
 import xmlrpc.client
+
+from flask import request
+from threading import Lock
+
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from .app import server
@@ -183,7 +184,6 @@ def display_page(pathname):
         client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
         return calibration_layout(calibration_data)
     if pathname == "/info":
-        # update camera based on requested layout
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
         zoom_factor = 1 if zoom_data is False else calibration_data["calibration"]["zoom_level"]

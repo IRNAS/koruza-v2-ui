@@ -18,7 +18,6 @@ from dash.exceptions import PreventUpdate
 from dash_extensions import Keyboard
 
 # import custom components
-from ..components.custom_toggle import custom_toggle
 from ..components.control_panel import control_panel
 from ..components.functions import generate_marker
 from ..components.camera_display import camera_display

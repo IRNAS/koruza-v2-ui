@@ -53,6 +53,7 @@ def info_layout(mode, sfp_data, unit_id, remote_unit_id, local_unit_ip, remote_u
                         children=[
                             info_panel_remote,
                             buttons_remote,
+                            html.P(style={"height": "38px"}),
                             rx_power_graph_remote
                         ]
                     )

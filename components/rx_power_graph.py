@@ -3,7 +3,7 @@ import dash_daq as daq
 import dash_html_components as html
 import dash_core_components as dcc
 
-def rx_power_graph(unit_id):
+def rx_power_graph(mode):
     """
     Generate rx power graph
 
@@ -12,62 +12,62 @@ def rx_power_graph(unit_id):
 
     """
 
-    # TODO remove and replace with actual callbacks
-    x = list(range(0, 60))  # 1 datapoint every 10 seconds, for 10 minutes
-    y = np.sin(x)
-
     return html.Div(
-        dcc.Graph(
-            id=f"rx-power-graph-{unit_id}",
-            config={
-                # "modeBarButtonsToAdd": [ "drawrect" ],
-                "displayModeBar": False,
-                # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
-                # "showAxisDragHandles": False,
-                "displaylogo": False,
-                "editable": False
-            },
-            figure={
-                "data": [
-                    {
-                        "type": "line",
-                        "x": x,  # TODO parse timestamps for x axis
-                        "y": y.tolist(),  # TODO gather data from unit and display on Y
-                    }
-                ],
-                "layout": {
-                    "xaxis": {
-                        "showticklabels": True,
-                        "ticks": "",
-                        "showgrid": False,
-                        "zeroline": False,
-                        "fixedrange": True,
-                    },
-                    "yaxis": {
-                        "showticklabels": True,
-                        "ticks": "outside",
-                        "showgrid": True,
-                        "zeroline": False,
-                        "fixedrange": False,
-                    },
-                    "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
-                    "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
-                    "margin": {
-                        "t": 0,
-                        # "b": 0,
-                        "l": 30,
-                        "r": 10
-                    },
-                    "clickmode": "event",
-                    "hovermode": "closest",
-                    "newshape": {
-                        "line": {
-                            "color": "#ff0000",
-                            "opacity": "1.0"
+        className="mt-3",
+        children=[
+            dcc.Graph(
+                id=f"rx-power-graph-{mode}",
+                style={"height": "260px"},
+                config={
+                    # "modeBarButtonsToAdd": [ "drawrect" ],
+                    "displayModeBar": False,
+                    # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
+                    # "showAxisDragHandles": False,
+                    "displaylogo": False,
+                    "editable": False
+                },
+                figure={
+                    "data": [
+                        {
+                            "type": "line",
+                            "x": [],
+                            "y": [],
+                            "line": {
+                                # "color": range(-40, 1),
+                                # "colorscale": "Hot",
+                                "opacity": "1.0"
+                            }
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {
+                            "showticklabels": True,
+                            "ticks": "",
+                            "showgrid": False,
+                            "zeroline": False,
+                            "fixedrange": False,
+                            "range": [-110, 10]
+                        },
+                        "yaxis": {
+                            "showticklabels": True,
+                            "ticks": "outside",
+                            "showgrid": True,
+                            "zeroline": False,
+                            "fixedrange": True,
+                            "range": [-45, 5],
+                            "title": "Rx Power (dBm)"
+                        },
+                        "paper_bgcolor": "rgba(255, 0, 0, 0.0)",
+                        "plot_bgcolor": "rgba(255, 0, 0, 0.0)",
+                        "margin": {
+                            "t": 20,
+                            # "b": 0,
+                            "l": 60,
+                            "r": 20
                         }
                     }
                 }
-            }
-        )
+            )
+        ]
     )
    

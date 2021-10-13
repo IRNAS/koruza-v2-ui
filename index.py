@@ -8,12 +8,16 @@
 # run with sudo python3 -m koruza_v2.koruza_v2_ui.index
 
 import dash
+import socket
+import logging
+import xmlrpc.client
+
+from flask import request
+from threading import Lock
+
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-
-import logging
-import xmlrpc.client
 
 # see https://community.plot.ly/t/nolayoutexception-on-deployment-of-multi-page-dash-app-example-code/12463/2?u=dcomfort
 from .app import server
@@ -30,9 +34,11 @@ from .components.footer import footer
 from .layouts.info_layout import info_layout
 from .layouts.dashboard_layout import dashboard_layout
 from .layouts.landing_page_layout import landing_page_layout
+from .layouts.calibration_layout import calibration_layout
 
-from ..src.constants import KORUZA_MAIN_PORT
 from ..src.config_manager import get_config
+from ..src.constants import KORUZA_MAIN_PORT
+from ..src.camera_util import get_set_zoom
 
 log = logging.getLogger()
 
@@ -63,28 +69,129 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
-config = get_config()["device_mgmt"]
-ch = config["channel"]
-mode = config[ch]["mode"]
+config = get_config()
+link_config = config["link_config"]
+ch = link_config["channel"]
+mode = link_config[ch]["mode"]
+remote_unit_ip = link_config[ch]["remote_unit_addr"]
+local_unit_id = config["unit_id"]
+local_version = config["version"]
+local_unit_mode = mode
+remote_unit_mode = "secondary" if mode == "primary" else mode
+
+# get local ip
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+local_unit_ip = s.getsockname()[0]
+s.close()
+
+lock = Lock()
 
 client = xmlrpc.client.ServerProxy(f"http://localhost:{KORUZA_MAIN_PORT}", allow_none=True)
-KoruzaGuiCallbacks(client, mode).callbacks()
+koruza_callbacks = KoruzaGuiCallbacks(client, mode, lock)
+koruza_callbacks.init_dashboard_callbacks()
+koruza_callbacks.init_info_layout_callbacks()
+koruza_callbacks.init_calibration_callbacks()
 
 # Update page
 # # # # # # # # #
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    calibration_data = client.get_calibration_data()
-    led_data = client.get_led_data()
-   
+    lock.acquire()
+    try:
+        calibration_data = client.get_calibration()
+    except Exception as e:
+        logging.warning(f"Error trying to get calibration data: {e}")
+        calibration_data = None
+    lock.release()
+    
+    lock.acquire()
+    try:
+        led_data = client.get_led_data()
+    except Exception as e:
+        logging.warning(f"Error trying to get led data: {e}")
+        led_data = None
+    lock.release()
+
+    lock.acquire()
+    try:
+        remote_unit_led_data = client.issue_remote_command("get_led_data", ())
+    except Exception as e:
+        logging.warning(f"Error trying to get remote unit led data: {e}")
+        remote_unit_led_data = None
+    lock.release()
+
+    # TODO add zoom level with calibration, change image according to that
+    lock.acquire()
+    try:
+        zoom_data = client.get_zoom_data()
+    except Exception as e:
+        logging.warning(f"Error trying to get zoom data: {e}")
+        zoom_data = None
+    lock.release()
+
+    sfp_data = {}
+    lock.acquire()
+    try:
+        sfp_data["local"] = client.get_sfp_diagnostics()
+    except Exception as e:
+        sfp_data["local"] = {}
+    if sfp_data["local"] is None:
+        sfp_data["local"] = {}
+    lock.release()
+    
+    lock.acquire()
+    try:
+        sfp_data["remote"] = client.issue_remote_command("get_sfp_diagnostics", ())
+    except Exception as e:
+        sfp_data["remote"] = {}
+    if sfp_data["remote"] is None:
+        sfp_data["remote"] = {}
+    lock.release()
+
+    remote_unit_id = "Not Set"
+    lock.acquire()
+    try:
+        remote_unit_id = client.issue_remote_command("get_unit_id", ())
+    except Exception as e:
+        pass
+    lock.release()
+
+    remote_version = "Not Set"
+    lock.acquire()
+    try:
+        remote_version = client.issue_remote_command("get_unit_version", ())
+    except Exception as e:
+        pass
+    lock.release()
+
+    camera_config = {}
+    lock.acquire()
+    try:
+        camera_config = client.get_camera_config()
+    except Exception as e:
+        pass
+    lock.release()
+
+    print(f"Camera config: {camera_config}")
+
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
-    # if pathname == "/info":
-    #     return info_layout
+    if pathname == "/calibration":
+        # update camera based on requested layout
+        client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+        return calibration_layout(calibration_data)
+    if pathname == "/info":
+        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
-        return dashboard_layout(led_data, calibration_data, mode)  # pass configs to layout
+        zoom_factor = 1 if zoom_data is False else calibration_data["calibration"]["zoom_level"]
+        if zoom_data:
+            client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+        else:
+            client.update_camera_config(None, 0, 0, 1)
+        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor)  # pass configs to layout
     else:
         return landing_page_layout
 

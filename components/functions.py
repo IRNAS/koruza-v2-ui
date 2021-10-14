@@ -61,7 +61,6 @@ def get_valid_users():
     with open(SECRETS_FILENAME, "r") as file:
         secrets_json = json.load(file)
         for user in secrets_json["users"]:
-            print(f"User: {user}")
             for username, password in user.items():
                 valid_user_pass_pairs[username] = password
 

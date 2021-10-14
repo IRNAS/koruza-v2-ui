@@ -37,12 +37,21 @@ class KoruzaGuiCallbacks():
 
         # load calibration into local storage
         self.lock.acquire()
-        self.curr_calib = self.koruza_client.get_calibration()["calibration"]
-        self.calib = self.koruza_client.get_calibration()["calibration"]
+        try:
+            self.curr_calib = self.koruza_client.get_calibration()["calibration"]
+            self.calib = self.koruza_client.get_calibration()["calibration"]
+        except Exception as e:
+            self.curr_calib = {}
+            self.calib = {}
+            print(f"Failed to get calibration from main: {e}")
         self.lock.release()
 
         self.lock.acquire()
-        self.zoomed_in = self.koruza_client.get_zoom_data()
+        try:
+            self.zoomed_in = self.koruza_client.get_zoom_data()
+        except Exception as e:
+            print(f"Failed to get zoom data: {e}")
+            self.zoomed_in = None
         self.lock.release()
 
         self.mode = mode
@@ -178,13 +187,16 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "confirm-update-unit-dialog":
                     self.lock.acquire()
-                    ret, ver = self.koruza_client.update_unit()
+                    try:
+                        ret, ver = self.koruza_client.update_unit()
+                        display_update_status_dialog = True
+                        if ret is True:
+                            message = f"The unit is updating to version: {ver}. The unit will restart once the update is finished!"
+                        if ret is False:
+                            message = f"The unit is already at the latest version: {ver}!"
+                    except Exception as e:
+                        print(f"An error occured when updating unit: {e}")
                     self.lock.release()
-                    display_update_status_dialog = True
-                    if ret is True:
-                        message = f"The unit is updating to version: {ver}. The unit will restart once the update is finished!"
-                    if ret is False:
-                        message = f"The unit is already at the latest version: {ver}!"
 
             
             return display_update_unit_dialog, display_update_status_dialog, message
@@ -238,15 +250,18 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "confirm-restore-calibration-dialog":
                     self.lock.acquire()
-                    self.koruza_client.restore_calibration()
+                    try:
+                        self.koruza_client.restore_calibration()
 
-                    cam_config = self.koruza_client.get_camera_config()
-                    self.calib = self.koruza_client.get_calibration()["calibration"]
+                        cam_config = self.koruza_client.get_camera_config()
+                        self.calib = self.koruza_client.get_calibration()["calibration"]
 
-                    self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
-                    self.koruza_client.update_calibration(self.calib)
+                        self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
+                        self.koruza_client.update_calibration(self.calib)
 
-                    js = "location.reload();"
+                        js = "location.reload();"
+                    except Exception as e:
+                        print(f"Error when trying to restore calibration: {e}")
                     self.lock.release()
 
                 if prop_id == "calibration-btn":
@@ -254,43 +269,47 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "camera-zoom-slider":
                     self.lock.acquire()
-                    # get current camera configuration (position of top left corner and zoom)
-                    cam_config = get_camera_config()
+                    try:
+                        # get current camera configuration (position of top left corner and zoom)
+                        cam_config = get_camera_config()
 
-                    marker_x = self.curr_calib["offset_x"]
-                    marker_y = self.curr_calib["offset_y"]
-                    self.curr_calib["zoom_level"] = zoom_state
+                        marker_x = self.curr_calib["offset_x"]
+                        marker_y = self.curr_calib["offset_y"]
+                        self.curr_calib["zoom_level"] = zoom_state
 
-                    img_p = math.sqrt(1.0 / zoom_state)
+                        img_p = math.sqrt(1.0 / zoom_state)
 
-                    # covert to global coordinates
-                    global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
-                    global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+                        # covert to global coordinates
+                        global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
 
-                    if img_p == 1.0:
-                        pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
-                        marker_x = sum(pixels_x) / len(pixels_x)
-                        pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
-                        marker_y = sum(pixels_y) / len(pixels_y)
-                    else:
-                        marker_x = round(global_marker_x)
-                        marker_y = round(global_marker_y)
+                        if img_p == 1.0:
+                            pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
+                            marker_x = sum(pixels_x) / len(pixels_x)
+                            pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
+                            marker_y = sum(pixels_y) / len(pixels_y)
+                        else:
+                            marker_x = round(global_marker_x)
+                            marker_y = round(global_marker_y)
 
-                    # get new position of top left zoom area based on calculation
-                    x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
-                    self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
-                    
-                    if img_p != 1.0:
-                        marker_x, marker_y = calculate_marker_pos(x, y, img_p)
+                        # get new position of top left zoom area based on calculation
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
+                        
+                        if img_p != 1.0:
+                            marker_x, marker_y = calculate_marker_pos(x, y, img_p)
 
-                    self.curr_calib["offset_x"] = marker_x
-                    self.curr_calib["offset_y"] = marker_y
-                    line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
-                    fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+                        self.curr_calib["offset_x"] = marker_x
+                        self.curr_calib["offset_y"] = marker_y
+                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+                    except Exception as e:
+                        print(f"Error when trying to update calibration: {e}")
                     self.lock.release()
                     
 
                 if prop_id == "camera-overlay":
+                    self.lock.acquire()
                     try:
                         self.curr_calib["offset_x"] = click_data["points"][0]["x"]
                         self.curr_calib["offset_y"] = click_data["points"][0]["y"]
@@ -331,35 +350,39 @@ class KoruzaGuiCallbacks():
                         fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:
                         print(f"An error occured when setting calibration: {e}")
+                    self.lock.release()
 
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
-                    self.calib["offset_x"] = self.curr_calib["offset_x"]
-                    self.calib["offset_y"] = self.curr_calib["offset_y"]
-                    self.calib["zoom_level"] = self.curr_calib["zoom_level"]
+                    try:
+                        self.calib["offset_x"] = self.curr_calib["offset_x"]
+                        self.calib["offset_y"] = self.curr_calib["offset_y"]
+                        self.calib["zoom_level"] = self.curr_calib["zoom_level"]
 
-                    cam_config = get_camera_config()
-                    # generate overlay image with zoom level set
-                    generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
+                        cam_config = get_camera_config()
+                        # generate overlay image with zoom level set
+                        generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
 
-                    # generate overlay image with zoom = 1x
+                        # generate overlay image with zoom = 1x
 
-                    marker_x = self.calib["offset_x"]
-                    marker_y = self.calib["offset_y"]
-                    self.calib["zoom_level"] = zoom_state
+                        marker_x = self.calib["offset_x"]
+                        marker_y = self.calib["offset_y"]
+                        self.calib["zoom_level"] = zoom_state
 
-                    img_p = math.sqrt(1.0 / zoom_state)
+                        img_p = math.sqrt(1.0 / zoom_state)
 
-                    # covert to global coordinates
-                    global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
-                    global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
-                    marker_x = global_marker_x
-                    marker_y = global_marker_y
+                        # covert to global coordinates
+                        global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+                        marker_x = global_marker_x
+                        marker_y = global_marker_y
 
-                    generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
+                        generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
 
-                    self.koruza_client.update_calibration(self.calib)
-                    self.koruza_client.update_camera_calib()
+                        self.koruza_client.update_calibration(self.calib)
+                        self.koruza_client.update_camera_calib()
+                    except Exception as e:
+                        print(f"An error occured when confirming calibration: {e}")
                     self.lock.release()
             
             return fig, display_confirm_calib_dialog, img_src, display_restore_calib_dialog, js
@@ -399,18 +422,21 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "camera-zoom-toggle":
                     self.lock.acquire()
-                    self.koruza_client.update_zoom_data(zoom_checked)
-                    self.zoomed_in = zoom_checked
-                    marker_x = self.calib["offset_x"]
-                    marker_y = self.calib["offset_y"]
-                    camera_config = self.koruza_client.get_camera_config()
-                    # print(f"Camera config json: {camera_config}")
-                    if zoom_checked:
-                        # print(f"Focus on marker!")
-                        zoom_level = self.calib["zoom_level"]
-                        self.koruza_client.focus_on_marker(marker_x, marker_y, camera_config["IMG_P"], camera_config)
-                    else:
-                        self.koruza_client.update_camera_config(None, 0, 0, 1)  # default zoomed out settings
+                    try:
+                        self.koruza_client.update_zoom_data(zoom_checked)
+                        self.zoomed_in = zoom_checked
+                        marker_x = self.calib["offset_x"]
+                        marker_y = self.calib["offset_y"]
+                        camera_config = self.koruza_client.get_camera_config()
+                        # print(f"Camera config json: {camera_config}")
+                        if zoom_checked:
+                            # print(f"Focus on marker!")
+                            zoom_level = self.calib["zoom_level"]
+                            self.koruza_client.focus_on_marker(marker_x, marker_y, camera_config["IMG_P"], camera_config)
+                        else:
+                            self.koruza_client.update_camera_config(None, 0, 0, 1)  # default zoomed out settings
+                    except Exception as e:
+                        print(f"An error occured when toggling zoom: {e}")
                     self.lock.release()
             
             img_src = app.get_asset_url(f"markers/marker_{zoom_level}.png?{time.time()}")

@@ -103,7 +103,7 @@ def display_page(pathname):
         calibration_data = client.get_calibration()
     except Exception as e:
         logging.warning(f"Error trying to get calibration data: {e}")
-        calibration_data = None
+        calibration_data = {}
     lock.release()
     
     lock.acquire()
@@ -181,16 +181,25 @@ def display_page(pathname):
     #     return layout_setup_wizard
     if pathname == "/calibration":
         # update camera based on requested layout
-        client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+        try:
+            client.focus_on_marker(calibration_data.get("calibration", {}).get("offset_x", 360), calibration_data.get("calibration", {}).get("offset_y", 360), camera_config.get("IMG_P", 1.0), camera_config)
+        except Exception as e:
+            print(f"Failed to focus on marker: {e}")
         return calibration_layout(calibration_data)
     if pathname == "/info":
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
-        zoom_factor = 1 if zoom_data is False else calibration_data["calibration"]["zoom_level"]
+        zoom_factor = 1 if zoom_data is False else calibration_data.get("calibration", {}).get("zoom_level", False)
         if zoom_data:
-            client.focus_on_marker(calibration_data["calibration"]["offset_x"], calibration_data["calibration"]["offset_y"], camera_config["IMG_P"], camera_config)
+            try:
+                client.focus_on_marker(calibration_data.get("calibration", {}).get("offset_x", 360), calibration_data.get("calibration", {}).get("offset_y", 360), camera_config.get("IMG_P", 1.0), camera_config)
+            except Exception as e:
+                print(f"Failed to focus on marker: {e}")
         else:
-            client.update_camera_config(None, 0, 0, 1)
+            try:
+                client.update_camera_config(None, 0, 0, 1)
+            except Exception as e:
+                print(f"Failed to update camera config: {e}")
         return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor)  # pass configs to layout
     else:
         return landing_page_layout

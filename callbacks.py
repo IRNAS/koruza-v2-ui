@@ -70,7 +70,8 @@ class KoruzaGuiCallbacks():
             [
                 Output("rx-power-graph-local", "figure"),
                 Output("tx-power-local", "children"),
-                Output("rx-power-local", "children")
+                Output("rx-power-local", "children"),
+                Output("motor-status-local", "children")
             ],
             [
                 Input("n-intervals-update-local-info", "n_intervals")
@@ -110,14 +111,27 @@ class KoruzaGuiCallbacks():
             rx_power_graph["data"][0]["y"] = rx_dBm_list
             rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
 
-            return rx_power_graph, tx_label, rx_label
+            motor_status = False
+            self.lock.acquire()
+            try:
+                motor_status = self.koruza_client.get_motor_status()
+            except Exception as e:
+                print(e)
+            self.lock.release()
+
+            motor_status_label = "Not Connected"
+            if motor_status:
+                motor_status_label = "Connected"
+
+            return rx_power_graph, tx_label, rx_label, motor_status_label
 
         # draw on graph
         @app.callback(
             [
                 Output("rx-power-graph-remote", "figure"),
                 Output("tx-power-remote", "children"),
-                Output("rx-power-remote", "children")
+                Output("rx-power-remote", "children"),
+                Output("motor-status-remote", "children")
             ],
             [
                 Input("n-intervals-update-remote-info", "n_intervals")
@@ -159,7 +173,19 @@ class KoruzaGuiCallbacks():
             rx_power_graph["data"][0]["y"] = rx_dBm_list
             rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
 
-            return rx_power_graph, tx_label, rx_label
+            motor_status = False
+            self.lock.acquire()
+            try:
+                motor_status = self.koruza_client.issue_remote_command("get_motor_status", ())
+            except Exception as e:
+                print(e)
+            self.lock.release()
+
+            motor_status_label = "Not Connected"
+            if motor_status:
+                motor_status_label = "Connected"
+
+            return rx_power_graph, tx_label, rx_label, motor_status_label
 
         @app.callback(
             [

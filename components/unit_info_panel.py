@@ -1,10 +1,13 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
-def unit_info_panel(unit, unit_ip, unit_id, unit_mode, sw_version, sfp_data):
+def unit_info_panel(unit, unit_ip, unit_id, unit_mode, sw_version, sfp_data, motor_status):
     """Info panel containing info on unit"""
 
     print(f"SFP data passed to unit info panel: {sfp_data}")
+    motor_status_label = "Not Connected"
+    if motor_status:
+        motor_status_label = "Connected"
 
     return html.Div(
         className="flex-direction-column",
@@ -21,6 +24,13 @@ def unit_info_panel(unit, unit_ip, unit_id, unit_mode, sw_version, sfp_data):
                 children=[
                     html.Div("Unit Mode", className="property-title"),
                     html.Div(unit_mode, id=f"unit-mode-{unit}", style={"font-size": "18px"})
+                ]
+            ),
+             html.Div(
+                className="mt-3",
+                children=[
+                    html.Div("Motor Status", className="property-title"),
+                    html.Div(motor_status_label, id=f"motor-status-{unit}", style={"font-size": "18px"})
                 ]
             ),
             html.Div(

@@ -190,6 +190,22 @@ def display_page(pathname):
         pass
     lock.release()
 
+    local_motor_status = False
+    lock.acquire()
+    try:
+        local_motor_status = client.get_motor_status()
+    except Exception as e:
+        pass
+    lock.release()
+
+    remote_motor_status = False
+    lock.acquire()
+    try:
+        remote_motor_status = client.issue_remote_command("get_motor_status", ())
+    except Exception as e:
+        pass
+    lock.release()
+
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
@@ -201,7 +217,7 @@ def display_page(pathname):
             print(f"Failed to focus on marker: {e}")
         return calibration_layout(curr_calib.get("calibration", {}))
     if pathname == "/info":
-        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
+        return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version, local_motor_status, remote_motor_status)
     if pathname == "/dashboard":
         print(f"Current calibration data: {calibration_data}")
         zoom_factor = 1 if zoom_data is False else calibration_data.get("calibration", {}).get("zoom_level", False)

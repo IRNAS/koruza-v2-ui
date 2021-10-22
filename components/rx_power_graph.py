@@ -20,8 +20,8 @@ def rx_power_graph(mode):
                 style={"height": "260px"},
                 config={
                     # "modeBarButtonsToAdd": [ "drawrect" ],
-                    "displayModeBar": False,
-                    # "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "resetScale2d" ],
+                    # "displayModeBar": False,
+                    "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "lasso2d", "select2d" ],
                     # "showAxisDragHandles": False,
                     "displaylogo": False,
                     "editable": False

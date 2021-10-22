@@ -203,6 +203,7 @@ class KoruzaGuiCallbacks():
 
     def init_calibration_callbacks(self):
         """Defines all callbacks used on unit calibration page"""
+
         # draw on graph
         @app.callback(
             [
@@ -257,7 +258,7 @@ class KoruzaGuiCallbacks():
                         self.calib = self.koruza_client.get_calibration()["calibration"]
 
                         self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
-                        self.koruza_client.update_calibration(self.calib)
+                        self.koruza_client.update_current_calibration(self.calib)
 
                         js = "location.reload();"
                     except Exception as e:
@@ -275,7 +276,6 @@ class KoruzaGuiCallbacks():
 
                         marker_x = self.curr_calib["offset_x"]
                         marker_y = self.curr_calib["offset_y"]
-                        self.curr_calib["zoom_level"] = zoom_state
 
                         img_p = math.sqrt(1.0 / zoom_state)
 
@@ -301,6 +301,9 @@ class KoruzaGuiCallbacks():
 
                         self.curr_calib["offset_x"] = marker_x
                         self.curr_calib["offset_y"] = marker_y
+                        self.curr_calib["zoom_level"] = zoom_state
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
                         line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                         fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:
@@ -346,6 +349,8 @@ class KoruzaGuiCallbacks():
 
                         self.curr_calib["offset_x"] = marker_x
                         self.curr_calib["offset_y"] = marker_y
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
                         line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
                         fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:

@@ -174,15 +174,16 @@ def display_page(pathname):
         pass
     lock.release()
 
-    print(f"Camera config: {camera_config}")
-
     # layouts implemented in the future
     # if pathname == "/setup":  
     #     return layout_setup_wizard
     if pathname == "/calibration":
         # update camera based on requested layout
+        curr_calib = koruza_callbacks.curr_calib
+        print(f"Focusing on marker on reload: {curr_calib}")
+        print(f"Saved camera config: {camera_config}")
         try:
-            client.focus_on_marker(calibration_data.get("calibration", {}).get("offset_x", 360), calibration_data.get("calibration", {}).get("offset_y", 360), camera_config.get("IMG_P", 1.0), camera_config)
+            client.focus_on_marker(curr_calib.get("offset_x", 360), curr_calib.get("offset_y", 360), camera_config.get("IMG_P", 1.0), camera_config)
         except Exception as e:
             print(f"Failed to focus on marker: {e}")
         return calibration_layout(calibration_data)

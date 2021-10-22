@@ -15,8 +15,8 @@ def calibration_display(src, calibration_data):
 
     num_pts = 720
 
-    marker_x = calibration_data.get("calibration", {}).get("offset_x", 360)
-    marker_y = calibration_data.get("calibration", {}).get("offset_y", 360)
+    marker_x = calibration_data.get("offset_x", 360)
+    marker_y = calibration_data.get("offset_y", 360)
 
     marker_lb_rt, marker_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)  # set marker to center of image
 
@@ -39,7 +39,8 @@ def calibration_display(src, calibration_data):
                                 config={
                                     "displayModeBar": False,
                                     "displaylogo": False,
-                                    "editable": False
+                                    "editable": False,
+                                    "staticPlot": False
                                 },
                                 figure={
                                     "data": [

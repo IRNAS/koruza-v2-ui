@@ -54,6 +54,9 @@ class KoruzaGuiCallbacks():
             self.zoomed_in = None
         self.lock.release()
 
+        self.marker = generate_marker(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE)
+        self.calib_action_in_progress = False
+
         self.mode = mode
         if self.mode == "primary":
             self.alignment_alg = SpiralAlign()
@@ -240,6 +243,8 @@ class KoruzaGuiCallbacks():
             js = ""
             img_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
 
+            # print(f"Current marker: {self.marker}")
+
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
@@ -254,11 +259,17 @@ class KoruzaGuiCallbacks():
                     try:
                         self.koruza_client.restore_calibration()
 
-                        cam_config = self.koruza_client.get_camera_config()
-                        self.calib = self.koruza_client.get_calibration()["calibration"]
+                        cam_config = self.koruza_client.get_current_camera_config()
+                        self.curr_calib = self.koruza_client.get_current_calibration()["calibration"]
+                        # self.calib = self.koruza_client.get_calibration()["calibration"]
 
                         self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
-                        self.koruza_client.update_current_calibration(self.calib)
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
+
+                        # self.curr_calib["offset_x"] = self.calib["offset_x"]
+                        # self.curr_calib["offset_y"] = self.calib["offset_y"]
+                        # self.curr_calib["zoom_level"] = self.calib["zoom_level"]
 
                         js = "location.reload();"
                     except Exception as e:
@@ -304,8 +315,9 @@ class KoruzaGuiCallbacks():
                         self.curr_calib["zoom_level"] = zoom_state
                         self.koruza_client.update_current_calibration(self.curr_calib)
                         self.koruza_client.update_current_camera_calib()
-                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
-                        fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+                        # line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        
                     except Exception as e:
                         print(f"Error when trying to update calibration: {e}")
                     self.lock.release()
@@ -349,10 +361,12 @@ class KoruzaGuiCallbacks():
 
                         self.curr_calib["offset_x"] = marker_x
                         self.curr_calib["offset_y"] = marker_y
+
                         self.koruza_client.update_current_calibration(self.curr_calib)
                         self.koruza_client.update_current_camera_calib()
-                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
-                        fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+                        # line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        # fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:
                         print(f"An error occured when setting calibration: {e}")
                     self.lock.release()
@@ -365,14 +379,15 @@ class KoruzaGuiCallbacks():
                         self.calib["zoom_level"] = self.curr_calib["zoom_level"]
 
                         cam_config = get_camera_config()
-                        # generate overlay image with zoom level set
-                        generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
+                        # # generate overlay image with zoom level set
+                        # generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
 
                         # generate overlay image with zoom = 1x
 
                         marker_x = self.calib["offset_x"]
                         marker_y = self.calib["offset_y"]
                         self.calib["zoom_level"] = zoom_state
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
 
                         img_p = math.sqrt(1.0 / zoom_state)
 
@@ -384,12 +399,31 @@ class KoruzaGuiCallbacks():
 
                         generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
 
+                        # convert to 5x zoom and generate marker
+                        # get new position of top left zoom area based on calculation
+                        img_p = math.sqrt(1.0 / 5.0)
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        marker_x, marker_y = calculate_marker_pos(x, y, img_p)
+                        
+
+                        self.calib["offset_x"] = marker_x
+                        self.calib["offset_y"] = marker_y
+                        self.calib["zoom_level"] = 5
+                        
+                        generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_5.png")  # TODO: get relative path
+                        # self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
                         self.koruza_client.update_calibration(self.calib)
-                        self.koruza_client.update_camera_calib()
+                        cam_config = {}
+                        cam_config["x"] = clamped_x
+                        cam_config["y"] = clamped_y
+                        cam_config["img_p"] = img_p
+                        self.koruza_client.update_camera_calib(cam_config)
                     except Exception as e:
                         print(f"An error occured when confirming calibration: {e}")
                     self.lock.release()
+            # fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
             
+            fig["layout"]["shapes"] = self.marker  # draw new shape
             return fig, display_confirm_calib_dialog, img_src, display_restore_calib_dialog, js
 
 
@@ -417,7 +451,6 @@ class KoruzaGuiCallbacks():
             # https://plotly.com/python/creating-and-updating-figures/
 
             ctx = dash.callback_context
-            display_confirm_calib_dialog = False
             # js = ""
             video_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
             zoom_level = 1
@@ -528,7 +561,6 @@ class KoruzaGuiCallbacks():
             # update sfp diagnostics
             sfp_data = {}
             
-            start_time = time.time()
             self.lock.acquire()  # will block until completed
             try:
                 # print("Getting remote sfp diagnostics")
@@ -537,7 +569,6 @@ class KoruzaGuiCallbacks():
             except Exception as e:
                 print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
-            # print(f"Duration of get_sfp_diagnostics on remote RPC call: {time.time() - start_time}")
 
             rx_power = 0
             rx_power_dBm = -40
@@ -548,7 +579,6 @@ class KoruzaGuiCallbacks():
             rx_bar = update_rx_power_bar(id="secondary", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
 
-            start_time = time.time()
             self.lock.acquire()
             try:
                 # print("Getting remote motors position")
@@ -558,7 +588,6 @@ class KoruzaGuiCallbacks():
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
-            # print(f"Duration of get_motors_position on remote RPC call: {time.time() - start_time}")
                 
             return motor_x, motor_y, rx_power_label, rx_bar
 

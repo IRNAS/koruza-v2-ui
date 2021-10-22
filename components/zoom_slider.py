@@ -1,7 +1,7 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-def zoom_slider(calibration_data):
+def zoom_slider(zoom_level):
     return html.Div(
         children=[
             html.Span("Camera Zoom", style={"font-size": "26px"}),
@@ -14,7 +14,7 @@ def zoom_slider(calibration_data):
                 min=1,
                 max=21,
                 step=1,
-                value=calibration_data.get("calibration", {}).get("zoom_level", 1),
+                value=zoom_level,
                 marks={
                     1: {"label": "1x", "style": {"font-size": "14px"}},
                     2: {"label": "2x", "style": {"font-size": "14px"}},

@@ -50,7 +50,7 @@ def calibration_layout(calibration_data):
                                 className="div-control-group",
                                 style={"padding-bottom": "24px", "padding-top": "10px"},
                                 children=[
-                                    zoom_slider(calibration_data),
+                                    zoom_slider(calibration_data.get("zoom_level", 1)),
                                     dbc.Button(
                                         html.Span("Confirm Calibration", style={"font-size": "18px"}),
                                         style={"width": "200px", "margin-top": "20px"},

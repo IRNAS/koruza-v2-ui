@@ -166,10 +166,26 @@ def display_page(pathname):
         pass
     lock.release()
 
+    current_camera_config = {}
+    lock.acquire()
+    try:
+        current_camera_config = client.get_current_camera_config()
+    except Exception as e:
+        pass
+    lock.release()
+
     camera_config = {}
     lock.acquire()
     try:
         camera_config = client.get_camera_config()
+    except Exception as e:
+        pass
+    lock.release()
+
+    curr_calib = {}
+    lock.acquire()
+    try:
+        curr_calib = client.get_current_calibration()
     except Exception as e:
         pass
     lock.release()
@@ -179,17 +195,15 @@ def display_page(pathname):
     #     return layout_setup_wizard
     if pathname == "/calibration":
         # update camera based on requested layout
-        curr_calib = koruza_callbacks.curr_calib
-        print(f"Focusing on marker on reload: {curr_calib}")
-        print(f"Saved camera config: {camera_config}")
         try:
-            client.focus_on_marker(curr_calib.get("offset_x", 360), curr_calib.get("offset_y", 360), camera_config.get("IMG_P", 1.0), camera_config)
+            client.focus_on_marker(curr_calib.get("calibration", {}).get("offset_x", 360), curr_calib.get("calibration", {}).get("offset_y", 360), current_camera_config.get("IMG_P", 1.0), current_camera_config)
         except Exception as e:
             print(f"Failed to focus on marker: {e}")
-        return calibration_layout(calibration_data)
+        return calibration_layout(curr_calib.get("calibration", {}))
     if pathname == "/info":
         return info_layout(mode, sfp_data, local_unit_id, remote_unit_id, local_unit_ip, remote_unit_ip, local_unit_mode, remote_unit_mode, local_version, remote_version)
     if pathname == "/dashboard":
+        print(f"Current calibration data: {calibration_data}")
         zoom_factor = 1 if zoom_data is False else calibration_data.get("calibration", {}).get("zoom_level", False)
         if zoom_data:
             try:

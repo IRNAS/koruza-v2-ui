@@ -155,16 +155,20 @@ def display_page(pathname):
     try:
         remote_unit_id = client.issue_remote_command("get_unit_id", ())
     except Exception as e:
-        pass
+        remote_unit_id = "Not Set"
     lock.release()
+    if remote_unit_id is None:
+        remote_unit_id = "Not Set"
 
     remote_version = "Not Set"
     lock.acquire()
     try:
         remote_version = client.issue_remote_command("get_unit_version", ())
     except Exception as e:
-        pass
+        remote_version = "Not Set"
     lock.release()
+    if remote_version is None:
+        remote_version = "Not Set"
 
     current_camera_config = {}
     lock.acquire()

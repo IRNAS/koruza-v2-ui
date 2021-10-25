@@ -71,7 +71,9 @@ class KoruzaGuiCallbacks():
                 Output("rx-power-graph-local", "figure"),
                 Output("tx-power-local", "children"),
                 Output("rx-power-local", "children"),
-                Output("motor-status-local", "children")
+                Output("motor-status-local", "children"),
+                Output("sfp-serial-number-local", "children"),
+                Output("sfp-wavelength-local", "children")
             ],
             [
                 Input("n-intervals-update-local-info", "n_intervals")
@@ -88,25 +90,40 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
                 # print(sfp_data)
             except Exception as e:
-                print(e)
+                sfp_data = {}
             self.lock.release()
 
-            rx_power = 0
-            rx_power_dBm = -40
-            tx_power = 0
-            tx_power_dBm = -40
+            if sfp_data is None:
+                sfp_data = {}
+
+            module_info = sfp_data.get("sfp_0", {}).get("module_info", {})
+            sfp_serial = module_info.get("serial_num", "Not Connected")
+            sfp_wavelength = module_info.get("wavelength", "Not Connected")
+
+            rx_power = "Not Connected"
+            rx_power_dBm = "Not Connected"
+            tx_power = "Not Connected"
+            tx_power_dBm = "Not Connected"
+            diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
-                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)
-                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
-                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
-                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                rx_power = diagnostics.get("rx_power", "")
+                rx_power_dBm = diagnostics.get("rx_power_dBm", "")
+                tx_power = diagnostics.get("tx_power", "")
+                tx_power_dBm = diagnostics.get("tx_power_dBm", "")
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
-            rx_dBm_list.append(rx_power_dBm)
+            if rx_power_dBm != "":
+                rx_dBm_list.append(rx_power_dBm)
             rx_dBm_list = rx_dBm_list[-100:]
 
-            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
-            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            try:
+                rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            except Exception as e:
+                rx_label = "Not Connected"
+            try:
+                tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            except Exception as e:
+                tx_label = "Not Connected"
 
             rx_power_graph["data"][0]["y"] = rx_dBm_list
             rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
@@ -123,7 +140,7 @@ class KoruzaGuiCallbacks():
             if motor_status:
                 motor_status_label = "Connected"
 
-            return rx_power_graph, tx_label, rx_label, motor_status_label
+            return rx_power_graph, tx_label, rx_label, motor_status_label, sfp_serial, sfp_wavelength
 
         # draw on graph
         @app.callback(
@@ -131,7 +148,9 @@ class KoruzaGuiCallbacks():
                 Output("rx-power-graph-remote", "figure"),
                 Output("tx-power-remote", "children"),
                 Output("rx-power-remote", "children"),
-                Output("motor-status-remote", "children")
+                Output("motor-status-remote", "children"),
+                Output("sfp-serial-number-remote", "children"),
+                Output("sfp-wavelength-remote", "children")
             ],
             [
                 Input("n-intervals-update-remote-info", "n_intervals")
@@ -152,26 +171,37 @@ class KoruzaGuiCallbacks():
                 print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
 
-            rx_power = 0
-            rx_power_dBm = -40
-            tx_power = 0
-            tx_power_dBm = -40
+            if sfp_data is None:
+                sfp_data = {}
 
+            module_info = sfp_data.get("sfp_0", {}).get("module_info", {})
+            sfp_serial = module_info.get("serial_num", "Not Connected")
+            sfp_wavelength = module_info.get("wavelength", "Not Connected")
+
+            rx_power = "Not Connected"
+            rx_power_dBm = "Not Connected"
+            tx_power = "Not Connected"
+            tx_power_dBm = "Not Connected"
+            diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
-                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)  # TODO: is this informative enough? if there is no sfp should no info be displayed?
-                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
-                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
-                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                rx_power = diagnostics.get("rx_power", "")
+                rx_power_dBm = diagnostics.get("rx_power_dBm", "")
+                tx_power = diagnostics.get("tx_power", "")
+                tx_power_dBm = diagnostics.get("tx_power_dBm", "")
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
-            rx_dBm_list.append(rx_power_dBm)
+            if rx_power_dBm != "":
+                rx_dBm_list.append(rx_power_dBm)
             rx_dBm_list = rx_dBm_list[-100:]
 
-            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
-            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
-
-            rx_power_graph["data"][0]["y"] = rx_dBm_list
-            rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
+            try:
+                rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            except Exception as e:
+                rx_label = "Not Connected"
+            try:
+                tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            except Exception as e:
+                tx_label = "Not Connected"
 
             motor_status = False
             self.lock.acquire()
@@ -185,7 +215,7 @@ class KoruzaGuiCallbacks():
             if motor_status:
                 motor_status_label = "Connected"
 
-            return rx_power_graph, tx_label, rx_label, motor_status_label
+            return rx_power_graph, tx_label, rx_label, motor_status_label, sfp_serial, sfp_wavelength
 
         @app.callback(
             [

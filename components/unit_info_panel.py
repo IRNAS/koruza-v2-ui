@@ -43,15 +43,15 @@ def unit_info_panel(unit, unit_ip, unit_id, unit_mode, sw_version, sfp_data, mot
             html.Div(
                 className="mt-3",
                 children=[
-                    html.Div("SFP Serial Number", className="property-title"),
-                    html.Div(sfp_data.get("sfp_0", {}).get("module_info", {}).get("serial_num", "/"), id=f"sfp-serial-number-{unit}", style={"font-size": "18px"})
+                    html.Div("IP Address", className="property-title"),
+                    html.Div(unit_ip, id=f"unit-ip-address-{unit}", style={"font-size": "18px"})
                 ]
             ),
             html.Div(
                 className="mt-3",
                 children=[
-                    html.Div("IP Address", className="property-title"),
-                    html.Div(unit_ip, id=f"unit-ip-address-{unit}", style={"font-size": "18px"})
+                    html.Div("SFP Serial Number", className="property-title"),
+                    html.Div(sfp_data.get("sfp_0", {}).get("module_info", {}).get("serial_num", "/"), id=f"sfp-serial-number-{unit}", style={"font-size": "18px"})
                 ]
             ),
             html.Div(

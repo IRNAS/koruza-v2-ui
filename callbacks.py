@@ -203,6 +203,9 @@ class KoruzaGuiCallbacks():
             except Exception as e:
                 tx_label = "Not Connected"
 
+            rx_power_graph["data"][0]["y"] = rx_dBm_list
+            rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
+
             motor_status = False
             self.lock.acquire()
             try:

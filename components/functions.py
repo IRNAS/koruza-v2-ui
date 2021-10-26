@@ -12,19 +12,19 @@ def update_rx_power_bar(id, signal_str):
         class_name = "signal-strength-1"
     if signal_str >= -38:
         class_name = "signal-strength-2"
-    if signal_str >= -34:
-        class_name = "signal-strength-3"
     if signal_str >= -30:
-        class_name = "signal-strength-4"
+        class_name = "signal-strength-3"
     if signal_str >= -25:
-        class_name = "signal-strength-5"
+        class_name = "signal-strength-4"
     if signal_str >= -20:
-        class_name = "signal-strength-6"
+        class_name = "signal-strength-5"
     if signal_str >= -15:
-        class_name = "signal-strength-7"
+        class_name = "signal-strength-6"
     if signal_str >= -10:
-        class_name = "signal-strength-8"
+        class_name = "signal-strength-7"
     if signal_str >= -5:
+        class_name = "signal-strength-8"
+    if signal_str >= -3:
         class_name = "signal-strength-9"
 
     return rx_indicator(id=f"rx-power-bar-{id}", class_name=class_name)

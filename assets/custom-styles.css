@@ -604,22 +604,22 @@ input:checked+.slider-toggle:before {
  
 .signal-strength-5 .bar-5, .signal-strength-6 .bar-5, .signal-strength-7 .bar-5, 
 .signal-strength-8 .bar-5, .signal-strength-9 .bar-5 {
-    background-color: #beeb42;
+    background-color: #dff837;
 }
 
 .signal-strength-6 .bar-6, .signal-strength-7 .bar-6, 
 .signal-strength-8 .bar-6, .signal-strength-9 .bar-6 {
-    background-color: #89e235;
+    background-color: #abfa2b;
 }
 
 .signal-strength-7 .bar-7, .signal-strength-8 .bar-7, .signal-strength-9 .bar-7 {
-    background-color: #4bc37d;
+    background-color: #84eb51;
 }
 
 .signal-strength-8 .bar-8, .signal-strength-9 .bar-8 {
-    background-color: #38b8d2;
+    background-color: #1ed53d;
 }
 
 .signal-strength-9 .bar-9 {
-    background-color: #1cafe9;
+    background-color: #4bc37d;
 }

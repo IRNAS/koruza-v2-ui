@@ -37,13 +37,25 @@ class KoruzaGuiCallbacks():
 
         # load calibration into local storage
         self.lock.acquire()
-        self.curr_calib = self.koruza_client.get_calibration()["calibration"]
-        self.calib = self.koruza_client.get_calibration()["calibration"]
+        try:
+            self.curr_calib = self.koruza_client.get_calibration()["calibration"]
+            self.calib = self.koruza_client.get_calibration()["calibration"]
+        except Exception as e:
+            self.curr_calib = {}
+            self.calib = {}
+            print(f"Failed to get calibration from main: {e}")
         self.lock.release()
 
         self.lock.acquire()
-        self.zoomed_in = self.koruza_client.get_zoom_data()
+        try:
+            self.zoomed_in = self.koruza_client.get_zoom_data()
+        except Exception as e:
+            print(f"Failed to get zoom data: {e}")
+            self.zoomed_in = None
         self.lock.release()
+
+        self.marker = generate_marker(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE)
+        self.calib_action_in_progress = False
 
         self.mode = mode
         if self.mode == "primary":
@@ -58,7 +70,10 @@ class KoruzaGuiCallbacks():
             [
                 Output("rx-power-graph-local", "figure"),
                 Output("tx-power-local", "children"),
-                Output("rx-power-local", "children")
+                Output("rx-power-local", "children"),
+                Output("motor-status-local", "children"),
+                Output("sfp-serial-number-local", "children"),
+                Output("sfp-wavelength-local", "children")
             ],
             [
                 Input("n-intervals-update-local-info", "n_intervals")
@@ -75,37 +90,67 @@ class KoruzaGuiCallbacks():
                 sfp_data = self.koruza_client.get_sfp_diagnostics()
                 # print(sfp_data)
             except Exception as e:
-                print(e)
+                sfp_data = {}
             self.lock.release()
 
-            rx_power = 0
-            rx_power_dBm = -40
-            tx_power = 0
-            tx_power_dBm = -40
+            if sfp_data is None:
+                sfp_data = {}
+
+            module_info = sfp_data.get("sfp_0", {}).get("module_info", {})
+            sfp_serial = module_info.get("serial_num", "Not Connected")
+            sfp_wavelength = module_info.get("wavelength", "Not Connected")
+
+            rx_power = "Not Connected"
+            rx_power_dBm = "Not Connected"
+            tx_power = "Not Connected"
+            tx_power_dBm = "Not Connected"
+            diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
-                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)
-                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
-                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
-                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                rx_power = diagnostics.get("rx_power", "")
+                rx_power_dBm = diagnostics.get("rx_power_dBm", "")
+                tx_power = diagnostics.get("tx_power", "")
+                tx_power_dBm = diagnostics.get("tx_power_dBm", "")
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
-            rx_dBm_list.append(rx_power_dBm)
+            if rx_power_dBm != "":
+                rx_dBm_list.append(rx_power_dBm)
             rx_dBm_list = rx_dBm_list[-100:]
 
-            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
-            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            try:
+                rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            except Exception as e:
+                rx_label = "Not Connected"
+            try:
+                tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            except Exception as e:
+                tx_label = "Not Connected"
 
             rx_power_graph["data"][0]["y"] = rx_dBm_list
             rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
 
-            return rx_power_graph, tx_label, rx_label
+            motor_status = False
+            self.lock.acquire()
+            try:
+                motor_status = self.koruza_client.get_motor_status()
+            except Exception as e:
+                print(e)
+            self.lock.release()
+
+            motor_status_label = "Not Connected"
+            if motor_status:
+                motor_status_label = "Connected"
+
+            return rx_power_graph, tx_label, rx_label, motor_status_label, sfp_serial, sfp_wavelength
 
         # draw on graph
         @app.callback(
             [
                 Output("rx-power-graph-remote", "figure"),
                 Output("tx-power-remote", "children"),
-                Output("rx-power-remote", "children")
+                Output("rx-power-remote", "children"),
+                Output("motor-status-remote", "children"),
+                Output("sfp-serial-number-remote", "children"),
+                Output("sfp-wavelength-remote", "children")
             ],
             [
                 Input("n-intervals-update-remote-info", "n_intervals")
@@ -126,28 +171,54 @@ class KoruzaGuiCallbacks():
                 print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
 
-            rx_power = 0
-            rx_power_dBm = -40
-            tx_power = 0
-            tx_power_dBm = -40
+            if sfp_data is None:
+                sfp_data = {}
 
+            module_info = sfp_data.get("sfp_0", {}).get("module_info", {})
+            sfp_serial = module_info.get("serial_num", "Not Connected")
+            sfp_wavelength = module_info.get("wavelength", "Not Connected")
+
+            rx_power = "Not Connected"
+            rx_power_dBm = "Not Connected"
+            tx_power = "Not Connected"
+            tx_power_dBm = "Not Connected"
+            diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
-                rx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power", 0)  # TODO: is this informative enough? if there is no sfp should no info be displayed?
-                rx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
-                tx_power = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("tx_power", 0)
-                tx_power_dBm = sfp_data.get("sfp_0", {}).get("diagnostics", {}).get("rx_power_dBm", -40)
+                rx_power = diagnostics.get("rx_power", "")
+                rx_power_dBm = diagnostics.get("rx_power_dBm", "")
+                tx_power = diagnostics.get("tx_power", "")
+                tx_power_dBm = diagnostics.get("tx_power_dBm", "")
 
             rx_dBm_list = rx_power_graph["data"][0]["y"]
-            rx_dBm_list.append(rx_power_dBm)
+            if rx_power_dBm != "":
+                rx_dBm_list.append(rx_power_dBm)
             rx_dBm_list = rx_dBm_list[-100:]
 
-            rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
-            tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            try:
+                rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
+            except Exception as e:
+                rx_label = "Not Connected"
+            try:
+                tx_label = "{:.4f} mW ({:.3f} dBm)".format(tx_power, tx_power_dBm)
+            except Exception as e:
+                tx_label = "Not Connected"
 
             rx_power_graph["data"][0]["y"] = rx_dBm_list
             rx_power_graph["data"][0]["x"] = [t for t in range(-len(rx_dBm_list), 0)]
 
-            return rx_power_graph, tx_label, rx_label
+            motor_status = False
+            self.lock.acquire()
+            try:
+                motor_status = self.koruza_client.issue_remote_command("get_motor_status", ())
+            except Exception as e:
+                print(e)
+            self.lock.release()
+
+            motor_status_label = "Not Connected"
+            if motor_status:
+                motor_status_label = "Connected"
+
+            return rx_power_graph, tx_label, rx_label, motor_status_label, sfp_serial, sfp_wavelength
 
         @app.callback(
             [
@@ -178,19 +249,23 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "confirm-update-unit-dialog":
                     self.lock.acquire()
-                    ret, ver = self.koruza_client.update_unit()
+                    try:
+                        ret, ver = self.koruza_client.update_unit()
+                        display_update_status_dialog = True
+                        if ret is True:
+                            message = f"The unit is updating to version: {ver}. The unit will restart once the update is finished!"
+                        if ret is False:
+                            message = f"The unit is already at the latest version: {ver}!"
+                    except Exception as e:
+                        print(f"An error occured when updating unit: {e}")
                     self.lock.release()
-                    display_update_status_dialog = True
-                    if ret is True:
-                        message = f"The unit is updating to version: {ver}. The unit will restart once the update is finished!"
-                    if ret is False:
-                        message = f"The unit is already at the latest version: {ver}!"
 
             
             return display_update_unit_dialog, display_update_status_dialog, message
 
     def init_calibration_callbacks(self):
         """Defines all callbacks used on unit calibration page"""
+
         # draw on graph
         @app.callback(
             [
@@ -227,6 +302,8 @@ class KoruzaGuiCallbacks():
             js = ""
             img_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
 
+            # print(f"Current marker: {self.marker}")
+
             if ctx.triggered:
                 split = ctx.triggered[0]["prop_id"].split(".")
                 prop_id = split[0]
@@ -238,15 +315,24 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "confirm-restore-calibration-dialog":
                     self.lock.acquire()
-                    self.koruza_client.restore_calibration()
+                    try:
+                        self.koruza_client.restore_calibration()
 
-                    cam_config = self.koruza_client.get_camera_config()
-                    self.calib = self.koruza_client.get_calibration()["calibration"]
+                        cam_config = self.koruza_client.get_current_camera_config()
+                        self.curr_calib = self.koruza_client.get_current_calibration()["calibration"]
+                        # self.calib = self.koruza_client.get_calibration()["calibration"]
 
-                    self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
-                    self.koruza_client.update_calibration(self.calib)
+                        self.koruza_client.update_camera_config(None, cam_config["X"], cam_config["Y"], cam_config["IMG_P"])
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
 
-                    js = "location.reload();"
+                        # self.curr_calib["offset_x"] = self.calib["offset_x"]
+                        # self.curr_calib["offset_y"] = self.calib["offset_y"]
+                        # self.curr_calib["zoom_level"] = self.calib["zoom_level"]
+
+                        js = "location.reload();"
+                    except Exception as e:
+                        print(f"Error when trying to restore calibration: {e}")
                     self.lock.release()
 
                 if prop_id == "calibration-btn":
@@ -254,43 +340,50 @@ class KoruzaGuiCallbacks():
                     
                 if prop_id == "camera-zoom-slider":
                     self.lock.acquire()
-                    # get current camera configuration (position of top left corner and zoom)
-                    cam_config = get_camera_config()
+                    try:
+                        # get current camera configuration (position of top left corner and zoom)
+                        cam_config = get_camera_config()
 
-                    marker_x = self.curr_calib["offset_x"]
-                    marker_y = self.curr_calib["offset_y"]
-                    self.curr_calib["zoom_level"] = zoom_state
+                        marker_x = self.curr_calib["offset_x"]
+                        marker_y = self.curr_calib["offset_y"]
 
-                    img_p = math.sqrt(1.0 / zoom_state)
+                        img_p = math.sqrt(1.0 / zoom_state)
 
-                    # covert to global coordinates
-                    global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
-                    global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+                        # covert to global coordinates
+                        global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
 
-                    if img_p == 1.0:
-                        pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
-                        marker_x = sum(pixels_x) / len(pixels_x)
-                        pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
-                        marker_y = sum(pixels_y) / len(pixels_y)
-                    else:
-                        marker_x = round(global_marker_x)
-                        marker_y = round(global_marker_y)
+                        if img_p == 1.0:
+                            pixels_x = list(range(round(global_marker_x), round(global_marker_x) + int(math.sqrt(zoom_state))))
+                            marker_x = sum(pixels_x) / len(pixels_x)
+                            pixels_y = list(range(round(global_marker_y), round(global_marker_y) + int(math.sqrt(zoom_state))))
+                            marker_y = sum(pixels_y) / len(pixels_y)
+                        else:
+                            marker_x = round(global_marker_x)
+                            marker_y = round(global_marker_y)
 
-                    # get new position of top left zoom area based on calculation
-                    x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
-                    self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
-                    
-                    if img_p != 1.0:
-                        marker_x, marker_y = calculate_marker_pos(x, y, img_p)
+                        # get new position of top left zoom area based on calculation
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
+                        
+                        if img_p != 1.0:
+                            marker_x, marker_y = calculate_marker_pos(x, y, img_p)
 
-                    self.curr_calib["offset_x"] = marker_x
-                    self.curr_calib["offset_y"] = marker_y
-                    line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
-                    fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+                        self.curr_calib["offset_x"] = marker_x
+                        self.curr_calib["offset_y"] = marker_y
+                        self.curr_calib["zoom_level"] = zoom_state
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
+                        # line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        
+                    except Exception as e:
+                        print(f"Error when trying to update calibration: {e}")
                     self.lock.release()
                     
 
                 if prop_id == "camera-overlay":
+                    self.lock.acquire()
                     try:
                         self.curr_calib["offset_x"] = click_data["points"][0]["x"]
                         self.curr_calib["offset_y"] = click_data["points"][0]["y"]
@@ -327,41 +420,69 @@ class KoruzaGuiCallbacks():
 
                         self.curr_calib["offset_x"] = marker_x
                         self.curr_calib["offset_y"] = marker_y
-                        line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
-                        fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
+
+                        self.koruza_client.update_current_calibration(self.curr_calib)
+                        self.koruza_client.update_current_camera_calib()
+                        # line_lb_rt, line_lt_rb = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
+                        # fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
                     except Exception as e:
                         print(f"An error occured when setting calibration: {e}")
+                    self.lock.release()
 
                 if prop_id == "confirm-calibration-dialog":
                     self.lock.acquire()
-                    self.calib["offset_x"] = self.curr_calib["offset_x"]
-                    self.calib["offset_y"] = self.curr_calib["offset_y"]
-                    self.calib["zoom_level"] = self.curr_calib["zoom_level"]
+                    try:
+                        self.calib["offset_x"] = self.curr_calib["offset_x"]
+                        self.calib["offset_y"] = self.curr_calib["offset_y"]
+                        self.calib["zoom_level"] = self.curr_calib["zoom_level"]
 
-                    cam_config = get_camera_config()
-                    # generate overlay image with zoom level set
-                    generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
+                        cam_config = get_camera_config()
+                        # # generate overlay image with zoom level set
+                        # generate_overlay_image(self.calib["offset_x"], self.calib["offset_y"], SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_{zoom_state}.png")  # TODO: get relative path
 
-                    # generate overlay image with zoom = 1x
+                        # generate overlay image with zoom = 1x
 
-                    marker_x = self.calib["offset_x"]
-                    marker_y = self.calib["offset_y"]
-                    self.calib["zoom_level"] = zoom_state
+                        marker_x = self.calib["offset_x"]
+                        marker_y = self.calib["offset_y"]
+                        self.calib["zoom_level"] = zoom_state
+                        self.marker = generate_marker(marker_x, marker_y, SQUARE_SIZE)
 
-                    img_p = math.sqrt(1.0 / zoom_state)
+                        img_p = math.sqrt(1.0 / zoom_state)
 
-                    # covert to global coordinates
-                    global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
-                    global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
-                    marker_x = global_marker_x
-                    marker_y = global_marker_y
+                        # covert to global coordinates
+                        global_marker_x = marker_x * cam_config["img_p"] + cam_config["x"] * 720
+                        global_marker_y = (1.0 - cam_config["y"]) * 720.0 - (720 - marker_y) * cam_config["img_p"]
+                        marker_x = global_marker_x
+                        marker_y = global_marker_y
 
-                    generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
+                        generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_1.png")  # TODO: get relative path
 
-                    self.koruza_client.update_calibration(self.calib)
-                    self.koruza_client.update_camera_calib()
+                        # convert to 5x zoom and generate marker
+                        # get new position of top left zoom area based on calculation
+                        img_p = math.sqrt(1.0 / 5.0)
+                        x, y, clamped_x, clamped_y = calculate_zoom_area_position(marker_x, marker_y, img_p)
+                        marker_x, marker_y = calculate_marker_pos(x, y, img_p)
+                        
+
+                        self.calib["offset_x"] = marker_x
+                        self.calib["offset_y"] = marker_y
+                        self.calib["zoom_level"] = 5
+                        
+                        generate_overlay_image(marker_x, marker_y, SQUARE_SIZE, f"/home/pi/koruza_v2/koruza_v2_ui/assets/markers/marker_5.png")  # TODO: get relative path
+                        # self.koruza_client.update_camera_config(None, clamped_x, clamped_y, img_p)
+                        self.koruza_client.update_calibration(self.calib)
+                        cam_config = {}
+                        cam_config["x"] = clamped_x
+                        cam_config["y"] = clamped_y
+                        cam_config["img_p"] = img_p
+                        self.koruza_client.update_camera_calib(cam_config)
+                    except Exception as e:
+                        print(f"An error occured when confirming calibration: {e}")
                     self.lock.release()
+            # fig["layout"]["shapes"] = [line_lb_rt, line_lt_rb]  # draw new shape
             
+            fig["layout"]["shapes"] = self.marker  # draw new shape
             return fig, display_confirm_calib_dialog, img_src, display_restore_calib_dialog, js
 
 
@@ -389,7 +510,6 @@ class KoruzaGuiCallbacks():
             # https://plotly.com/python/creating-and-updating-figures/
 
             ctx = dash.callback_context
-            display_confirm_calib_dialog = False
             # js = ""
             video_src = f"{VIDEO_STREAM_SRC}?{time.time()}"
             zoom_level = 1
@@ -399,18 +519,21 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "camera-zoom-toggle":
                     self.lock.acquire()
-                    self.koruza_client.update_zoom_data(zoom_checked)
-                    self.zoomed_in = zoom_checked
-                    marker_x = self.calib["offset_x"]
-                    marker_y = self.calib["offset_y"]
-                    camera_config = self.koruza_client.get_camera_config()
-                    # print(f"Camera config json: {camera_config}")
-                    if zoom_checked:
-                        # print(f"Focus on marker!")
-                        zoom_level = self.calib["zoom_level"]
-                        self.koruza_client.focus_on_marker(marker_x, marker_y, camera_config["IMG_P"], camera_config)
-                    else:
-                        self.koruza_client.update_camera_config(None, 0, 0, 1)  # default zoomed out settings
+                    try:
+                        self.koruza_client.update_zoom_data(zoom_checked)
+                        self.zoomed_in = zoom_checked
+                        marker_x = self.calib["offset_x"]
+                        marker_y = self.calib["offset_y"]
+                        camera_config = self.koruza_client.get_camera_config()
+                        # print(f"Camera config json: {camera_config}")
+                        if zoom_checked:
+                            # print(f"Focus on marker!")
+                            zoom_level = self.calib["zoom_level"]
+                            self.koruza_client.focus_on_marker(marker_x, marker_y, camera_config["IMG_P"], camera_config)
+                        else:
+                            self.koruza_client.update_camera_config(None, 0, 0, 1)  # default zoomed out settings
+                    except Exception as e:
+                        print(f"An error occured when toggling zoom: {e}")
                     self.lock.release()
             
             img_src = app.get_asset_url(f"markers/marker_{zoom_level}.png?{time.time()}")
@@ -497,7 +620,6 @@ class KoruzaGuiCallbacks():
             # update sfp diagnostics
             sfp_data = {}
             
-            start_time = time.time()
             self.lock.acquire()  # will block until completed
             try:
                 # print("Getting remote sfp diagnostics")
@@ -506,7 +628,6 @@ class KoruzaGuiCallbacks():
             except Exception as e:
                 print(f"Error getting secondary sfp data: {e}")
             self.lock.release()
-            # print(f"Duration of get_sfp_diagnostics on remote RPC call: {time.time() - start_time}")
 
             rx_power = 0
             rx_power_dBm = -40
@@ -517,7 +638,6 @@ class KoruzaGuiCallbacks():
             rx_bar = update_rx_power_bar(id="secondary", signal_str=rx_power_dBm)
             rx_power_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
 
-            start_time = time.time()
             self.lock.acquire()
             try:
                 # print("Getting remote motors position")
@@ -527,7 +647,6 @@ class KoruzaGuiCallbacks():
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
-            # print(f"Duration of get_motors_position on remote RPC call: {time.time() - start_time}")
                 
             return motor_x, motor_y, rx_power_label, rx_bar
 

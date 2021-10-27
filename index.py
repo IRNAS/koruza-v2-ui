@@ -12,7 +12,7 @@ import socket
 import logging
 import xmlrpc.client
 
-from flask import request
+from flask import request, redirect
 from threading import Lock
 
 import dash_core_components as dcc
@@ -92,6 +92,13 @@ koruza_callbacks = KoruzaGuiCallbacks(client, mode, lock)
 koruza_callbacks.init_dashboard_callbacks()
 koruza_callbacks.init_info_layout_callbacks()
 koruza_callbacks.init_calibration_callbacks()
+
+@app.server.before_request
+def before_request_func():
+    if request.is_secure:
+        url = request.url.replace('https://', 'http://', 1)
+        code = 301
+        return redirect(url, code=code)
 
 # Update page
 # # # # # # # # #

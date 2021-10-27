@@ -9,21 +9,22 @@ def unit_control(unit, is_master=False, checked=False):
     """Generate unit control div with control buttons, homing button and step selection"""
     align_button = html.Div(id=f"motor-control-btn-align-{unit}")
 
-    arrows = [
-        control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
-        control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
-        control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
-        control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
-    ]
-
-    if is_master:
+    if unit == "local":
         arrows = [
             control_button(arrow_direction="W", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
             control_button(arrow_direction="A", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
             control_button(arrow_direction="D", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
             control_button(arrow_direction="S", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
         ]
+    else:
+        arrows = [
+            control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
+            control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
+            control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
+            control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
+        ]
 
+    if is_master:
         align_button = html.Div(
             style={"position": "relative", "left": "10%"}, 
             children=[

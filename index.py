@@ -239,12 +239,17 @@ def display_page(pathname):
     else:
         return landing_page_layout
 
-if __name__ == '__main__':
-    hostname = "0.0.0.0"
-    port = "80"
-
+def run_server(hostname, port, ssl_context):
     app.run_server(
         port=port,
         debug=False,
-        host=hostname
+        host=hostname,
+        ssl_context=ssl_context
     )
+
+if __name__ == '__main__':
+    from threading import Thread
+    secure_server_thread = Thread(target=run_server, args=("0.0.0.0", "443", ("/etc/ssl/certs/selfsigned.crt", "/etc/ssl/private/selfsigned.key"), ), daemon=True)
+    secure_server_thread.start()
+
+    run_server("0.0.0.0", "80", None)

@@ -679,9 +679,10 @@ class KoruzaGuiCallbacks():
             self.lock.acquire()
             try:
                 # print("Getting remote motors position")
-                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())  # NOTE: works confirmed
+                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())
                 # print(f"Remote motor x: {motor_x}, remote motor y: {motor_y}")
             except Exception as e:
+                print(f"Error getting secondary motor positions: {e}")
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
@@ -690,8 +691,9 @@ class KoruzaGuiCallbacks():
             self.lock.acquire()
             try:
                 led_toggled = self.koruza_client.issue_remote_command("get_led_data", ())
+                # print(f"Remote led state: {led_toggled}")
             except Exception as e:
-                print(e)
+                print(f"Error getting secondary led data: {e}")
             self.lock.release()
                 
             return motor_x, motor_y, rx_power_label, rx_bar, led_toggled

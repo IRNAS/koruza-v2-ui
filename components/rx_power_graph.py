@@ -21,7 +21,7 @@ def rx_power_graph(mode):
                 config={
                     # "modeBarButtonsToAdd": [ "drawrect" ],
                     # "displayModeBar": False,
-                    "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "lasso2d", "select2d" ],
+                    "modeBarButtonsToRemove": [ "autoScale2d", "pan2d", "zoom2d", "zoomIn2d", "zoomOut2d", "lasso2d", "select2d", "hoverClosestCartesian", "hoverCompareCartesian", "toggleSpikelines",  "toImage"],
                     # "showAxisDragHandles": False,
                     "displaylogo": False,
                     "editable": False

@@ -32,7 +32,7 @@ VIDEO_STREAM_SRC = f"http://{LOCALHOST}:{PORT}/?action=stream"
 
 ###################### Dashboard Layout ######################
 
-def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_level):
+def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_level, alignment_enabled):
 
     if mode == "primary":
         local_interval = dcc.Interval(id="n-intervals-update-local-info", interval=1000, n_intervals=0)
@@ -40,7 +40,7 @@ def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote
         local_control = html.Div(
             style={"margin-top": "28px"},
             children=[
-                control_panel(unit="local", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data)  # primary unit controls and transmit power indicator
+                control_panel(unit="local", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data, alignment_enabled=alignment_enabled)  # primary unit controls and transmit power indicator
             ]
         )
         remote_control = html.Div(

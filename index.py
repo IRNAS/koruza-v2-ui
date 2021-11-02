@@ -78,6 +78,11 @@ local_unit_id = config["unit_id"]
 local_version = config["version"]
 local_unit_mode = mode
 remote_unit_mode = "secondary" if mode == "primary" else mode
+alignment_enabled = False
+try:
+    alignment_enabled = link_config["alignment"]
+except Exception as e:
+    pass
 
 # get local ip
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -242,7 +247,7 @@ def display_page(pathname):
                 client.update_camera_config(None, 0, 0, 1)
             except Exception as e:
                 print(f"Failed to update camera config: {e}")
-        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor)  # pass configs to layout
+        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor, alignment_enabled)  # pass configs to layout
     else:
         return landing_page_layout
 

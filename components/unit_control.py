@@ -5,7 +5,7 @@ import dash_core_components as dcc
 from .control_button import control_button
 from .custom_toggle import custom_toggle
 
-def unit_control(unit, is_master=False, checked=False):
+def unit_control(unit, is_master=False, checked=False, alignment_enabled=False):
     """Generate unit control div with control buttons, homing button and step selection"""
     align_button = html.Div(id=f"motor-control-btn-align-{unit}")
 
@@ -25,12 +25,18 @@ def unit_control(unit, is_master=False, checked=False):
         ]
 
     if is_master:
-        align_button = html.Div(
-            style={"position": "relative", "left": "10%"}, 
-            children=[
-                dbc.Button("Align", id=f"motor-control-btn-align-{unit}", style={"font-size": "28px", "font-weight": "500", "color": "#00aacf", "position": "absolute", "top": "0%", "left": "100%", "height": "42px", "width": "120px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
-            ]
-        )
+        if alignment_enabled:
+            align_button = html.Div(
+                style={"position": "relative", "left": "10%"}, 
+                children=[
+                    dbc.Button("Align", id=f"motor-control-btn-align-{unit}", style={"font-size": "28px", "font-weight": "500", "color": "#00aacf", "position": "absolute", "top": "0%", "left": "100%", "height": "42px", "width": "120px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
+                ]
+            )
+        else:
+            align_button = html.Div(
+                style={"visibility": "hidden"},
+                id=f"motor-control-btn-align-{unit}"
+            )
 
     return html.Div(
         className="d-flex flex-direction-row",

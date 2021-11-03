@@ -1,7 +1,7 @@
 """
 Dashboard layout contents:
 * camera stream from device the code is running on
-* "master" and "slave" unit control blocks and rx power indicators
+* "primary" and "secondary" unit control blocks and rx power indicators
 """
 
 import socket
@@ -40,13 +40,13 @@ def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote
         local_control = html.Div(
             style={"margin-top": "28px"},
             children=[
-                control_panel(unit="local", title=f"Primary Unit - {local_unit_ip}", is_master=True, checked=led_data, alignment_enabled=alignment_enabled)  # primary unit controls and transmit power indicator
+                control_panel(unit="local", title=f"Unit - {local_unit_ip}", is_master=True, checked=led_data, alignment_enabled=alignment_enabled)  # primary unit controls and transmit power indicator
             ]
         )
         remote_control = html.Div(
             style={"margin-top": "30px"},
             children=[
-                control_panel(unit="remote", title=f"Secondary Unit - {remote_unit_ip}", is_master=False, checked=remote_unit_led_data)  # secondary unit controls and transmit power indicator
+                control_panel(unit="remote", title=f"Unit - {remote_unit_ip}", is_master=False, checked=remote_unit_led_data)  # secondary unit controls and transmit power indicator
             ]
         )
     if mode == "secondary":
@@ -56,7 +56,7 @@ def dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote
             style={"margin-top": "28px"},
             children=[
                 # NOTE: we set unit_id to primary, as this is the primary control panel, we change the title however
-                control_panel(unit="local", title=f"Secondary Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
+                control_panel(unit="local", title=f"Unit - {local_unit_ip}", is_master=False, checked=led_data)  # primary unit controls and transmit power indicator
             ]
         )
         remote_control = None

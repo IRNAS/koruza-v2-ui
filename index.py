@@ -12,7 +12,7 @@ import socket
 import logging
 import xmlrpc.client
 
-from flask import request
+from flask import request, redirect
 from threading import Lock
 
 import dash_core_components as dcc
@@ -78,6 +78,11 @@ local_unit_id = config["unit_id"]
 local_version = config["version"]
 local_unit_mode = mode
 remote_unit_mode = "secondary" if mode == "primary" else mode
+alignment_enabled = False
+try:
+    alignment_enabled = link_config["alignment"]
+except Exception as e:
+    pass
 
 # get local ip
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -92,6 +97,13 @@ koruza_callbacks = KoruzaGuiCallbacks(client, mode, lock)
 koruza_callbacks.init_dashboard_callbacks()
 koruza_callbacks.init_info_layout_callbacks()
 koruza_callbacks.init_calibration_callbacks()
+
+@app.server.before_request
+def before_request_func():
+    if request.is_secure:
+        url = request.url.replace('https://', 'http://', 1)
+        code = 301
+        return redirect(url, code=code)
 
 # Update page
 # # # # # # # # #
@@ -235,16 +247,21 @@ def display_page(pathname):
                 client.update_camera_config(None, 0, 0, 1)
             except Exception as e:
                 print(f"Failed to update camera config: {e}")
-        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor)  # pass configs to layout
+        return dashboard_layout(led_data, remote_unit_led_data, mode, local_unit_ip, remote_unit_ip, zoom_data, zoom_factor, alignment_enabled)  # pass configs to layout
     else:
         return landing_page_layout
 
-if __name__ == '__main__':
-    hostname = "0.0.0.0"
-    port = "80"
-
+def run_server(hostname, port, ssl_context):
     app.run_server(
         port=port,
         debug=False,
-        host=hostname
+        host=hostname,
+        ssl_context=ssl_context
     )
+
+if __name__ == '__main__':
+    from threading import Thread
+    secure_server_thread = Thread(target=run_server, args=("0.0.0.0", "443", ("/etc/ssl/certs/selfsigned.crt", "/etc/ssl/private/selfsigned.key"), ), daemon=True)
+    secure_server_thread.start()
+
+    run_server("0.0.0.0", "80", None)

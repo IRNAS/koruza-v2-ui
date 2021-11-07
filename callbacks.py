@@ -100,10 +100,10 @@ class KoruzaGuiCallbacks():
             sfp_serial = module_info.get("serial_num", "Not Connected")
             sfp_wavelength = module_info.get("wavelength", "Not Connected")
 
-            rx_power = "Not Connected"
-            rx_power_dBm = "Not Connected"
-            tx_power = "Not Connected"
-            tx_power_dBm = "Not Connected"
+            rx_power = ""
+            rx_power_dBm = ""
+            tx_power = ""
+            tx_power_dBm = ""
             diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
                 rx_power = diagnostics.get("rx_power", "")
@@ -114,7 +114,7 @@ class KoruzaGuiCallbacks():
             rx_dBm_list = rx_power_graph["data"][0]["y"]
             if rx_power_dBm != "":
                 rx_dBm_list.append(rx_power_dBm)
-            rx_dBm_list = rx_dBm_list[-100:]
+                rx_dBm_list = rx_dBm_list[-100:]
 
             try:
                 rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
@@ -178,10 +178,10 @@ class KoruzaGuiCallbacks():
             sfp_serial = module_info.get("serial_num", "Not Connected")
             sfp_wavelength = module_info.get("wavelength", "Not Connected")
 
-            rx_power = "Not Connected"
-            rx_power_dBm = "Not Connected"
-            tx_power = "Not Connected"
-            tx_power_dBm = "Not Connected"
+            rx_power = ""
+            rx_power_dBm = ""
+            tx_power = ""
+            tx_power_dBm = ""
             diagnostics = sfp_data.get("sfp_0", {}).get("diagnostics", {})
             if sfp_data:
                 rx_power = diagnostics.get("rx_power", "")
@@ -192,7 +192,7 @@ class KoruzaGuiCallbacks():
             rx_dBm_list = rx_power_graph["data"][0]["y"]
             if rx_power_dBm != "":
                 rx_dBm_list.append(rx_power_dBm)
-            rx_dBm_list = rx_dBm_list[-100:]
+                rx_dBm_list = rx_dBm_list[-100:]
 
             try:
                 rx_label = "{:.4f} mW ({:.3f} dBm)".format(rx_power, rx_power_dBm)
@@ -501,10 +501,10 @@ class KoruzaGuiCallbacks():
             [
                 State("camera-zoom-toggle", "checked")
             ],
-            prevent_initial_call=True  # TIL this is supposed to not trigger the initial
+            prevent_initial_call=True  # TIL this is supposed to not trigger the initial callback
         )
         def update_calibration_position(zoom_checked, zoom_state):
-            """Update calibration position and save somewhere globally. TODO: a file with global config"""
+            """Update calibration position and save in file"""
             # HELP:
             # https://dash.plotly.com/annotations
             # https://plotly.com/python/creating-and-updating-figures/
@@ -545,13 +545,15 @@ class KoruzaGuiCallbacks():
                 Output("motor-coord-x-local", "children"),
                 Output("motor-coord-y-local", "children"),
                 Output("sfp-rx-power-local", "children"),
-                Output("rx-bar-container-local", "children")
+                Output("rx-bar-container-local", "children"),
+                Output("led-slider-local", "checked")
             ],
             [
-                Input("n-intervals-update-local-info", "n_intervals")
+                Input("n-intervals-update-local-info", "n_intervals"),
+                Input("led-slider-local", "checked")
             ]
         )
-        def update_local_info(n_intervals):
+        def update_local_info(n_intervals, led_toggle):
             """
             Updates local unit info:
                 - RX
@@ -561,7 +563,20 @@ class KoruzaGuiCallbacks():
             Input: 
                 n_intervals increment triggers this callback.
             """
-            
+            ctx = dash.callback_context
+            if ctx.triggered:
+
+                split = ctx.triggered[0]["prop_id"].split(".")
+                prop_id = split[0]
+
+                if prop_id == "led-slider-local":
+                    self.lock.acquire()
+                    try:
+                        self.koruza_client.toggle_led()
+                    except Exception as e:
+                        print(e)
+                    self.lock.release()
+
             # update sfp diagnostics
             sfp_data = {}
             self.lock.acquire()  # TODO maybe move locks to koruza.py?
@@ -591,9 +606,16 @@ class KoruzaGuiCallbacks():
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
-            # print(f"Releasing motor position lock")
-                
-            return motor_x, motor_y, rx_power_label, rx_bar
+
+            led_toggled = False
+            self.lock.acquire()
+            try:
+                led_toggled = self.koruza_client.get_led_data()
+            except Exception as e:
+                print(e)
+            self.lock.release()
+            
+            return motor_x, motor_y, rx_power_label, rx_bar, led_toggled
 
         #  remote unit info update
         @app.callback(
@@ -601,13 +623,15 @@ class KoruzaGuiCallbacks():
                 Output("motor-coord-x-remote", "children"),
                 Output("motor-coord-y-remote", "children"),
                 Output("sfp-rx-power-remote", "children"),
-                Output("rx-bar-container-remote", "children")
+                Output("rx-bar-container-remote", "children"),
+                Output("led-slider-remote", "checked")
             ],
             [
-                Input("n-intervals-update-remote-info", "n_intervals")
+                Input("n-intervals-update-remote-info", "n_intervals"),
+                Input("led-slider-remote", "checked")
             ]
         )
-        def update_remote_info(n_intervals):
+        def update_remote_info(n_intervals, led_toggle):
             """
             Updates secondary unit info:
                 - RX
@@ -617,6 +641,20 @@ class KoruzaGuiCallbacks():
             Input: 
                 n_intervals increment triggers this callback.
             """
+            ctx = dash.callback_context
+            if ctx.triggered:
+
+                split = ctx.triggered[0]["prop_id"].split(".")
+                prop_id = split[0]
+                
+                if prop_id == "led-slider-remote":
+                    self.lock.acquire()
+                    try:
+                        self.koruza_client.issue_remote_command("toggle_led", ())
+                    except Exception as e:
+                        print(e)
+                    self.lock.release()
+
             # update sfp diagnostics
             sfp_data = {}
             
@@ -641,14 +679,24 @@ class KoruzaGuiCallbacks():
             self.lock.acquire()
             try:
                 # print("Getting remote motors position")
-                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())  # NOTE: works confirmed
+                motor_x, motor_y = self.koruza_client.issue_remote_command("get_motors_position", ())
                 # print(f"Remote motor x: {motor_x}, remote motor y: {motor_y}")
             except Exception as e:
+                print(f"Error getting secondary motor positions: {e}")
                 motor_x = 0
                 motor_y = 0
             self.lock.release()
+
+            led_toggled = False
+            self.lock.acquire()
+            try:
+                led_toggled = self.koruza_client.issue_remote_command("get_led_data", ())
+                # print(f"Remote led state: {led_toggled}")
+            except Exception as e:
+                print(f"Error getting secondary led data: {e}")
+            self.lock.release()
                 
-            return motor_x, motor_y, rx_power_label, rx_bar
+            return motor_x, motor_y, rx_power_label, rx_bar, led_toggled
 
         # remote button callbacks
         @app.callback(
@@ -661,7 +709,6 @@ class KoruzaGuiCallbacks():
                 Input("motor-control-btn-down-remote", "n_clicks"),
                 Input("motor-control-btn-right-remote", "n_clicks"),
                 Input("motor-control-btn-center-remote", "n_clicks"),
-                Input("led-slider-remote", "checked"),
                 Input("confirm-homing-dialog-remote", "submit_n_clicks")
             ],
             [
@@ -669,7 +716,7 @@ class KoruzaGuiCallbacks():
                 State("keyboard", "keydown")
             ]
         )
-        def update_remote_button_action(n_keydowns, motor_up, motor_left, motor_down, motor_right, motor_center, led_toggle, confirm_center, steps, event):
+        def update_remote_button_action(n_keydowns, motor_up, motor_left, motor_down, motor_right, motor_center, confirm_center, steps, event):
 
             display_remote_homing_dialog = False
             ctx = dash.callback_context
@@ -766,21 +813,6 @@ class KoruzaGuiCallbacks():
                 if prop_id == "motor-control-btn-center-remote":
                     display_remote_homing_dialog = True
 
-                if prop_id == "led-slider-remote":
-                    self.lock.acquire()
-                    # TODO implement synchronization of remote and local state of toggle
-                    if led_toggle:
-                        try:
-                            self.koruza_client.issue_remote_command("toggle_led", ())
-                        except Exception as e:
-                            print(e)
-                    else:
-                        try:
-                            self.koruza_client.issue_remote_command("toggle_led", ())
-                        except Exception as e:
-                            print(e)
-                    self.lock.release()
-
             return display_remote_homing_dialog
 
         # local button callbacks
@@ -799,7 +831,6 @@ class KoruzaGuiCallbacks():
                 Input("motor-control-btn-right-local", "n_clicks"),
                 Input("motor-control-btn-center-local", "n_clicks"),
                 Input("motor-control-btn-align-local", "n_clicks"),
-                Input("led-slider-local", "checked"),
                 Input("confirm-homing-dialog-local", "submit_n_clicks"),
                 Input("confirm-align-dialog-local", "submit_n_clicks"),
             ],
@@ -808,7 +839,7 @@ class KoruzaGuiCallbacks():
                 State("keyboard", "keydown")
             ]
         )
-        def update_button_action(n_keydowns, motor_up, motor_left, motor_down, motor_right, motor_home, align_units, led_toggle, confirm_center, confirm_align, steps, event):
+        def update_button_action(n_keydowns, motor_up, motor_left, motor_down, motor_right, motor_home, align_units, confirm_center, confirm_align, steps, event):
             """
             Trigger button callbacks. On every click one of these callbacks is triggered.
             """
@@ -916,20 +947,5 @@ class KoruzaGuiCallbacks():
 
                 if prop_id == "motor-control-btn-align-local":
                     display_local_align_dialog = True
-
-                if prop_id == "led-slider-local":
-                    # print("TOGGLING LED")
-                    self.lock.acquire()
-                    if led_toggle:
-                        try:
-                            self.koruza_client.toggle_led()
-                        except Exception as e:
-                            print(e)
-                    else:
-                        try:
-                            self.koruza_client.toggle_led()
-                        except Exception as e:
-                            print(e)
-                    self.lock.release()
                 
             return display_local_homing_dialog, display_local_align_dialog

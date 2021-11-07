@@ -6,7 +6,7 @@ from .unit_control import unit_control
 from .custom_toggle import custom_toggle
 from .rx_indicator import rx_indicator
 
-def control_panel(unit, title, is_master=False, checked=False):
+def control_panel(unit, title, is_master=False, checked=False, alignment_enabled=False):
     """Generate unit control layout with buttons, power indicator and motor positions"""
     
     control_panel_div = html.Div(
@@ -85,7 +85,7 @@ def control_panel(unit, title, is_master=False, checked=False):
                                 style={"height": "100%", "margin": "6px"},
                                 className="no-pad-l-10 background-koruza div-control-group",
                                 children=[
-                                    unit_control(unit, is_master, checked) 
+                                    unit_control(unit, is_master, checked, alignment_enabled) 
                                 ]
                             )
                         ]

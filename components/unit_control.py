@@ -5,31 +5,38 @@ import dash_core_components as dcc
 from .control_button import control_button
 from .custom_toggle import custom_toggle
 
-def unit_control(unit, is_master=False, checked=False):
+def unit_control(unit, is_master=False, checked=False, alignment_enabled=False):
     """Generate unit control div with control buttons, homing button and step selection"""
     align_button = html.Div(id=f"motor-control-btn-align-{unit}")
 
-    arrows = [
-        control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
-        control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
-        control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
-        control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
-    ]
-
-    if is_master:
+    if unit == "local":
         arrows = [
             control_button(arrow_direction="W", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
             control_button(arrow_direction="A", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
             control_button(arrow_direction="D", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
             control_button(arrow_direction="S", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
         ]
+    else:
+        arrows = [
+            control_button(arrow_direction="up", id=f"motor-control-btn-up-{unit}", style={"position": "absolute", "top": "6%", "left": "35%"}),
+            control_button(arrow_direction="left", id=f"motor-control-btn-left-{unit}", style={"position": "absolute", "left": "0%", "top": "48%"}),
+            control_button(arrow_direction="right", id=f"motor-control-btn-right-{unit}", style={"position": "absolute", "right": "0%", "top": "48%"}),
+            control_button(arrow_direction="down", id=f"motor-control-btn-down-{unit}", style={"position": "absolute", "top": "48%", "left": "35%"})
+        ]
 
-        align_button = html.Div(
-            style={"position": "relative", "left": "10%"}, 
-            children=[
-                dbc.Button("Align", id=f"motor-control-btn-align-{unit}", style={"font-size": "28px", "font-weight": "500", "color": "#00aacf", "position": "absolute", "top": "0%", "left": "100%", "height": "42px", "width": "120px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
-            ]
-        )
+    if is_master:
+        if alignment_enabled:
+            align_button = html.Div(
+                style={"position": "relative", "left": "10%"}, 
+                children=[
+                    dbc.Button("Align", id=f"motor-control-btn-align-{unit}", style={"font-size": "28px", "font-weight": "500", "color": "#00aacf", "position": "absolute", "top": "0%", "left": "100%", "height": "42px", "width": "120px", "line-height": "0px"}, className="align-self-center", size="lg", n_clicks=0)
+                ]
+            )
+        else:
+            align_button = html.Div(
+                style={"visibility": "hidden"},
+                id=f"motor-control-btn-align-{unit}"
+            )
 
     return html.Div(
         className="d-flex flex-direction-row",
